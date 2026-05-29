@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Window Builder • Anglo Windows Digital Rough Copy</title>
+  <style>
+    :root {
+      --bg: oklch(15.1% 0.009 239.8);
+      --surface: oklch(19% 0.012 246);
+      --surface-2: oklch(24% 0.014 248);
+      --surface-3: oklch(31% 0.015 252.3);
+      --fg: oklch(92.5% 0.007 88.6);
+      --muted: oklch(70.4% 0.031 87.6);
+      --border: oklch(31% 0.015 252.3);
+      --accent: oklch(87.1% 0.178 91.8);
+      --fixed: oklch(68% 0.07 228);
+      --hung: oklch(82% 0.14 91);
+      --side: oklch(73% 0.14 150);
+      --toplight: oklch(76% 0.11 18);
+      --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      --font-body: "Segoe UI", "Segoe UI Variable Text", Inter, system-ui, sans-serif;
+      --font-mono: "Cascadia Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, oklch(17% 0.01 245), var(--bg));
+      color: var(--fg);
+      font-family: var(--font-body);
+    }
+    .page {
+      width: min(1320px, calc(100% - 28px));
+      margin: 18px auto;
+      display: grid;
+      grid-template-columns: 360px 1fr 320px;
+      gap: 16px;
+    }
+    .panel {
+      background: color-mix(in oklab, var(--surface) 92%, black 8%);
+      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
+      border-radius: 20px;
+      padding: 18px;
+    }
+    .label {
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    h1, h2 { margin: 8px 0 0; }
+    h1 { font-size: 34px; font-family: var(--font-display); }
+    h2 { font-size: 20px; }
+    .stack, .legend, .actions { display: grid; gap: 12px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .input, select, textarea, button {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      background: color-mix(in oklab, var(--surface-2) 92%, black 8%);
+      color: var(--fg);
+      font: inherit;
+    }
+    .input, select, textarea { padding: 10px 12px; }
+    button { padding: 11px 14px; cursor: pointer; font-weight: 700; }
+    .primary { background: var(--accent); color: var(--bg); border: 0; }
+    .builder-shell {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .dimension-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      background: color-mix(in oklab, var(--surface-2) 92%, black 8%);
+      font-family: var(--font-mono);
+    }
+    .canvas {
+      aspect-ratio: 1.1 / 1;
+      border-radius: 20px;
+      border: 1px solid color-mix(in oklab, var(--border) 82%, var(--accent) 18%);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), transparent),
+        color-mix(in oklab, var(--surface) 76%, black 24%);
+      padding: 24px;
+      display: grid;
+      gap: 10px;
+    }
+    .dims {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 0.7fr 1fr;
+      gap: 8px;
+      min-height: 260px;
+    }
+    .cell {
+      border-radius: 12px;
+      border: 2px solid transparent;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      padding: 10px;
+    }
+    .fixed { background: color-mix(in oklab, var(--fixed) 22%, var(--surface-2)); border-color: color-mix(in oklab, var(--fixed) 64%, black 36%); }
+    .top-hung { background: color-mix(in oklab, var(--hung) 22%, var(--surface-2)); border-color: color-mix(in oklab, var(--hung) 72%, black 28%); }
+    .side-hung { background: color-mix(in oklab, var(--side) 22%, var(--surface-2)); border-color: color-mix(in oklab, var(--side) 70%, black 30%); }
+    .toplight { background: color-mix(in oklab, var(--toplight) 24%, var(--surface-2)); border-color: color-mix(in oklab, var(--toplight) 68%, black 32%); }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      background: color-mix(in oklab, var(--surface-2) 90%, black 10%);
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+    }
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    @media (max-width: 1120px) {
+      .page { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel stack">
+      <div>
+        <div class="label">Builder context</div>
+        <h1>Combination Builder</h1>
+      </div>
+      <p style="margin:0;line-height:1.55">Use this for custom grids when the imported Bizman line does not match a standard picker option. The builder keeps sizes, sash counts, and diagram intent on one working surface.</p>
+      <div class="form-grid">
+        <label><span class="label">Overall width</span><input class="input" id="widthInput" value="2100" /></label>
+        <label><span class="label">Overall height</span><input class="input" id="heightInput" value="1500" /></label>
+        <label><span class="label">Columns</span><select><option>3</option><option>2</option><option>4</option></select></label>
+        <label><span class="label">Rows</span><select><option>2</option><option>1</option><option>3</option></select></label>
+        <label><span class="label">Glass</span><select><option>6.38 Clear Lam / 4 mm Obscure</option><option>6.38 Clear Lam</option></select></label>
+        <label><span class="label">Colour</span><select><option>Natural anodised</option><option>Matt Charcoal</option></select></label>
+      </div>
+      <label><span class="label">Notes</span><textarea>Lower centre light fixed. Top row vents aligned to kitchen counter line. Confirm mullion packer for stone reveal.</textarea></label>
+      <div class="actions">
+        <button class="primary">Apply to line 02</button>
+        <button onclick="location.href='workspace.html'">Return to workspace</button>
+      </div>
+    </section>
+
+    <section class="panel builder-shell">
+      <div class="dimension-bar">
+        <span class="label" style="color:var(--fg)">Generated diagram</span>
+        <span id="summaryText">2 top hung • 3 fixed • 0 side hung</span>
+      </div>
+      <div class="canvas">
+        <div class="dims">
+          <span>700</span>
+          <span>700</span>
+          <span>700</span>
+        </div>
+        <div class="grid" id="builderGrid">
+          <button class="cell top-hung" data-state="top-hung">Top Hung<br><small>700 × 500</small></button>
+          <button class="cell top-hung" data-state="top-hung">Top Hung<br><small>700 × 500</small></button>
+          <button class="cell fixed" data-state="fixed">Fixed<br><small>700 × 500</small></button>
+          <button class="cell fixed" data-state="fixed">Fixed<br><small>700 × 1000</small></button>
+          <button class="cell fixed" data-state="fixed">Fixed<br><small>700 × 1000</small></button>
+          <button class="cell side-hung" data-state="side-hung">Side Hung<br><small>700 × 1000</small></button>
+        </div>
+        <div class="dims">
+          <span>500</span>
+          <span>1000</span>
+          <span style="grid-column: 2 / span 2; text-align:right">Overall: <strong id="overallSize">2100 × 1500</strong></span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel legend">
+      <div>
+        <div class="label">Cell types</div>
+        <h2>Click any cell to cycle panel behavior.</h2>
+      </div>
+      <div class="legend-item"><span class="swatch" style="background:color-mix(in oklab, var(--hung) 75%, black 25%)"></span><div><strong>Top Hung</strong><div>Upper-opening vent</div></div></div>
+      <div class="legend-item"><span class="swatch" style="background:color-mix(in oklab, var(--side) 75%, black 25%)"></span><div><strong>Side Hung</strong><div>Side-opening sash</div></div></div>
+      <div class="legend-item"><span class="swatch" style="background:color-mix(in oklab, var(--fixed) 75%, black 25%)"></span><div><strong>Fixed</strong><div>Non-opening glazed light</div></div></div>
+      <div class="legend-item"><span class="swatch" style="background:color-mix(in oklab, var(--toplight) 75%, black 25%)"></span><div><strong>Toplight</strong><div>Shallow upper transom</div></div></div>
+      <button onclick="location.href='window-picker.html'">Back to window picker</button>
+      <button onclick="location.href='door-picker.html'">Switch to door picker</button>
+    </aside>
+  </main>
+  <script>
+    const states = ["fixed", "top-hung", "side-hung", "toplight"];
+    const labels = {
+      "fixed": "Fixed",
+      "top-hung": "Top Hung",
+      "side-hung": "Side Hung",
+      "toplight": "Toplight"
+    };
+    const grid = Array.from(document.querySelectorAll(".cell"));
+    const summaryText = document.getElementById("summaryText");
+    const overallSize = document.getElementById("overallSize");
+    function recount() {
+      const count = { "fixed": 0, "top-hung": 0, "side-hung": 0, "toplight": 0 };
+      grid.forEach((cell) => { count[cell.dataset.state] += 1; });
+      summaryText.textContent = `${count["top-hung"]} top hung • ${count["fixed"]} fixed • ${count["side-hung"]} side hung • ${count["toplight"]} toplight`;
+      overallSize.textContent = `${document.getElementById("widthInput").value} × ${document.getElementById("heightInput").value}`;
+    }
+    grid.forEach((cell) => {
+      cell.addEventListener("click", () => {
+        const current = states.indexOf(cell.dataset.state);
+        const next = states[(current + 1) % states.length];
+        cell.dataset.state = next;
+        cell.className = `cell ${next}`;
+        cell.innerHTML = `${labels[next]}<br><small>${cell.querySelector("small").textContent}</small>`;
+        recount();
+      });
+    });
+    document.getElementById("widthInput").addEventListener("input", recount);
+    document.getElementById("heightInput").addEventListener("input", recount);
+    recount();
+  </script>
+</body>
+</html>

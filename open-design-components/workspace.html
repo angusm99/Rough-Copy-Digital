@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Workspace • Anglo Windows Digital Rough Copy</title>
+  <style>
+    :root {
+      --bg: oklch(15.1% 0.009 239.8);
+      --surface: oklch(18.5% 0.012 245);
+      --surface-2: oklch(22.5% 0.014 247);
+      --surface-3: oklch(27% 0.015 250);
+      --fg: oklch(92.5% 0.007 88.6);
+      --muted: oklch(70.4% 0.031 87.6);
+      --border: oklch(31% 0.015 252.3);
+      --accent: oklch(87.1% 0.178 91.8);
+      --success: oklch(71% 0.13 152);
+      --danger: oklch(67% 0.18 32);
+      --info: oklch(68% 0.09 236);
+      --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      --font-body: "Segoe UI", "Segoe UI Variable Text", Inter, system-ui, sans-serif;
+      --font-mono: "Cascadia Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, oklch(17% 0.01 245), var(--bg));
+      color: var(--fg);
+      font-family: var(--font-body);
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar, .workspace, .header, .toolbar, .job-card, .table-card, .drawer {
+      border-color: color-mix(in oklab, var(--border) 86%, white 14%);
+    }
+    .sidebar {
+      padding: 20px;
+      border-right: 1px solid color-mix(in oklab, var(--border) 82%, white 18%);
+      background: color-mix(in oklab, var(--surface) 96%, black 4%);
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+    .brand {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+      border-radius: 16px;
+      background: color-mix(in oklab, var(--surface-2) 96%, black 4%);
+      border: 1px solid color-mix(in oklab, var(--border) 78%, var(--accent) 22%);
+    }
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+    }
+    .label, .mono, .nav small, th {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+    .nav a, .quick {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: color-mix(in oklab, var(--surface) 72%, var(--surface-2));
+      border: 1px solid transparent;
+      color: var(--fg);
+      text-decoration: none;
+    }
+    .nav a.active {
+      border-color: color-mix(in oklab, var(--accent) 50%, var(--border));
+      background: color-mix(in oklab, var(--accent) 14%, var(--surface-2));
+    }
+    .workspace {
+      padding: 20px;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+    .header, .job-card, .table-card, .drawer {
+      background: color-mix(in oklab, var(--surface) 92%, black 8%);
+      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
+      border-radius: 18px;
+    }
+    .header {
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 1.2fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+    .header h1 {
+      margin: 6px 0 0;
+      font-size: 34px;
+      font-family: var(--font-display);
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: end;
+    }
+    button, .link-btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .primary { background: var(--accent); color: var(--bg); }
+    .secondary {
+      background: color-mix(in oklab, var(--surface-3) 88%, black 12%);
+      color: var(--fg);
+      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
+    }
+    .job-card {
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+    .field {
+      padding: 12px;
+      border-radius: 12px;
+      background: color-mix(in oklab, var(--surface-2) 94%, black 6%);
+      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
+    }
+    .field strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 15px;
+    }
+    .table-card { overflow: hidden; }
+    .table-head, .table-tools, .drawer {
+      padding: 16px 18px;
+    }
+    .table-tools {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+      border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+      background: color-mix(in oklab, var(--surface-2) 86%, black 14%);
+    }
+    .filters, .summary {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .chip, .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .chip {
+      background: color-mix(in oklab, var(--surface-3) 88%, black 12%);
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+    }
+    .status.ready { background: color-mix(in oklab, var(--success) 22%, var(--surface-2)); color: color-mix(in oklab, var(--success) 78%, white 22%); }
+    .status.warn { background: color-mix(in oklab, var(--accent) 18%, var(--surface-2)); color: color-mix(in oklab, var(--accent) 76%, white 24%); }
+    .status.info { background: color-mix(in oklab, var(--info) 18%, var(--surface-2)); color: color-mix(in oklab, var(--info) 76%, white 24%); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid color-mix(in oklab, var(--border) 90%, white 10%);
+      vertical-align: top;
+    }
+    tbody tr {
+      cursor: pointer;
+      transition: background 140ms ease;
+    }
+    tbody tr:hover, tbody tr.selected {
+      background: color-mix(in oklab, var(--accent) 10%, var(--surface-2));
+    }
+    .diagram {
+      width: 68px;
+      height: 48px;
+      border: 1px solid color-mix(in oklab, var(--border) 72%, var(--accent) 28%);
+      border-radius: 8px;
+      position: relative;
+      background: color-mix(in oklab, var(--surface) 62%, var(--surface-3));
+    }
+    .diagram::before, .diagram::after {
+      content: "";
+      position: absolute;
+      inset: 8px 50% 8px 8px;
+      border: 2px solid var(--accent);
+      border-right-width: 1px;
+    }
+    .diagram::after {
+      inset: 8px 8px 8px 50%;
+      border-left-width: 1px;
+    }
+    .drawer {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+    }
+    .detail-card {
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
+      background: color-mix(in oklab, var(--surface-2) 90%, black 10%);
+    }
+    .detail-card h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .input, select, textarea {
+      width: 100%;
+      background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
+      color: var(--fg);
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+    textarea { min-height: 92px; resize: vertical; }
+    .export-menu {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .export-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+    }
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid color-mix(in oklab, var(--border) 82%, white 18%); }
+      .job-card, .drawer, .header { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .job-card { grid-template-columns: repeat(2, 1fr); }
+      .table-tools, .toolbar { justify-content: start; }
+      table, thead, tbody, tr, th, td { display: block; }
+      thead { display: none; }
+      tbody tr { padding: 10px 0; }
+      td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="label">Anglo Windows</div>
+        <div class="brand-title">Digital Rough Copy</div>
+        <div>Quote-driven manufacturing prep for windows and doors.</div>
+      </div>
+      <nav class="nav" style="display:grid;gap:10px">
+        <a class="active" href="workspace.html"><span>Quote workspace</span><small>18 lines</small></a>
+        <a href="window-picker.html"><span>Window picker</span><small>Ctrl+P</small></a>
+        <a href="window-builder.html"><span>Custom builder</span><small>Ctrl+B</small></a>
+        <a href="door-picker.html"><span>Door picker</span><small>Ctrl+D</small></a>
+        <a href="validation-report.html"><span>Validation report</span><small>7 issues</small></a>
+      </nav>
+      <div class="quick">
+        <span>Road rep mode</span>
+        <strong>Tablet-ready</strong>
+      </div>
+      <div class="quick">
+        <span>Bizman import</span>
+        <strong>QS-240518</strong>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <header class="header">
+        <div>
+          <div class="label">Current job</div>
+          <h1>Silver Oak Estate • Unit 14</h1>
+        </div>
+        <div class="toolbar">
+          <button class="secondary">Import Bizman</button>
+          <button class="secondary">Add Line</button>
+          <button class="secondary" onclick="location.href='validation-report.html'">Validate</button>
+          <button class="primary" id="exportBtn">Export PDF / Excel</button>
+        </div>
+      </header>
+
+      <section class="job-card">
+        <div class="field"><span class="label">Client</span><strong>Silver Oak Developments</strong></div>
+        <div class="field"><span class="label">Quote no.</span><strong class="mono">Q240518-147</strong></div>
+        <div class="field"><span class="label">Prepared by</span><strong>M. Pretorius</strong></div>
+        <div class="field"><span class="label">Site contact</span><strong>J. Maseko • 082 648 1118</strong></div>
+        <div class="field"><span class="label">Required by</span><strong>30 May 2026</strong></div>
+        <div class="field"><span class="label">Status</span><strong>Awaiting final line confirmation</strong></div>
+      </section>
+
+      <section class="table-card">
+        <div class="table-head">
+          <div class="label">Quote line list</div>
+          <h2 style="margin:6px 0 0;font-size:24px">Scan, confirm, and complete each opening.</h2>
+        </div>
+        <div class="table-tools">
+          <div class="filters">
+            <span class="chip">Needs type</span>
+            <span class="chip">Bathroom</span>
+            <span class="chip">Doors only</span>
+          </div>
+          <div class="summary">
+            <span class="status ready">11 Ready</span>
+            <span class="status warn">4 Needs input</span>
+            <span class="status info">3 Builder items</span>
+          </div>
+        </div>
+        <table id="lineTable">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Location</th>
+              <th>Product</th>
+              <th>Diagram</th>
+              <th>Size</th>
+              <th>Qty</th>
+              <th>Glass</th>
+              <th>Colour</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected" data-line="01">
+              <td data-label="Item"><strong class="mono">01</strong></td>
+              <td data-label="Location">Lounge north</td>
+              <td data-label="Product">Top Hung 2-lite</td>
+              <td data-label="Diagram"><div class="diagram"></div></td>
+              <td data-label="Size">1800 × 1200</td>
+              <td data-label="Qty">2</td>
+              <td data-label="Glass">6.38 Clear Lam</td>
+              <td data-label="Colour">Matt Charcoal</td>
+              <td data-label="Status"><span class="status ready">Ready</span></td>
+            </tr>
+            <tr data-line="02">
+              <td data-label="Item"><strong class="mono">02</strong></td>
+              <td data-label="Location">Kitchen east</td>
+              <td data-label="Product">Combination Builder</td>
+              <td data-label="Diagram"><div class="diagram"></div></td>
+              <td data-label="Size">2100 × 1500</td>
+              <td data-label="Qty">1</td>
+              <td data-label="Glass">4 mm Obscure / 6.38 Clear</td>
+              <td data-label="Colour">Natural anodised</td>
+              <td data-label="Status"><span class="status info">Open builder</span></td>
+            </tr>
+            <tr data-line="03">
+              <td data-label="Item"><strong class="mono">03</strong></td>
+              <td data-label="Location">Main bath</td>
+              <td data-label="Product">Unknown</td>
+              <td data-label="Diagram"><div class="diagram"></div></td>
+              <td data-label="Size">900 × 600</td>
+              <td data-label="Qty">1</td>
+              <td data-label="Glass">Obscure TBD</td>
+              <td data-label="Colour">White</td>
+              <td data-label="Status"><span class="status warn">Needs type</span></td>
+            </tr>
+            <tr data-line="04">
+              <td data-label="Item"><strong class="mono">04</strong></td>
+              <td data-label="Location">Patio</td>
+              <td data-label="Product">Sliding Door XO</td>
+              <td data-label="Diagram"><div class="diagram"></div></td>
+              <td data-label="Size">2400 × 2100</td>
+              <td data-label="Qty">1</td>
+              <td data-label="Glass">6.38 Safety</td>
+              <td data-label="Colour">Matt Charcoal</td>
+              <td data-label="Status"><span class="status warn">Check config</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="drawer">
+        <article class="detail-card">
+          <div class="label">Selected line • 01</div>
+          <h3>Lounge north window</h3>
+          <div class="detail-grid">
+            <label><span class="label">Room / location</span><input class="input" value="Lounge north" /></label>
+            <label><span class="label">Product code</span><input class="input" value="TH-2L-1800" /></label>
+            <label><span class="label">Width (mm)</span><input class="input" value="1800" /></label>
+            <label><span class="label">Height (mm)</span><input class="input" value="1200" /></label>
+            <label><span class="label">Glass</span><select><option>6.38 Clear Lam</option><option>4 mm Clear</option></select></label>
+            <label><span class="label">Colour</span><select><option>Matt Charcoal</option><option>White</option></select></label>
+          </div>
+          <label style="display:block;margin-top:12px"><span class="label">Notes</span><textarea>Client requested matching vent split to adjacent item 02. Confirm handle side after site mark-up.</textarea></label>
+        </article>
+        <article class="detail-card">
+          <div class="label">Output and next actions</div>
+          <h3>Export package</h3>
+          <div class="export-menu">
+            <div class="export-item"><span>Rough copy PDF</span><strong>Landscape A4</strong></div>
+            <div class="export-item"><span>Workshop Excel</span><strong>Line data + glass notes</strong></div>
+            <div class="export-item"><span>Rep summary</span><strong>Mobile-friendly PDF</strong></div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+            <button class="secondary" onclick="location.href='window-picker.html'">Open window picker</button>
+            <button class="secondary" onclick="location.href='window-builder.html'">Open builder</button>
+            <button class="secondary" onclick="location.href='door-picker.html'">Open door picker</button>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+  <script>
+    const rows = Array.from(document.querySelectorAll("#lineTable tbody tr"));
+    rows.forEach((row) => {
+      row.addEventListener("click", () => {
+        rows.forEach((other) => other.classList.remove("selected"));
+        row.classList.add("selected");
+      });
+    });
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      location.href = "validation-report.html";
+    });
+  </script>
+</body>
+</html>

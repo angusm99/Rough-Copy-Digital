@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Window Picker • Anglo Windows Digital Rough Copy</title>
+  <style>
+    :root {
+      --bg: oklch(15.1% 0.009 239.8);
+      --surface: oklch(20% 0.013 247);
+      --surface-2: oklch(25% 0.014 249);
+      --fg: oklch(92.5% 0.007 88.6);
+      --muted: oklch(70.4% 0.031 87.6);
+      --border: oklch(31% 0.015 252.3);
+      --accent: oklch(87.1% 0.178 91.8);
+      --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      --font-body: "Segoe UI", "Segoe UI Variable Text", Inter, system-ui, sans-serif;
+      --font-mono: "Cascadia Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, rgba(4, 6, 10, 0.72), rgba(4, 6, 10, 0.86)), linear-gradient(180deg, oklch(17% 0.01 245), var(--bg));
+      color: var(--fg);
+      font-family: var(--font-body);
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+    .modal {
+      width: min(1240px, 100%);
+      min-height: min(860px, calc(100vh - 36px));
+      background: color-mix(in oklab, var(--surface) 92%, black 8%);
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      border-radius: 24px;
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.4);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      overflow: hidden;
+    }
+    .head, .tools, .foot {
+      padding: 18px 22px;
+      border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+    }
+    .head { display: flex; justify-content: space-between; gap: 16px; align-items: end; }
+    .label, .micro {
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    h1 { margin: 8px 0 0; font-size: 32px; font-family: var(--font-display); }
+    .tools {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      background: color-mix(in oklab, var(--surface-2) 82%, black 18%);
+    }
+    .tabs, .filters, .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 13px;
+      font: inherit;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .tab { background: color-mix(in oklab, var(--surface) 72%, var(--surface-2)); color: var(--fg); }
+    .tab.active { background: color-mix(in oklab, var(--accent) 20%, var(--surface-2)); color: color-mix(in oklab, var(--accent) 78%, white 22%); }
+    .content {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      min-height: 0;
+    }
+    .catalog {
+      padding: 20px 22px;
+      display: grid;
+      align-content: start;
+      gap: 16px;
+      overflow: auto;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .card {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      background: color-mix(in oklab, var(--surface-2) 88%, black 12%);
+      display: grid;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .card.selected {
+      border-color: color-mix(in oklab, var(--accent) 56%, var(--border));
+      box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 26%, transparent);
+      background: color-mix(in oklab, var(--accent) 10%, var(--surface-2));
+    }
+    .thumb {
+      height: 124px;
+      border-radius: 12px;
+      border: 1px solid color-mix(in oklab, var(--border) 80%, var(--accent) 20%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent), color-mix(in oklab, var(--surface) 76%, black 24%);
+      position: relative;
+    }
+    .thumb .frame, .preview .frame {
+      position: absolute;
+      inset: 18px;
+      border: 2px solid var(--accent);
+    }
+    .thumb .frame::before, .preview .frame::before, .thumb .frame::after, .preview .frame::after {
+      content: "";
+      position: absolute;
+      inset: 0 50% 0 0;
+      border-right: 2px solid var(--accent);
+    }
+    .thumb .frame::after, .preview .frame::after { inset: 50% 0 0 0; border-right: 0; border-top: 2px solid var(--accent); }
+    .card strong { font-size: 15px; }
+    .side {
+      padding: 20px 22px;
+      border-left: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      background: color-mix(in oklab, var(--surface) 88%, black 12%);
+    }
+    .panel {
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
+      background: color-mix(in oklab, var(--surface-2) 92%, black 8%);
+    }
+    .preview {
+      height: 210px;
+      border-radius: 14px;
+      border: 1px solid color-mix(in oklab, var(--border) 80%, var(--accent) 20%);
+      background: color-mix(in oklab, var(--surface) 76%, black 24%);
+      position: relative;
+      margin-top: 12px;
+    }
+    .input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      background: color-mix(in oklab, var(--surface) 72%, var(--surface-2));
+      color: var(--fg);
+      font: inherit;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 0;
+      border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+    }
+    .primary { background: var(--accent); color: var(--bg); }
+    .secondary { background: color-mix(in oklab, var(--surface-2) 86%, black 14%); color: var(--fg); border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%); }
+    @media (max-width: 980px) {
+      .content { grid-template-columns: 1fr; }
+      .side { border-left: 0; border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%); }
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 720px) {
+      .head, .tools, .foot { grid-template-columns: 1fr; }
+      .grid, .form-grid { grid-template-columns: 1fr; }
+      .tools, .foot, .head { display: grid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="modal">
+    <header class="head">
+      <div>
+        <div class="label">Line 03 • Main bath • 900 × 600</div>
+        <h1>Pick the right window configuration fast.</h1>
+      </div>
+      <div class="actions">
+        <button class="secondary" onclick="location.href='workspace.html'">Back to workspace</button>
+        <button class="secondary" onclick="location.href='window-builder.html'">Open builder</button>
+      </div>
+    </header>
+    <section class="tools">
+      <div class="tabs">
+        <button class="tab active">Common sizes</button>
+        <button class="tab">Custom builder</button>
+        <button class="tab">Recent</button>
+        <button class="tab">Favourites</button>
+      </div>
+      <div class="filters">
+        <button class="tab active">Top Hung</button>
+        <button class="tab">Side Hung</button>
+        <button class="tab">Fixed</button>
+        <button class="tab">Toplight</button>
+        <button class="tab">Sidelight</button>
+        <button class="tab">Combination</button>
+        <button class="tab">Sliders</button>
+      </div>
+    </section>
+    <section class="content">
+      <div class="catalog">
+        <div class="micro">Recommended matches</div>
+        <div class="grid" id="catalog">
+          <article class="card selected" data-name="Top Hung 1-lite" data-size="900 × 600" data-glass="4 mm Obscure" data-code="TH-1L-0906">
+            <div class="thumb"><div class="frame"></div></div>
+            <strong>Top Hung 1-lite</strong>
+            <span>Bathroom standard • 900 × 600</span>
+          </article>
+          <article class="card" data-name="Top Hung 2-lite" data-size="1200 × 600" data-glass="4 mm Obscure" data-code="TH-2L-1206">
+            <div class="thumb"><div class="frame"></div></div>
+            <strong>Top Hung 2-lite</strong>
+            <span>Two equal vents • 1200 × 600</span>
+          </article>
+          <article class="card" data-name="Fixed + Top Hung" data-size="900 × 900" data-glass="6.38 Clear / Obscure" data-code="FX-TH-0909">
+            <div class="thumb"><div class="frame"></div></div>
+            <strong>Fixed + Top Hung</strong>
+            <span>Vent over privacy panel</span>
+          </article>
+          <article class="card" data-name="Sidelight narrow" data-size="450 × 1800" data-glass="6.38 Safety" data-code="SL-4518">
+            <div class="thumb"><div class="frame"></div></div>
+            <strong>Sidelight narrow</strong>
+            <span>For door-adjacent openings</span>
+          </article>
+          <article class="card" data-name="Toplight transom" data-size="1800 × 450" data-glass="4 mm Clear" data-code="TL-1804">
+            <div class="thumb"><div class="frame"></div></div>
+            <strong>Toplight transom</strong>
+            <span>Horizontal vent band</span>
+          </article>
+          <article class="card" data-name="Combination builder seed" data-size="Custom" data-glass="Mixed" data-code="COMBO-SEED">
+            <div class="thumb"><div class="frame"></div></div>
+            <strong>Combination builder seed</strong>
+            <span>Start from a pre-zoned custom grid</span>
+          </article>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="panel">
+          <div class="label">Selection preview</div>
+          <h3 id="selectionName" style="margin:8px 0 0;font-size:22px">Top Hung 1-lite</h3>
+          <div class="preview"><div class="frame"></div></div>
+          <div class="form-grid">
+            <label><span class="micro">Code</span><input id="codeField" class="input" value="TH-1L-0906" /></label>
+            <label><span class="micro">Nominal size</span><input id="sizeField" class="input" value="900 × 600" /></label>
+            <label><span class="micro">Glass</span><select id="glassField"><option>4 mm Obscure</option><option>4 mm Clear</option><option>6.38 Clear Lam</option></select></label>
+            <label><span class="micro">Colour</span><select><option>White</option><option>Matt Charcoal</option><option>Natural anodised</option></select></label>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="label">Why this is first</div>
+          <p style="margin:10px 0 0;line-height:1.55">The room is tagged as a bathroom, the imported size already fits a standard top-hung unit, and the current line is missing only type confirmation. This keeps the rep in a quick yes/no path instead of forcing custom builder work.</p>
+        </div>
+      </aside>
+    </section>
+    <footer class="foot">
+      <div class="label">Enter confirms selection • B opens builder • Esc returns to workspace</div>
+      <div class="actions">
+        <button class="secondary" onclick="location.href='workspace.html'">Cancel</button>
+        <button class="primary" onclick="location.href='workspace.html'">Use selected window</button>
+      </div>
+    </footer>
+  </div>
+  <script>
+    const cards = Array.from(document.querySelectorAll(".card"));
+    const selectionName = document.getElementById("selectionName");
+    const codeField = document.getElementById("codeField");
+    const sizeField = document.getElementById("sizeField");
+    const glassField = document.getElementById("glassField");
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        cards.forEach((other) => other.classList.remove("selected"));
+        card.classList.add("selected");
+        selectionName.textContent = card.dataset.name;
+        codeField.value = card.dataset.code;
+        sizeField.value = card.dataset.size;
+        glassField.value = card.dataset.glass;
+      });
+    });
+  </script>
+</body>
+</html>

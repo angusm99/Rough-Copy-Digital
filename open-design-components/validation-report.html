@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Validation Review • Anglo Windows Digital Rough Copy</title>
+  <style>
+    :root {
+      --bg: oklch(15.1% 0.009 239.8);
+      --surface: oklch(19% 0.012 246);
+      --surface-2: oklch(24% 0.014 248);
+      --fg: oklch(92.5% 0.007 88.6);
+      --muted: oklch(70.4% 0.031 87.6);
+      --border: oklch(31% 0.015 252.3);
+      --accent: oklch(87.1% 0.178 91.8);
+      --success: oklch(71% 0.13 152);
+      --danger: oklch(67% 0.18 32);
+      --info: oklch(68% 0.09 236);
+      --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      --font-body: "Segoe UI", "Segoe UI Variable Text", Inter, system-ui, sans-serif;
+      --font-mono: "Cascadia Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, oklch(17% 0.01 245), var(--bg));
+      color: var(--fg);
+      font-family: var(--font-body);
+    }
+    .shell {
+      width: min(1260px, calc(100% - 28px));
+      margin: 18px auto;
+      display: grid;
+      gap: 16px;
+    }
+    .panel {
+      background: color-mix(in oklab, var(--surface) 92%, black 8%);
+      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
+      border-radius: 20px;
+      padding: 18px 20px;
+    }
+    .top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: end;
+    }
+    .label {
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 8px 0 0;
+      font-size: 36px;
+      font-family: var(--font-display);
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .stat {
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
+      background: color-mix(in oklab, var(--surface-2) 92%, black 8%);
+    }
+    .stat strong {
+      display: block;
+      font-size: 26px;
+      margin-top: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+    .issues {
+      display: grid;
+      gap: 12px;
+    }
+    .issue {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: start;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
+      background: color-mix(in oklab, var(--surface-2) 92%, black 8%);
+    }
+    .badge {
+      min-width: 88px;
+      text-align: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .warn { background: color-mix(in oklab, var(--accent) 18%, var(--surface-2)); color: color-mix(in oklab, var(--accent) 76%, white 24%); }
+    .danger { background: color-mix(in oklab, var(--danger) 20%, var(--surface-2)); color: color-mix(in oklab, var(--danger) 76%, white 24%); }
+    .info { background: color-mix(in oklab, var(--info) 18%, var(--surface-2)); color: color-mix(in oklab, var(--info) 76%, white 24%); }
+    .ok { background: color-mix(in oklab, var(--success) 20%, var(--surface-2)); color: color-mix(in oklab, var(--success) 76%, white 24%); }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      border-radius: 10px;
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      background: color-mix(in oklab, var(--surface-2) 92%, black 8%);
+      color: var(--fg);
+      font: inherit;
+      padding: 11px 14px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .primary { background: var(--accent); color: var(--bg); border: 0; }
+    @media (max-width: 860px) {
+      .top, .summary, .issue { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="panel top">
+      <div>
+        <div class="label">Validation pass • Q240518-147</div>
+        <h1>Catch missing or conflicting data before export.</h1>
+      </div>
+      <div class="actions">
+        <button onclick="location.href='workspace.html'">Back to workspace</button>
+        <button class="primary">Export cleared PDF</button>
+      </div>
+    </section>
+
+    <section class="summary">
+      <div class="stat panel"><span class="label">Ready</span><strong>11</strong><span>Lines can export now</span></div>
+      <div class="stat panel"><span class="label">Needs input</span><strong>4</strong><span>Missing type or glass</span></div>
+      <div class="stat panel"><span class="label">Config checks</span><strong>2</strong><span>Door logic still unconfirmed</span></div>
+      <div class="stat panel"><span class="label">Builder items</span><strong>3</strong><span>Custom grids to review</span></div>
+    </section>
+
+    <section class="panel issues">
+      <article class="issue">
+        <span class="badge warn">Needs type</span>
+        <div>
+          <strong>Item 03 • Main bath • 900 × 600</strong>
+          <p style="margin:8px 0 0;line-height:1.55">Size and location fit a likely top-hung bathroom unit, but the line still has no confirmed product family. Picker confirmation is required before export.</p>
+        </div>
+        <div class="actions">
+          <button onclick="location.href='window-picker.html'">Open picker</button>
+          <button class="primary" onclick="resolveIssue(this)">Mark resolved</button>
+        </div>
+      </article>
+
+      <article class="issue">
+        <span class="badge info">Builder</span>
+        <div>
+          <strong>Item 02 • Kitchen east • Combination Builder</strong>
+          <p style="margin:8px 0 0;line-height:1.55">Custom grid exists, but sash count and mullion layout have not been checked against the imported notes. Confirm builder output before workshop issue.</p>
+        </div>
+        <div class="actions">
+          <button onclick="location.href='window-builder.html'">Open builder</button>
+          <button class="primary" onclick="resolveIssue(this)">Mark resolved</button>
+        </div>
+      </article>
+
+      <article class="issue">
+        <span class="badge danger">Check config</span>
+        <div>
+          <strong>Item 04 • Patio • Sliding door</strong>
+          <p style="margin:8px 0 0;line-height:1.55">Opening direction and lock side are not aligned between the imported quote note and the current draft. Door picker confirmation is required to avoid a reversed site issue.</p>
+        </div>
+        <div class="actions">
+          <button onclick="location.href='door-picker.html'">Open door picker</button>
+          <button class="primary" onclick="resolveIssue(this)">Mark resolved</button>
+        </div>
+      </article>
+
+      <article class="issue">
+        <span class="badge ok">Ready</span>
+        <div>
+          <strong>Item 01 • Lounge north • Top Hung 2-lite</strong>
+          <p style="margin:8px 0 0;line-height:1.55">Dimensions, glass, colour, and quantity are all complete. Keep this as the reference line for similar lounge openings.</p>
+        </div>
+        <div class="actions">
+          <button onclick="location.href='workspace.html'">Review line</button>
+        </div>
+      </article>
+    </section>
+  </main>
+  <script>
+    function resolveIssue(button) {
+      const issue = button.closest(".issue");
+      const badge = issue.querySelector(".badge");
+      badge.textContent = "Resolved";
+      badge.className = "badge ok";
+      button.disabled = true;
+      button.textContent = "Resolved";
+    }
+  </script>
+</body>
+</html>
