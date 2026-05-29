@@ -21,7 +21,8 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: linear-gradient(180deg, rgba(4, 6, 10, 0.72), rgba(4, 6, 10, 0.86)), linear-gradient(180deg, oklch(17% 0.01 245), var(--bg));
+      background: linear-gradient(180deg, rgba(4,6,10,.72), rgba(4,6,10,.86)),
+                  linear-gradient(180deg, oklch(17% .01 245), var(--bg));
       color: var(--fg);
       font-family: var(--font-body);
       display: grid;
@@ -29,262 +30,417 @@
       padding: 18px;
     }
     .modal {
-      width: min(1240px, 100%);
+      width: min(1280px, 100%);
       min-height: min(860px, calc(100vh - 36px));
       background: color-mix(in oklab, var(--surface) 92%, black 8%);
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
       border-radius: 24px;
-      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 28px 80px rgba(0,0,0,.4);
       display: grid;
       grid-template-rows: auto auto 1fr auto;
       overflow: hidden;
     }
-    .head, .tools, .foot {
-      padding: 18px 22px;
+    .head { padding: 18px 22px; border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+            display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; }
+    .label { color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: .15em; text-transform: uppercase; }
+    h1 { margin: 6px 0 0; font-size: 30px; font-family: var(--font-display); }
+    .tools {
+      padding: 12px 22px;
+      display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+      background: color-mix(in oklab, var(--surface-2) 82%, black 18%);
       border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
     }
-    .head { display: flex; justify-content: space-between; gap: 16px; align-items: end; }
-    .label, .micro {
-      color: var(--muted);
-      font-family: var(--font-mono);
-      font-size: 12px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-    }
-    h1 { margin: 8px 0 0; font-size: 32px; font-family: var(--font-display); }
-    .tools {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      background: color-mix(in oklab, var(--surface-2) 82%, black 18%);
-    }
-    .tabs, .filters, .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .tools-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .sep { width: 1px; height: 28px; background: color-mix(in oklab, var(--border) 80%, white 20%); }
     button {
-      border: 0;
-      border-radius: 10px;
-      padding: 10px 13px;
-      font: inherit;
-      cursor: pointer;
-      font-weight: 700;
+      border: 0; border-radius: 9px; padding: 8px 13px;
+      font: inherit; cursor: pointer; font-weight: 600; font-size: 13px;
     }
-    .tab { background: color-mix(in oklab, var(--surface) 72%, var(--surface-2)); color: var(--fg); }
-    .tab.active { background: color-mix(in oklab, var(--accent) 20%, var(--surface-2)); color: color-mix(in oklab, var(--accent) 78%, white 22%); }
-    .content {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      min-height: 0;
-    }
-    .catalog {
-      padding: 20px 22px;
-      display: grid;
-      align-content: start;
-      gap: 16px;
-      overflow: auto;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-    }
+    .tab { background: color-mix(in oklab, var(--surface) 72%, var(--surface-2)); color: var(--muted); }
+    .tab.active { background: color-mix(in oklab, var(--accent) 20%, var(--surface-2)); color: color-mix(in oklab, var(--accent) 85%, white 15%); }
+    /* ── content split ── */
+    .content { display: grid; grid-template-columns: 1fr 320px; min-height: 0; }
+    .catalog { padding: 18px 22px; overflow-y: auto; display: grid; align-content: start; gap: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    /* ── cards ── */
     .card {
-      padding: 14px;
-      border-radius: 16px;
-      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      padding: 12px; border-radius: 14px;
+      border: 1px solid color-mix(in oklab, var(--border) 82%, white 18%);
       background: color-mix(in oklab, var(--surface-2) 88%, black 12%);
-      display: grid;
-      gap: 10px;
-      cursor: pointer;
+      cursor: pointer; display: grid; gap: 8px; transition: border-color .12s;
     }
+    .card:hover { border-color: color-mix(in oklab, var(--border) 60%, var(--accent) 40%); }
     .card.selected {
-      border-color: color-mix(in oklab, var(--accent) 56%, var(--border));
-      box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 26%, transparent);
-      background: color-mix(in oklab, var(--accent) 10%, var(--surface-2));
+      border-color: color-mix(in oklab, var(--accent) 64%, var(--border));
+      box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 22%, transparent);
+      background: color-mix(in oklab, var(--accent) 8%, var(--surface-2));
     }
     .thumb {
-      height: 124px;
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1px solid color-mix(in oklab, var(--border) 80%, var(--accent) 20%);
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent), color-mix(in oklab, var(--surface) 76%, black 24%);
-      position: relative;
+      background: color-mix(in oklab, var(--surface) 72%, black 28%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 8px; min-height: 100px;
     }
-    .thumb .frame, .preview .frame {
-      position: absolute;
-      inset: 18px;
-      border: 2px solid var(--accent);
-    }
-    .thumb .frame::before, .preview .frame::before, .thumb .frame::after, .preview .frame::after {
-      content: "";
-      position: absolute;
-      inset: 0 50% 0 0;
-      border-right: 2px solid var(--accent);
-    }
-    .thumb .frame::after, .preview .frame::after { inset: 50% 0 0 0; border-right: 0; border-top: 2px solid var(--accent); }
-    .card strong { font-size: 15px; }
+    .card strong { font-size: 13px; line-height: 1.3; }
+    .card .sub { font-size: 11px; color: var(--muted); }
+    .card .code { font-family: var(--font-mono); font-size: 10px; color: var(--accent); opacity: .8; letter-spacing: .05em; }
+    /* ── side panel ── */
     .side {
-      padding: 20px 22px;
-      border-left: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
-      display: grid;
-      gap: 14px;
-      align-content: start;
+      padding: 18px; border-left: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+      display: grid; gap: 14px; align-content: start;
       background: color-mix(in oklab, var(--surface) 88%, black 12%);
     }
     .panel {
-      padding: 16px;
-      border-radius: 16px;
+      padding: 14px; border-radius: 14px;
       border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
       background: color-mix(in oklab, var(--surface-2) 92%, black 8%);
     }
-    .preview {
-      height: 210px;
-      border-radius: 14px;
+    .preview-box {
+      height: 200px; border-radius: 12px;
       border: 1px solid color-mix(in oklab, var(--border) 80%, var(--accent) 20%);
-      background: color-mix(in oklab, var(--surface) 76%, black 24%);
-      position: relative;
-      margin-top: 12px;
+      background: color-mix(in oklab, var(--surface) 72%, black 28%);
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 10px;
     }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .form-grid label { display: grid; gap: 4px; }
     .input, select {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
+      width: 100%; padding: 9px 11px; border-radius: 9px;
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
       background: color-mix(in oklab, var(--surface) 72%, var(--surface-2));
-      color: var(--fg);
-      font: inherit;
+      color: var(--fg); font: inherit; font-size: 13px;
     }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 12px;
-    }
+    /* ── footer ── */
     .foot {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 0;
+      padding: 14px 22px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
       border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
     }
-    .primary { background: var(--accent); color: var(--bg); }
-    .secondary { background: color-mix(in oklab, var(--surface-2) 86%, black 14%); color: var(--fg); border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%); }
-    @media (max-width: 980px) {
+    .actions { display: flex; gap: 10px; }
+    .primary { background: var(--accent); color: oklch(15% .009 239.8); font-weight: 700; }
+    .secondary { background: color-mix(in oklab, var(--surface-2) 86%, black 14%); color: var(--fg); border: 1px solid color-mix(in oklab, var(--border) 80%, white 20%); }
+    @media (max-width: 960px) {
       .content { grid-template-columns: 1fr; }
       .side { border-left: 0; border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%); }
       .grid { grid-template-columns: 1fr 1fr; }
     }
-    @media (max-width: 720px) {
-      .head, .tools, .foot { grid-template-columns: 1fr; }
+    @media (max-width: 640px) {
       .grid, .form-grid { grid-template-columns: 1fr; }
-      .tools, .foot, .head { display: grid; }
+      .head, .foot { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body>
-  <div class="modal">
-    <header class="head">
-      <div>
-        <div class="label">Line 03 • Main bath • 900 × 600</div>
-        <h1>Pick the right window configuration fast.</h1>
-      </div>
-      <div class="actions">
-        <button class="secondary" onclick="location.href='workspace.html'">Back to workspace</button>
-        <button class="secondary" onclick="location.href='window-builder.html'">Open builder</button>
-      </div>
-    </header>
-    <section class="tools">
-      <div class="tabs">
-        <button class="tab active">Common sizes</button>
-        <button class="tab">Custom builder</button>
-        <button class="tab">Recent</button>
-        <button class="tab">Favourites</button>
-      </div>
-      <div class="filters">
-        <button class="tab active">Top Hung</button>
-        <button class="tab">Side Hung</button>
-        <button class="tab">Fixed</button>
-        <button class="tab">Toplight</button>
-        <button class="tab">Sidelight</button>
-        <button class="tab">Combination</button>
-        <button class="tab">Sliders</button>
-      </div>
-    </section>
-    <section class="content">
-      <div class="catalog">
-        <div class="micro">Recommended matches</div>
-        <div class="grid" id="catalog">
-          <article class="card selected" data-name="Top Hung 1-lite" data-size="900 × 600" data-glass="4 mm Obscure" data-code="TH-1L-0906">
-            <div class="thumb"><div class="frame"></div></div>
-            <strong>Top Hung 1-lite</strong>
-            <span>Bathroom standard • 900 × 600</span>
-          </article>
-          <article class="card" data-name="Top Hung 2-lite" data-size="1200 × 600" data-glass="4 mm Obscure" data-code="TH-2L-1206">
-            <div class="thumb"><div class="frame"></div></div>
-            <strong>Top Hung 2-lite</strong>
-            <span>Two equal vents • 1200 × 600</span>
-          </article>
-          <article class="card" data-name="Fixed + Top Hung" data-size="900 × 900" data-glass="6.38 Clear / Obscure" data-code="FX-TH-0909">
-            <div class="thumb"><div class="frame"></div></div>
-            <strong>Fixed + Top Hung</strong>
-            <span>Vent over privacy panel</span>
-          </article>
-          <article class="card" data-name="Sidelight narrow" data-size="450 × 1800" data-glass="6.38 Safety" data-code="SL-4518">
-            <div class="thumb"><div class="frame"></div></div>
-            <strong>Sidelight narrow</strong>
-            <span>For door-adjacent openings</span>
-          </article>
-          <article class="card" data-name="Toplight transom" data-size="1800 × 450" data-glass="4 mm Clear" data-code="TL-1804">
-            <div class="thumb"><div class="frame"></div></div>
-            <strong>Toplight transom</strong>
-            <span>Horizontal vent band</span>
-          </article>
-          <article class="card" data-name="Combination builder seed" data-size="Custom" data-glass="Mixed" data-code="COMBO-SEED">
-            <div class="thumb"><div class="frame"></div></div>
-            <strong>Combination builder seed</strong>
-            <span>Start from a pre-zoned custom grid</span>
-          </article>
+<div class="modal">
+  <header class="head">
+    <div>
+      <div class="label">Line 03 • Main bath • 900 × 600</div>
+      <h1>Pick the right window configuration.</h1>
+    </div>
+    <div class="actions">
+      <button class="secondary" onclick="location.href='workspace.html'">Back to workspace</button>
+      <button class="secondary" onclick="location.href='window-builder.html'">Open builder</button>
+    </div>
+  </header>
+
+  <nav class="tools">
+    <!-- View mode -->
+    <div class="tools-group" id="viewTabs">
+      <button class="tab active" onclick="setView('common')">Common sizes</button>
+      <button class="tab" onclick="setView('builder')">Custom builder</button>
+      <button class="tab" onclick="setView('recent')">Recent</button>
+    </div>
+    <div class="sep"></div>
+    <!-- Product family filter -->
+    <div class="tools-group" id="filterTabs">
+      <button class="tab active" data-filter="all" onclick="setFilter('all')">All</button>
+      <button class="tab" data-filter="tophung" onclick="setFilter('tophung')">Top Hung</button>
+      <button class="tab" data-filter="tophung-fixed" onclick="setFilter('tophung-fixed')">Top Hung + Fixed</button>
+      <button class="tab" data-filter="sidehung" onclick="setFilter('sidehung')">Side Hung</button>
+      <button class="tab" data-filter="fixed" onclick="setFilter('fixed')">Fixed Panel</button>
+      <button class="tab" data-filter="toplight" onclick="setFilter('toplight')">Toplight</button>
+      <button class="tab" data-filter="sidelight" onclick="setFilter('sidelight')">Sidelight</button>
+    </div>
+  </nav>
+
+  <section class="content">
+    <div class="catalog">
+      <div class="label" id="sectionLabel">Recommended matches</div>
+      <div class="grid" id="catalog"></div>
+    </div>
+    <aside class="side">
+      <div class="panel">
+        <div class="label">Selection preview</div>
+        <h3 id="selName" style="margin:8px 0 0;font-size:20px;font-family:var(--font-display)">—</h3>
+        <div class="preview-box" id="previewBox"></div>
+        <div class="form-grid">
+          <label><span class="label">Code</span><input id="codeField" class="input" value="" /></label>
+          <label><span class="label">Size (mm)</span><input id="sizeField" class="input" value="" /></label>
+          <label><span class="label">Glass</span>
+            <select id="glassField">
+              <option>4mm Clear</option>
+              <option>4mm Obscure</option>
+              <option>6.38 Clear Lam</option>
+              <option>6.38 Safety</option>
+              <option>Bronze</option>
+            </select>
+          </label>
+          <label><span class="label">Colour</span>
+            <select id="colourField">
+              <option>White</option>
+              <option>Matt Charcoal</option>
+              <option>Natural Anodised</option>
+              <option>Bronze</option>
+            </select>
+          </label>
         </div>
       </div>
-      <aside class="side">
-        <div class="panel">
-          <div class="label">Selection preview</div>
-          <h3 id="selectionName" style="margin:8px 0 0;font-size:22px">Top Hung 1-lite</h3>
-          <div class="preview"><div class="frame"></div></div>
-          <div class="form-grid">
-            <label><span class="micro">Code</span><input id="codeField" class="input" value="TH-1L-0906" /></label>
-            <label><span class="micro">Nominal size</span><input id="sizeField" class="input" value="900 × 600" /></label>
-            <label><span class="micro">Glass</span><select id="glassField"><option>4 mm Obscure</option><option>4 mm Clear</option><option>6.38 Clear Lam</option></select></label>
-            <label><span class="micro">Colour</span><select><option>White</option><option>Matt Charcoal</option><option>Natural anodised</option></select></label>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="label">Why this is first</div>
-          <p style="margin:10px 0 0;line-height:1.55">The room is tagged as a bathroom, the imported size already fits a standard top-hung unit, and the current line is missing only type confirmation. This keeps the rep in a quick yes/no path instead of forcing custom builder work.</p>
-        </div>
-      </aside>
-    </section>
-    <footer class="foot">
-      <div class="label">Enter confirms selection • B opens builder • Esc returns to workspace</div>
-      <div class="actions">
-        <button class="secondary" onclick="location.href='workspace.html'">Cancel</button>
-        <button class="primary" onclick="location.href='workspace.html'">Use selected window</button>
+      <div class="panel">
+        <div class="label">Configuration</div>
+        <p id="configNote" style="margin:8px 0 0;line-height:1.55;font-size:13px;color:var(--muted)">Select a window above to see details.</p>
       </div>
-    </footer>
-  </div>
-  <script>
-    const cards = Array.from(document.querySelectorAll(".card"));
-    const selectionName = document.getElementById("selectionName");
-    const codeField = document.getElementById("codeField");
-    const sizeField = document.getElementById("sizeField");
-    const glassField = document.getElementById("glassField");
-    cards.forEach((card) => {
-      card.addEventListener("click", () => {
-        cards.forEach((other) => other.classList.remove("selected"));
-        card.classList.add("selected");
-        selectionName.textContent = card.dataset.name;
-        codeField.value = card.dataset.code;
-        sizeField.value = card.dataset.size;
-        glassField.value = card.dataset.glass;
-      });
-    });
-  </script>
+    </aside>
+  </section>
+
+  <footer class="foot">
+    <div class="label">Enter confirms • B opens builder • Esc returns to workspace</div>
+    <div class="actions">
+      <button class="secondary" onclick="location.href='workspace.html'">Cancel</button>
+      <button class="primary" id="useBtn" onclick="location.href='workspace.html'">Use selected window</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ── SVG colours matching rough-copy-digital_6 WB_COLOURS ──────────────────
+const CLR = { FIXED:'#3a6bc2', TOP:'#2e9e68', SIDE:'#c28a2e', TOPLIGHT:'#7a5ea8' };
+
+// ── Draw a thumbnail SVG from preset data ─────────────────────────────────
+function presetSVG(p, W, H) {
+  let colXs=[0]; p.colW.forEach(w=>colXs.push(colXs[colXs.length-1]+w));
+  let rowYs=[0]; p.rowH.forEach(h=>rowYs.push(rowYs[rowYs.length-1]+h));
+  const scX = W/p.W, scY = H/p.H;
+  let s = '';
+  for (let r=0; r<p.rows; r++) for (let c=0; c<p.cols; c++) {
+    const t = p.types[r*p.cols+c];
+    const x1=Math.round(colXs[c]*scX+.5),  y1=Math.round(rowYs[r]*scY+.5);
+    const x2=Math.round(colXs[c+1]*scX-.5), y2=Math.round(rowYs[r+1]*scY-.5);
+    const clr = CLR[t];
+    s += `<rect x="${x1}" y="${y1}" width="${x2-x1}" height="${y2-y1}" fill="${clr}28" stroke="${clr}" stroke-width="1.4"/>`;
+    if (t==='TOP') {
+      const hy = y1 + Math.round((y2-y1)*.38);
+      s += `<line x1="${x1+3}" y1="${hy}" x2="${x2-3}" y2="${hy}" stroke="${clr}" stroke-width=".9" stroke-dasharray="2.5,2"/>`;
+      s += `<line x1="${x1+3}" y1="${y1+2}" x2="${x1+3}" y2="${hy}" stroke="${clr}" stroke-width="1"/>`;
+      s += `<line x1="${x2-3}" y1="${y1+2}" x2="${x2-3}" y2="${hy}" stroke="${clr}" stroke-width="1"/>`;
+    }
+    if (t==='SIDE') {
+      const vx = x1 + Math.round((x2-x1)*.35);
+      s += `<line x1="${vx}" y1="${y1+3}" x2="${vx}" y2="${y2-3}" stroke="${clr}" stroke-width=".9" stroke-dasharray="2.5,2"/>`;
+      s += `<line x1="${x1+2}" y1="${y1+3}" x2="${vx}" y2="${y1+3}" stroke="${clr}" stroke-width="1"/>`;
+      s += `<line x1="${x1+2}" y1="${y2-3}" x2="${vx}" y2="${y2-3}" stroke="${clr}" stroke-width="1"/>`;
+    }
+    if (t==='TOPLIGHT') {
+      for (let hx=x1+5; hx<x2; hx+=5)
+        s += `<line x1="${hx}" y1="${y1+2}" x2="${hx-4}" y2="${y2-2}" stroke="${clr}" stroke-width=".5" opacity=".4"/>`;
+    }
+  }
+  // outer frame
+  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="#f5b800" stroke-width="1.8"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
+}
+
+// ── Special SVGs for non-grid types ──────────────────────────────────────
+function fixedSVG(W, H) {
+  const clr = CLR.FIXED;
+  let s = `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="${clr}22" stroke="${clr}" stroke-width="1.4"/>`;
+  // diagonal hatch to indicate fixed/no-vent
+  for (let i=0; i<W+H; i+=10)
+    s += `<line x1="${i}" y1="0" x2="${i-H}" y2="${H}" stroke="${clr}" stroke-width=".5" opacity=".25"/>`;
+  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="#f5b800" stroke-width="1.8"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${s}</svg>`;
+}
+
+function sidelightSVG(W, H) {
+  const clr = CLR.FIXED;
+  let s = `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="${clr}18" stroke="${clr}" stroke-width="1.4"/>`;
+  const mid = Math.round(H*.45);
+  s += `<line x1="4" y1="${mid}" x2="${W-4}" y2="${mid}" stroke="${clr}" stroke-width="1" stroke-dasharray="4,3"/>`;
+  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="#f5b800" stroke-width="1.8"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${s}</svg>`;
+}
+
+function toplightSVG(W, H) {
+  const clr = CLR.TOPLIGHT;
+  let s = `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="${clr}22" stroke="${clr}" stroke-width="1.4"/>`;
+  for (let hx=5; hx<W; hx+=5)
+    s += `<line x1="${hx}" y1="2" x2="${hx-4}" y2="${H-2}" stroke="${clr}" stroke-width=".5" opacity=".4"/>`;
+  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="#f5b800" stroke-width="1.8"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${s}</svg>`;
+}
+
+// ── Window catalog — based on actual WB_PRESETS from rough-copy-digital_6 ──
+// family: tophung | tophung-fixed | sidehung | sidehung-fixed | fixed | toplight | sidelight
+const CATALOG = [
+  // ── Top Hung vents only ──────────────────────────────────────────────
+  { name:'Top Hung 600×600', code:'0606T', W:600,  H:600,  family:'tophung',
+    cols:1,rows:1, colW:[600],           rowH:[600],       types:['TOP'],
+    sub:'Single vent • 600×600', note:'Standard compact bathroom or toilet vent.' },
+  { name:'Top Hung 900×600', code:'0906T', W:900,  H:600,  family:'tophung',
+    cols:1,rows:1, colW:[900],           rowH:[600],       types:['TOP'],
+    sub:'Single vent • 900×600', note:'Most common standard vent size.' },
+  { name:'Top Hung 1200×600', code:'1206T', W:1200, H:600,  family:'tophung',
+    cols:1,rows:1, colW:[1200],          rowH:[600],       types:['TOP'],
+    sub:'Single wide vent • 1200×600', note:'Wide single vent, lounge or bedroom.' },
+  { name:'Top Hung 1800×600 (TT)', code:'1806TT', W:1800, H:600,  family:'tophung',
+    cols:2,rows:1, colW:[900,900],       rowH:[600],       types:['TOP','TOP'],
+    sub:'Twin vents • 1800×600', note:'Two equal vents side by side.' },
+  { name:'Top Hung 2400×600 (4T)', code:'2406TT', W:2400, H:600,  family:'tophung',
+    cols:4,rows:1, colW:[600,600,600,600],rowH:[600],      types:['TOP','TOP','TOP','TOP'],
+    sub:'Four vents • 2400×600', note:'Wide band of four top-hung vents.' },
+  { name:'Top Hung 900×1200 (DT)', code:'0912T', W:900,  H:1200, family:'tophung',
+    cols:1,rows:2, colW:[900],           rowH:[600,600],   types:['TOP','TOP'],
+    sub:'Double-stack vents • 900×1200', note:'Two stacked vents, no fixed base.' },
+  // ── Top Hung + Fixed ────────────────────────────────────────────────
+  { name:'Top Hung + Fixed 600×900', code:'0609T', W:600,  H:900,  family:'tophung-fixed',
+    cols:1,rows:2, colW:[600],           rowH:[600,300],   types:['TOP','FIXED'],
+    sub:'Vent + fixed base • 600×900', note:'Vent sash above, fixed light below.' },
+  { name:'Top Hung + Fixed 900×900', code:'0909T', W:900,  H:900,  family:'tophung-fixed',
+    cols:1,rows:2, colW:[900],           rowH:[600,300],   types:['TOP','FIXED'],
+    sub:'Vent + fixed base • 900×900', note:'Most common window on residential jobs.' },
+  { name:'Top Hung + Fixed 1200×900', code:'1209T', W:1200, H:900,  family:'tophung-fixed',
+    cols:1,rows:2, colW:[1200],          rowH:[600,300],   types:['TOP','FIXED'],
+    sub:'Wide vent + fixed base • 1200×900', note:'Lounge or bedroom standard.' },
+  { name:'Top Hung + Fixed 1800×900 (TT)', code:'1809TT', W:1800, H:900,  family:'tophung-fixed',
+    cols:2,rows:2, colW:[900,900],       rowH:[600,300],   types:['TOP','TOP','FIXED','FIXED'],
+    sub:'Twin vent + fixed • 1800×900', note:'Two vents with fixed base band.' },
+  { name:'Top Hung + Fixed 900×1500 (DT)', code:'0915DT', W:900,  H:1500, family:'tophung-fixed',
+    cols:1,rows:3, colW:[900],           rowH:[600,600,300],types:['TOP','TOP','FIXED'],
+    sub:'Double vent + fixed base • 900×1500', note:'Tall window: two vents, fixed sill panel.' },
+  { name:'Top Hung + Fixed 1200×1500 (DT)', code:'1215DT', W:1200, H:1500, family:'tophung-fixed',
+    cols:2,rows:3, colW:[600,600],       rowH:[600,600,300],types:['TOP','TOP','TOP','TOP','FIXED','FIXED'],
+    sub:'Wide double vent + fixed • 1200×1500', note:'Tall, wide: two columns of double vents.' },
+  // ── Side Hung ────────────────────────────────────────────────────────
+  { name:'Side Hung 600×900', code:'SH-0609', W:600, H:900, family:'sidehung',
+    cols:1,rows:1, colW:[600],           rowH:[900],       types:['SIDE'],
+    sub:'Single side-hung vent • 600×900', note:'Hinges on side — like a door. Angular casement.' },
+  { name:'Side Hung 900×1200', code:'SH-0912', W:900, H:1200, family:'sidehung',
+    cols:1,rows:1, colW:[900],           rowH:[1200],      types:['SIDE'],
+    sub:'Side vent • 900×1200', note:'Taller side-hung vent.' },
+  { name:'Side Hung Pair 1200×1200', code:'SH-1212P', W:1200, H:1200, family:'sidehung',
+    cols:2,rows:1, colW:[600,600],       rowH:[1200],      types:['SIDE','SIDE'],
+    sub:'Pair of side-hung vents • 1200×1200', note:'French-style pair — two side-hung units.' },
+  // ── Fixed Panel ──────────────────────────────────────────────────────
+  { name:'Fixed Panel 600×600', code:'FX-0606', W:600,  H:600,  family:'fixed', svgFn:'fixed',
+    sub:'Fixed panel • 600×600', note:'No opening — glass only. Used as infill.' },
+  { name:'Fixed Panel 900×900', code:'FX-0909', W:900,  H:900,  family:'fixed', svgFn:'fixed',
+    sub:'Fixed panel • 900×900', note:'Standard fixed window, view only.' },
+  { name:'Fixed Panel 1200×1200', code:'FX-1212', W:1200, H:1200, family:'fixed', svgFn:'fixed',
+    sub:'Fixed panel • 1200×1200', note:'Large fixed panel. Must use safety glass below 900mm sill.' },
+  // ── Toplight ─────────────────────────────────────────────────────────
+  { name:'Toplight 1200×300', code:'TL-1203', W:1200, H:300, family:'toplight', svgFn:'toplight',
+    sub:'Toplight transom • 1200×300', note:'Narrow band above door or wide opening.' },
+  { name:'Toplight 1800×300', code:'TL-1803', W:1800, H:300, family:'toplight', svgFn:'toplight',
+    sub:'Toplight transom • 1800×300', note:'Wide toplight over double door.' },
+  { name:'Toplight 900×450', code:'TL-0904', W:900,  H:450, family:'toplight', svgFn:'toplight',
+    sub:'Toplight • 900×450', note:'Standard toplight above window or door.' },
+  // ── Sidelight ────────────────────────────────────────────────────────
+  { name:'Sidelight 300×2100', code:'SL-3021', W:300,  H:2100, family:'sidelight', svgFn:'sidelight',
+    sub:'Narrow sidelight • 300×2100', note:'Door-adjacent narrow fixed light, full height.' },
+  { name:'Sidelight 450×2100', code:'SL-4521', W:450,  H:2100, family:'sidelight', svgFn:'sidelight',
+    sub:'Sidelight • 450×2100', note:'Wider sidelight beside door. Must be safety glass.' },
+  { name:'Sidelight 600×2100', code:'SL-6021', W:600,  H:2100, family:'sidelight', svgFn:'sidelight',
+    sub:'Sidelight • 600×2100', note:'Wide door sidelight. Full height.' },
+];
+
+// ── State ────────────────────────────────────────────────────────────────
+let activeFilter = 'all';
+let selectedCode = null;
+
+// ── Filter tabs ──────────────────────────────────────────────────────────
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('#filterTabs .tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === f);
+  });
+  renderCatalog();
+}
+
+function setView(v) {
+  document.querySelectorAll('#viewTabs .tab').forEach((b,i) => {
+    b.classList.toggle('active', ['common','builder','recent'][i] === v);
+  });
+  if (v === 'builder') location.href = 'window-builder.html';
+}
+
+// ── Render catalog grid ──────────────────────────────────────────────────
+function renderCatalog() {
+  const items = activeFilter === 'all'
+    ? CATALOG
+    : CATALOG.filter(w => w.family === activeFilter);
+
+  const label = {
+    all:'All window types', tophung:'Top Hung — vents only',
+    'tophung-fixed':'Top Hung + Fixed base', sidehung:'Side Hung',
+    fixed:'Fixed panels', toplight:'Toplights / transoms', sidelight:'Sidelights'
+  }[activeFilter] || 'All';
+
+  document.getElementById('sectionLabel').textContent = label;
+
+  const grid = document.getElementById('catalog');
+  grid.innerHTML = items.map(w => {
+    const thumbW = 88, thumbH = Math.max(56, Math.round(thumbW * w.H / w.W));
+    let svg;
+    if (w.svgFn === 'fixed')     svg = fixedSVG(thumbW, thumbH);
+    else if (w.svgFn === 'toplight') svg = toplightSVG(thumbW, thumbH);
+    else if (w.svgFn === 'sidelight') svg = sidelightSVG(thumbW, thumbH);
+    else svg = presetSVG(w, thumbW, thumbH);
+    const sel = w.code === selectedCode ? 'selected' : '';
+    return `<article class="card ${sel}" onclick="selectCard('${w.code}')">
+      <div class="thumb">${svg}</div>
+      <strong>${w.name}</strong>
+      <div class="sub">${w.sub}</div>
+      <div class="code">${w.code}</div>
+    </article>`;
+  }).join('');
+}
+
+// ── Select a card and update side panel ─────────────────────────────────
+function selectCard(code) {
+  selectedCode = code;
+  const w = CATALOG.find(x => x.code === code);
+  if (!w) return;
+
+  // re-highlight
+  document.querySelectorAll('.card').forEach(el => {
+    el.classList.toggle('selected', el.querySelector('.code')?.textContent === code);
+  });
+
+  // name
+  document.getElementById('selName').textContent = w.name;
+
+  // large preview SVG
+  const box = document.getElementById('previewBox');
+  const bW = box.clientWidth  || 260;
+  const bH = box.clientHeight || 180;
+  const aspect = w.W / w.H;
+  let pW = bW - 32, pH = Math.round(pW / aspect);
+  if (pH > bH - 24) { pH = bH - 24; pW = Math.round(pH * aspect); }
+  let svg;
+  if (w.svgFn === 'fixed')          svg = fixedSVG(pW, pH);
+  else if (w.svgFn === 'toplight')  svg = toplightSVG(pW, pH);
+  else if (w.svgFn === 'sidelight') svg = sidelightSVG(pW, pH);
+  else svg = presetSVG(w, pW, pH);
+  box.innerHTML = svg;
+
+  document.getElementById('codeField').value = w.code;
+  document.getElementById('sizeField').value = `${w.W} × ${w.H}`;
+  document.getElementById('configNote').textContent = w.note;
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────
+renderCatalog();
+// auto-select first card
+if (CATALOG.length) selectCard(CATALOG[0].code);
+</script>
 </body>
 </html>
