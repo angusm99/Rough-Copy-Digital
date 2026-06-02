@@ -1,0 +1,4 @@
+127.0.0.1 - - [02/Jun/2026 15:13:04] "GET /rough-copy-digital_6.html HTTP/1.1" 200 -
+127.0.0.1 - - [02/Jun/2026 15:13:42] "GET /rough-copy-digital_6.html HTTP/1.1" 200 -
+127.0.0.1 - - [02/Jun/2026 15:13:43] code 404, message File not found
+127.0.0.1 - - [02/Jun/2026 15:13:43] "GET /favicon.ico HTTP/1.1" 404 -

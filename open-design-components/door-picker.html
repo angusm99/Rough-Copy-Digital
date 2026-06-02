@@ -47,21 +47,6 @@
       letter-spacing: 0.15em;
     }
     h1 { margin: 0; font-size: 34px; font-family: var(--font-display); }
-    .body {
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      min-height: 0;
-    }
-    .catalog, .side {
-      padding: 20px 22px;
-      display: grid;
-      gap: 14px;
-      align-content: start;
-    }
-    .side {
-      border-left: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
-      background: color-mix(in oklab, var(--surface) 88%, black 12%);
-    }
     .families, .configs {
       display: flex;
       flex-wrap: wrap;
@@ -76,44 +61,55 @@
       padding: 10px 13px;
       cursor: pointer;
     }
-    .option.active, .config.active { border-color: color-mix(in oklab, var(--accent) 56%, var(--border)); background: color-mix(in oklab, var(--accent) 10%, var(--surface-2)); }
+    .option.active { border-color: color-mix(in oklab, var(--accent) 56%, var(--border)); background: color-mix(in oklab, var(--accent) 10%, var(--surface-2)); }
+    .body {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      min-height: 0;
+    }
+    .catalog, .side {
+      padding: 20px 22px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      overflow-y: auto;
+      max-height: 400px;
+    }
+    .side {
+      border-left: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+      background: color-mix(in oklab, var(--surface) 88%, black 12%);
+    }
     .cards {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
     }
-    .door-card, .panel {
+    .door-card {
       padding: 15px;
       border-radius: 16px;
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
       background: color-mix(in oklab, var(--surface-2) 90%, black 10%);
+      cursor: pointer;
+      display: grid;
+      gap: 10px;
     }
-    .door-card { cursor: pointer; display:grid; gap:10px; }
     .door-card.selected { border-color: color-mix(in oklab, var(--accent) 56%, var(--border)); }
     .door-graphic {
-      height: 136px;
+      height: 120px;
       border-radius: 12px;
       border: 1px solid color-mix(in oklab, var(--border) 78%, var(--accent) 22%);
       background: color-mix(in oklab, var(--surface) 76%, black 24%);
-      display: grid;
-      grid-auto-flow: column;
-      gap: 6px;
-      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
     }
-    .panel-graphic {
-      border: 2px solid var(--accent);
-      border-radius: 4px;
-      position: relative;
-    }
-    .panel-graphic.open::after {
-      content: ">";
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      color: var(--accent);
-      font-weight: 900;
-      font-size: 24px;
+    svg { width: 100%; height: 100%; }
+    .panel {
+      padding: 15px;
+      border-radius: 16px;
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      background: color-mix(in oklab, var(--surface-2) 90%, black 10%);
     }
     .input, select {
       width: 100%;
@@ -127,9 +123,11 @@
     .panel-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
       margin-top: 10px;
     }
+    .panel-grid label { font-size: 13px; }
+    .panel-grid .label { font-size: 11px; }
     .foot {
       display: flex;
       justify-content: space-between;
@@ -137,13 +135,15 @@
       border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
     }
     .primary { background: var(--accent); color: var(--bg); border: 0; font-weight: 700; }
+    h2 { margin: 0 0 10px; font-size: 18px; }
+    p { margin: 10px 0 0; line-height: 1.55; font-size: 13px; }
     @media (max-width: 980px) {
       .body { grid-template-columns: 1fr; }
       .side { border-left: 0; border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%); }
       .cards { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 720px) {
-      .cards, .panel-grid { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: 1fr; }
       .foot { display: grid; }
     }
   </style>
@@ -152,114 +152,235 @@
   <div class="wrap">
     <header class="head">
       <div class="label">Line 04 • Patio • 2400 × 2100</div>
-      <h1>Door picker with panel logic, lock side, and opening intent.</h1>
-      <div class="families">
-        <button class="option active">Sliding • Patio</button>
-        <button class="option">Elite Sliders</button>
-        <button class="option">Hinged</button>
-        <button class="option">Folding / Vistafold</button>
-        <button class="option">Palace</button>
-        <button class="option">Pivot</button>
+      <h1>Pick the right door configuration.</h1>
+      <div class="families" id="familyTabs">
+        <button class="option active" data-family="patio">Patio Sliding</button>
+        <button class="option" data-family="multislide">Multi-Slide</button>
+        <button class="option" data-family="vistafold">Vistafold</button>
+        <button class="option" data-family="hinged">Hinged</button>
       </div>
     </header>
     <section class="body">
       <div class="catalog">
-        <div class="label">Panel configurations</div>
-        <div class="cards" id="doorCards">
-          <article class="door-card selected" data-config="XO" data-lock="Right" data-open="Slide left" data-code="PATIO-XO">
-            <div class="door-graphic">
-              <div class="panel-graphic"></div>
-              <div class="panel-graphic open"></div>
-            </div>
-            <strong>XO • right lock</strong>
-            <span>Most common patio slider • 2400</span>
-            <div class="label" style="margin-top:4px;">PATIO-XO</div>
-          </article>
-          <article class="door-card" data-config="OX" data-lock="Left" data-open="Slide right" data-code="PATIO-OX">
-            <div class="door-graphic">
-              <div class="panel-graphic open"></div>
-              <div class="panel-graphic"></div>
-            </div>
-            <strong>OX • left lock</strong>
-            <span>Mirrored slider • 2400</span>
-            <div class="label" style="margin-top:4px;">PATIO-OX</div>
-          </article>
-          <article class="door-card" data-config="OXX" data-lock="Right" data-open="Slide left" data-code="PATIO-OXX">
-            <div class="door-graphic">
-              <div class="panel-graphic open"></div>
-              <div class="panel-graphic"></div>
-              <div class="panel-graphic"></div>
-            </div>
-            <strong>OXX • 3 panel</strong>
-            <span>Wide opening • 3600</span>
-            <div class="label" style="margin-top:4px;">PATIO-OXX</div>
-          </article>
-          <article class="door-card" data-config="XXO" data-lock="Left" data-open="Slide right" data-code="PATIO-XXO">
-            <div class="door-graphic">
-              <div class="panel-graphic"></div>
-              <div class="panel-graphic"></div>
-              <div class="panel-graphic open"></div>
-            </div>
-            <strong>XXO • 3 panel</strong>
-            <span>Wide opening, opposite • 3600</span>
-            <div class="label" style="margin-top:4px;">PATIO-XXO</div>
-          </article>
-          <article class="door-card" data-config="OXXO" data-lock="Centre pair" data-open="Bi-parting" data-code="PATIO-OXXO">
-            <div class="door-graphic">
-              <div class="panel-graphic open"></div>
-              <div class="panel-graphic"></div>
-              <div class="panel-graphic"></div>
-              <div class="panel-graphic open"></div>
-            </div>
-            <strong>OXXO • 4 panel</strong>
-            <span>Wide entertainment opening • 4800</span>
-            <div class="label" style="margin-top:4px;">PATIO-OXXO</div>
-          </article>
-        </div>
+        <div class="label" id="sectionLabel">PATIO SLIDING DOORS</div>
+        <div class="cards" id="doorCards"></div>
       </div>
       <aside class="side">
         <div class="panel">
           <div class="label">Selected door</div>
-          <h2 id="configTitle">XO slider</h2>
+          <h2 id="doorTitle">---</h2>
           <div class="panel-grid">
-            <label><span class="label">Config</span><input id="configField" class="input" value="XO" /></label>
-            <label><span class="label">Lock side</span><input id="lockField" class="input" value="Right" /></label>
-            <label><span class="label">Opening</span><input id="openField" class="input" value="Slide left" /></label>
-            <label><span class="label">Sidelight</span><select><option>None</option><option>Left</option><option>Right</option></select></label>
-            <label><span class="label">Midrail</span><select><option>Standard</option><option>Low midrail</option></select></label>
-            <label><span class="label">Stile</span><select><option>Standard</option><option>Heavy-duty</option></select></label>
+            <label><span class="label">Config</span><input id="configField" class="input" readonly /></label>
+            <label><span class="label">Lock side</span><input id="lockField" class="input" readonly /></label>
+            <label><span class="label">Opening</span><input id="openField" class="input" readonly /></label>
+            <label><span class="label">Code</span><input id="codeField" class="input" readonly /></label>
+            <label><span class="label">Glass</span><select id="glassField"><option>4mm Clear</option><option>Tinted</option></select></label>
+            <label><span class="label">Colour</span><select id="colourField"><option>White</option><option>Aluminium</option></select></label>
           </div>
         </div>
         <div class="panel">
-          <div class="label">Selection note</div>
-          <p style="margin:10px 0 0;line-height:1.55">Current validation flag is asking for configuration confirmation. This view makes the opening direction explicit so the rough copy export is usable on site and in production.</p>
+          <div class="label">Configuration note</div>
+          <p id="configNote">Select a door configuration.</p>
         </div>
       </aside>
     </section>
     <footer class="foot">
       <button onclick="location.href='workspace.html'">Back to workspace</button>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button onclick="location.href='validation-report.html'">Review validation</button>
-        <button class="primary" onclick="location.href='workspace.html'">Use selected door</button>
-      </div>
+      <button class="primary" onclick="saveDoorSelection()">Use selected door</button>
     </footer>
   </div>
+
   <script>
-    const cards = Array.from(document.querySelectorAll(".door-card"));
-    const configTitle = document.getElementById("configTitle");
-    const configField = document.getElementById("configField");
-    const lockField = document.getElementById("lockField");
-    const openField = document.getElementById("openField");
-    cards.forEach((card) => {
-      card.addEventListener("click", () => {
-        cards.forEach((other) => other.classList.remove("selected"));
-        card.classList.add("selected");
-        configTitle.textContent = `${card.dataset.config} slider`;
-        configField.value = card.dataset.config;
-        lockField.value = card.dataset.lock;
-        openField.value = card.dataset.open;
+    // SVG Rendering functions
+    function slidingSVG(panels, W, H) {
+      const panelW = W / panels.length;
+      let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+      svg += `<rect width="${W}" height="${H}" fill="none" stroke="#888" stroke-width="1"/>`;
+
+      for (let i = 0; i < panels.length; i++) {
+        const x = i * panelW;
+        const isOpen = panels[i] === 'O';
+        svg += `<rect x="${x}" y="0" width="${panelW}" height="${H}" fill="none" stroke="#ddd" stroke-width="1"/>`;
+        if (isOpen) {
+          svg += `<text x="${x + panelW/2}" y="${H/2}" text-anchor="middle" dominant-baseline="middle" font-size="24" font-weight="bold" fill="#fff" opacity="0.6">→</text>`;
+        }
+      }
+      svg += `</svg>`;
+      return svg;
+    }
+
+    function foldingSVG(leaves, W, H) {
+      const leafW = W / leaves;
+      let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+      svg += `<rect width="${W}" height="${H}" fill="none" stroke="#888" stroke-width="1"/>`;
+
+      for (let i = 0; i < leaves; i++) {
+        const x = i * leafW;
+        svg += `<rect x="${x}" y="0" width="${leafW}" height="${H}" fill="none" stroke="#ddd" stroke-width="1"/>`;
+        svg += `<line x1="${x + leafW - 4}" y1="0" x2="${x + leafW - 4}" y2="${H}" stroke="#fff" stroke-width="2" opacity="0.4"/>`;
+      }
+      svg += `</svg>`;
+      return svg;
+    }
+
+    function hingedSVG(doubleLeaf, W, H) {
+      let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+      svg += `<rect width="${W}" height="${H}" fill="none" stroke="#888" stroke-width="1"/>`;
+
+      if (doubleLeaf) {
+        const mid = W / 2;
+        svg += `<rect x="0" y="0" width="${mid}" height="${H}" fill="none" stroke="#ddd" stroke-width="1"/>`;
+        svg += `<rect x="${mid}" y="0" width="${mid}" height="${H}" fill="none" stroke="#ddd" stroke-width="1"/>`;
+        svg += `<circle cx="4" cy="${H/2}" r="2" fill="#fff" opacity="0.6"/>`;
+        svg += `<circle cx="${W-4}" cy="${H/2}" r="2" fill="#fff" opacity="0.6"/>`;
+      } else {
+        svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="none" stroke="#ddd" stroke-width="1"/>`;
+        svg += `<circle cx="4" cy="${H/2}" r="2" fill="#fff" opacity="0.6"/>`;
+      }
+      svg += `</svg>`;
+      return svg;
+    }
+
+    function colonialSVG(doubleLeaf, bars, W, H) {
+      let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+      svg += `<rect width="${W}" height="${H}" fill="none" stroke="#888" stroke-width="1"/>`;
+
+      const barSpacing = H / (bars + 1);
+      for (let i = 1; i <= bars; i++) {
+        svg += `<line x1="0" y1="${i * barSpacing}" x2="${W}" y2="${i * barSpacing}" stroke="#ddd" stroke-width="0.5"/>`;
+      }
+
+      if (doubleLeaf) {
+        svg += `<line x1="${W/2}" y1="0" x2="${W/2}" y2="${H}" stroke="#ddd" stroke-width="1"/>`;
+      }
+      svg += `</svg>`;
+      return svg;
+    }
+
+    const DOORS = {
+      patio: [
+        { id: 'SL-2-OX', config: 'OX', lock: 'Left', open: 'Slide right', code: 'SL-2-OX', label: 'Patio Slider OX (2 panel)', panels: ['O', 'X'], svg: slidingSVG },
+        { id: 'SL-2-XO', config: 'XO', lock: 'Right', open: 'Slide left', code: 'SL-2-XO', label: 'Patio Slider XO (2 panel)', panels: ['X', 'O'], svg: slidingSVG },
+        { id: 'SL-3-OXX', config: 'OXX', lock: 'Right', open: 'Slide left', code: 'SL-3-OXX', label: 'Patio 3-Panel OXX', panels: ['O', 'X', 'X'], svg: slidingSVG },
+        { id: 'SL-3-XXO', config: 'XXO', lock: 'Left', open: 'Slide right', code: 'SL-3-XXO', label: 'Patio 3-Panel XXO', panels: ['X', 'X', 'O'], svg: slidingSVG },
+        { id: 'SL-4-OXXO', config: 'OXXO', lock: 'Centre', open: 'Bi-part', code: 'SL-4-OXXO', label: 'Patio 4-Panel OXXO', panels: ['O', 'X', 'X', 'O'], svg: slidingSVG },
+        { id: 'SL-6', config: '6-panel', lock: 'Custom', open: 'Custom', code: 'SL-6', label: 'Patio 6-Panel', panels: ['O', 'X', 'X', 'X', 'X', 'O'], svg: slidingSVG }
+      ],
+      multislide: [
+        { id: 'MS-2-OX', config: 'OX', lock: 'Right', open: 'Slide left', code: 'MS-2-OX', label: 'Multi-Slide OX', brand: 'PALACE', panels: ['O', 'X'], svg: slidingSVG },
+        { id: 'MS-2-XO', config: 'XO', lock: 'Left', open: 'Slide right', code: 'MS-2-XO', label: 'Multi-Slide XO', brand: 'PALACE', panels: ['X', 'O'], svg: slidingSVG },
+        { id: 'MS-3-OXX', config: 'OXX', lock: 'Right', open: 'Slide left', code: 'MS-3-OXX', label: 'Multi-Slide OXX', brand: 'VALENCIA', panels: ['O', 'X', 'X'], svg: slidingSVG },
+        { id: 'MS-3-XXO', config: 'XXO', lock: 'Left', open: 'Slide right', code: 'MS-3-XXO', label: 'Multi-Slide XXO', brand: 'VALENCIA', panels: ['X', 'X', 'O'], svg: slidingSVG },
+        { id: 'MS-4-OXXO', config: 'OXXO', lock: 'Centre', open: 'Bi-part', code: 'MS-4-OXXO', label: 'Multi-Slide 4-Panel', brand: 'PALACE', panels: ['O', 'X', 'X', 'O'], svg: slidingSVG }
+      ],
+      vistafold: [
+        { id: 'VF-3L', config: '3-leaf', lock: 'Left', open: 'Stack left', code: 'VF-3L', label: 'Vistafold 3-Leaf', leaves: 3, svg: foldingSVG },
+        { id: 'VF-4L', config: '4-leaf', lock: 'Left', open: 'Stack left', code: 'VF-4L', label: 'Vistafold 4-Leaf', leaves: 4, svg: foldingSVG },
+        { id: 'VF-5L', config: '5-leaf', lock: 'Left', open: 'Stack left', code: 'VF-5L', label: 'Vistafold 5-Leaf', leaves: 5, svg: foldingSVG },
+        { id: 'VF-6L', config: '6-leaf', lock: 'Left', open: 'Stack left', code: 'VF-6L', label: 'Vistafold 6-Leaf', leaves: 6, svg: foldingSVG },
+        { id: 'VF-7L', config: '7-leaf', lock: 'Left', open: 'Stack left', code: 'VF-7L', label: 'Vistafold 7-Leaf', leaves: 7, svg: foldingSVG }
+      ],
+      hinged: [
+        { id: 'H-SL', config: 'Single', double: false, midrail: false, code: 'H-SL', label: 'Hinged Single Door', svg: hingedSVG },
+        { id: 'H-DBL', config: 'Double', double: true, midrail: false, code: 'H-DBL', label: 'Hinged Double Door', svg: hingedSVG },
+        { id: 'H-MID', config: 'Single + Midrail', double: false, midrail: true, code: 'H-MID', label: 'Hinged with Midrail', svg: hingedSVG },
+        { id: 'H-DMID', config: 'Double + Midrail', double: true, midrail: true, code: 'H-DMID', label: 'Hinged Double + Midrail', svg: hingedSVG },
+        { id: 'H-CB3S', config: 'Colonial 3-Bar Single', double: false, bars: 3, code: 'H-CB3S', label: 'Colonial 3-Bar Single', svg: colonialSVG },
+        { id: 'H-CB3D', config: 'Colonial 3-Bar Double', double: true, bars: 3, code: 'H-CB3D', label: 'Colonial 3-Bar Double', svg: colonialSVG },
+        { id: 'H-CB4S', config: 'Colonial 4-Bar Single', double: false, bars: 4, code: 'H-CB4S', label: 'Colonial 4-Bar Single', svg: colonialSVG },
+        { id: 'H-CB4D', config: 'Colonial 4-Bar Double', double: true, bars: 4, code: 'H-CB4D', label: 'Colonial 4-Bar Double', svg: colonialSVG }
+      ]
+    };
+
+    let currentFamily = 'patio';
+    let selectedDoor = null;
+
+    function renderCatalog(family) {
+      const catalog = DOORS[family];
+      const cardsHtml = catalog.map(door => {
+        const svgContent = door.svg(door.panels || door.leaves || false, 100, 80);
+        return `
+          <article class="door-card" data-id="${door.id}">
+            <div class="door-graphic">${svgContent}</div>
+            <strong>${door.label}</strong>
+            <div class="label">${door.code}</div>
+          </article>
+        `;
+      }).join('');
+
+      document.getElementById('doorCards').innerHTML = cardsHtml;
+
+      const labels = {
+        patio: 'PATIO SLIDING',
+        multislide: 'MULTI-SLIDE',
+        vistafold: 'VISTAFOLD',
+        hinged: 'HINGED DOORS'
+      };
+      document.getElementById('sectionLabel').textContent = labels[family];
+
+      document.querySelectorAll('.door-card').forEach(card => {
+        card.addEventListener('click', () => selectDoor(family, card.dataset.id));
       });
+    }
+
+    function selectDoor(family, doorId) {
+      const door = DOORS[family].find(d => d.id === doorId);
+      if (!door) return;
+
+      selectedDoor = { ...door, family };
+
+      document.querySelectorAll('.door-card').forEach(c => c.classList.remove('selected'));
+      document.querySelector(`[data-id="${doorId}"]`).classList.add('selected');
+
+      document.getElementById('doorTitle').textContent = door.label;
+      document.getElementById('configField').value = door.config || '';
+      document.getElementById('lockField').value = door.lock || '';
+      document.getElementById('openField').value = door.open || '';
+      document.getElementById('codeField').value = door.code;
+      document.getElementById('configNote').textContent = door.label + ' • ' + door.code;
+    }
+
+    document.getElementById('familyTabs').addEventListener('click', (e) => {
+      if (!e.target.classList.contains('option')) return;
+
+      document.querySelectorAll('#familyTabs .option').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+
+      currentFamily = e.target.dataset.family;
+      renderCatalog(currentFamily);
+      selectedDoor = null;
+
+      document.getElementById('doorTitle').textContent = '---';
+      document.getElementById('configField').value = '';
+      document.getElementById('lockField').value = '';
+      document.getElementById('openField').value = '';
+      document.getElementById('codeField').value = '';
+      document.getElementById('configNote').textContent = 'Select a door configuration.';
     });
+
+    function saveDoorSelection() {
+      if (!selectedDoor) {
+        alert('Please select a door first.');
+        return;
+      }
+
+      const selection = {
+        doorId: selectedDoor.id,
+        family: selectedDoor.family,
+        code: selectedDoor.code,
+        config: selectedDoor.config,
+        lock: selectedDoor.lock,
+        open: selectedDoor.open,
+        glass: document.getElementById('glassField').value,
+        colour: document.getElementById('colourField').value,
+        timestamp: new Date().toISOString()
+      };
+
+      localStorage.setItem('aw_picker_selection', JSON.stringify(selection));
+      location.href = 'workspace.html';
+    }
+
+    renderCatalog('patio');
   </script>
 </body>
 </html>
