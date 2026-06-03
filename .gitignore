@@ -5,3 +5,9 @@ desktop.ini
 *.bak
 .vscode/
 .idea/
+
+# local test server logs
+test-server.out.log
+test-server.err.log
+_test_quote.pdf
+_quote*.txt
