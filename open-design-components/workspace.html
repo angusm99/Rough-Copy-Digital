@@ -198,6 +198,28 @@
     .editor-size-row label { display: grid; gap: 5px; }
     .editor-size-row input { width: 110px; min-height: 46px; font-size: 17px; text-align: center; }
     .drawer { padding: 14px 18px; }
+    .tally-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 9px;
+      margin-top: 10px;
+    }
+    .tally-box {
+      padding: 11px 9px;
+      border-radius: 11px;
+      text-align: center;
+      background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+    }
+    .tally-box strong {
+      display: block;
+      font-size: 24px;
+      font-family: var(--font-display);
+      color: var(--accent);
+    }
+    .tally-box .label { font-size: 10px; }
+    @media (max-width: 1100px) { .tally-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 560px) { .tally-grid { grid-template-columns: repeat(2, 1fr); } }
     .export-menu { display: grid; gap: 9px; margin-top: 10px; }
     .export-item {
       display: flex; justify-content: space-between; padding: 11px 13px; border-radius: 11px;
@@ -399,7 +421,11 @@
       </section>
 
       <section class="drawer">
-        <div class="label">Output and next actions</div>
+        <div class="label">Material tally — totals for the material planner (printed at the foot of the RC)</div>
+        <div class="tally-grid" id="tallyGrid"></div>
+        <div class="note-banner hidden" id="tallyWarn" style="margin-top:10px"></div>
+
+        <div class="label" style="margin-top:16px">Output and next actions</div>
         <h3 id="exportHeading" style="margin:8px 0 0;font-size:17px">Export package — locked until sizes confirmed</h3>
         <div class="export-menu">
           <div class="export-item"><span>Rough copy PDF</span><strong>Landscape A4</strong></div>
@@ -807,6 +833,65 @@
       );
     }
 
+    // ---------- material tally (printed at the foot of the RC export) ----------
+    // Counts per category, multiplied by qty. Panel counts come from the
+    // config token (OX/OXXO…), "N panel", or "N-leaf" in the product text.
+    function tallyFor(l) {
+      const qty = l.qty || 1;
+      const fam = (l.family || "").toLowerCase();
+      const blob = `${l.product || ""} ${l.code || ""} ${l.rawDescription || ""}`.toUpperCase();
+      const cfgTok = (blob.match(/\b([OX]{2,6})\b/) || [])[1] || "";
+      const nPanel = +(blob.match(/(\d+)\s*PANEL/) || [])[1] || cfgTok.length || 0;
+      const nLeaf = +(blob.match(/(\d+)\s*-?\s*L(?:EAF)?\b/) || [])[1] || 0;
+      const t = { hinged: 0, windows: 0, palace: 0, folding: 0, sliding: 0, fixed: 0, other: 0 };
+
+      // picker-set family is authoritative; quote imports fall back to text
+      if (fam === "vistafold" || /VISTAFOLD|FOLDING/.test(blob)) {
+        t.folding = (nLeaf || nPanel || 3) * qty;
+      } else if (fam === "multislide" || /PALACE|MULTI-?SLIDE|\bMS-\d/.test(blob)) {
+        t.palace = (nPanel || 2) * qty;
+      } else if (fam === "patio" || /SLIDING|PATIO|\bSL-\d-\w/.test(blob)) {
+        t.sliding = (nPanel || 2) * qty;
+      } else if (fam === "hinged" || /STABLE|HINGED|PIVOT/.test(blob)) {
+        t.hinged = (/DOUBLE|DBL/.test(blob) ? 2 : 1) * qty;
+      } else if (["fixed", "sidelight", "toplight"].includes(fam) ||
+                 /FIXED PANEL|SIDELIGHT|TOPLIGHT|\bFX-|\bTL-\d/.test(blob)) {
+        t.fixed = qty;
+      } else if (/WINDOW|CASEMENT|TOP HUNG|SIDE HUNG|BOABAB|BAOBAB|\b\d{4}D?T{1,2}\b|SHOPFRONT/.test(blob) ||
+                 ["tophung", "tophung-fixed", "sidehung"].includes(fam)) {
+        t.windows = qty;
+      } else {
+        t.other = qty; // needs a type before it can be tallied
+      }
+      return t;
+    }
+
+    function renderTally() {
+      const total = { hinged: 0, windows: 0, palace: 0, folding: 0, sliding: 0, fixed: 0, other: 0 };
+      state.lines.forEach((l) => {
+        const t = tallyFor(l);
+        Object.keys(total).forEach((k) => { total[k] += t[k]; });
+      });
+      const boxes = [
+        ["Hinged door panels", total.hinged],
+        ["Windows (units)", total.windows],
+        ["Palace door panels", total.palace],
+        ["Folding door panels", total.folding],
+        ["Sliding panels", total.sliding],
+        ["Fixed frames", total.fixed],
+      ];
+      document.getElementById("tallyGrid").innerHTML = boxes
+        .map(([k, v]) => `<div class="tally-box"><strong>${v}</strong><span class="label">${k}</span></div>`)
+        .join("");
+      const warn = document.getElementById("tallyWarn");
+      if (total.other) {
+        warn.textContent = `${total.other} unit${total.other === 1 ? "" : "s"} not tallied — set the unit type on those lines so the material planner totals are complete.`;
+        warn.classList.remove("hidden");
+      } else {
+        warn.classList.add("hidden");
+      }
+    }
+
     function renderSummary() {
       const total = state.lines.length;
       const confirmed = state.lines.filter((l) => l.sizeConfirmed).length;
@@ -832,6 +917,7 @@
       document.getElementById("exportHeading").textContent = allReady
         ? "Export package — ready"
         : `Export package — locked (${open} line${open === 1 ? "" : "s"} to complete)`;
+      renderTally();
     }
 
     function renderAll() {
