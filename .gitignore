@@ -9,5 +9,5 @@ desktop.ini
 # local test server logs
 test-server.out.log
 test-server.err.log
-_test_quote.pdf
+_test_quote*.pdf
 _quote*.txt

@@ -4,6 +4,14 @@
    quotation PDF into structured job + line data for the
    Digital Rough Copy.
 
+   Handles both observed layout variants:
+   - 6.3.2p (e.g. D2161): one-line item descriptions, colour
+     merged into the "WHITE Windload … View from Outside" row
+   - 6.3.2d (e.g. C8549): descriptions wrap across lines so
+     "Overall size:" lands on its own line, SPECIAL powder-coat
+     colour rows ("SPECIAL C3|CPO 47032 PEBBLE GREY-NON TEX"),
+     DOORS/WINDOWS section headers, C-prefix quote refs
+
    Pure function, no DOM/PDF dependencies, so it can be unit
    tested in Node and reused in the browser.
    ============================================================ */
@@ -19,11 +27,13 @@
     /^Licensed to:/i,
     /^Total$/i,
     /^Unit\s*\(excl\)$/i,
-    /^Item\s*\/\s*Description$/i,
+    /^Item\s*\/\s*Description/i,
     /^QTY\s+Units$/i,
     /^Windload:/i,
     /^View from Outside$/i,
     /^Set$/i,
+    /^DOORS$/i,
+    /^WINDOWS$/i,
     /^\d{4}-\d{2}-\d{2}$/, // footer date stamp
   ];
 
@@ -44,18 +54,37 @@
     return /^\d{1,3}$/.test(line.trim());
   }
 
+  // A spec row naming the unit colour. Standard names, or special
+  // powder-coat rows like "SPECIAL C3|CPO 47032 PEBBLE GREY-NON TEX".
+  function isColourLine(line) {
+    const t = line.trim();
+    if (/^SPECIAL\b/i.test(t)) return true;
+    if (/\b(CPO|RAL)\s*\d/i.test(t)) return true;
+    const up = t.toUpperCase();
+    return COLOURS.some((c) => up === c || up.startsWith(c + " "));
+  }
+
   // Map bracketed product tags / description to a friendly product type.
-  function productType(supplyLine) {
-    const tags = (supplyLine.match(/\[([^\]]+)\]/g) || [])
+  function productType(desc) {
+    const tags = (desc.match(/\[([^\]]+)\]/g) || [])
       .map((t) => t.replace(/[\[\]]/g, "").trim());
-    const blob = (tags.join(" ") + " " + supplyLine).toLowerCase();
+    const blob = (tags.join(" ") + " " + desc).toLowerCase();
 
     if (/stable\s*door/.test(blob)) return { type: "Stable Door", tags };
+    if (/boabab|baobab/.test(blob)) return { type: "Boabab-40 Window", tags };
+    if (/double\s*hinged/.test(blob)) return { type: "Hinged Double Door", tags };
+    if (/single\s*hinged|hinged\s*door/.test(blob)) return { type: "Hinged Door", tags };
+    if (/palace/.test(blob)) {
+      if (/oxxo/.test(blob)) return { type: "Palace Sliding OXXO (4 panel)", tags };
+      if (/\boxx\b/.test(blob)) return { type: "Palace Sliding OXX (3 panel)", tags };
+      if (/\b(ox|xo)\b/.test(blob)) return { type: "Palace Sliding OX (2 panel)", tags };
+      return { type: "Palace Sliding", tags };
+    }
+    if (/vistafold|fold/.test(blob)) return { type: "Vistafold", tags };
     if (/\bcas[\s.]*\d/.test(blob) || /casement/.test(blob)) return { type: "Casement", tags };
     if (/slat/.test(blob)) return { type: "Cladding Slats", tags };
     if (/shop/.test(blob)) return { type: "Shopfront", tags };
-    if (/slid|patio|\bxo\b|\box\b/.test(blob)) return { type: "Sliding Door", tags };
-    if (/fold|vistafold/.test(blob)) return { type: "Vistafold", tags };
+    if (/slid|patio|\bxo\b|\box\b|\boxxo\b/.test(blob)) return { type: "Sliding Door", tags };
     if (/top\s*hung/.test(blob)) return { type: "Top Hung", tags };
     if (/side\s*hung/.test(blob)) return { type: "Side Hung", tags };
     return { type: "", tags }; // unknown -> needs type
@@ -68,6 +97,11 @@
       const m = text.match(re);
       return m ? m[1].trim() : "";
     };
+
+    // header region = everything before the salutation line
+    let headerEnd = lines.findIndex((l) => /thank you for the opportunity/i.test(l));
+    if (headerEnd === -1) headerEnd = Math.min(lines.length, 40);
+    const header = lines.slice(0, headerEnd);
 
     // line following an exact-match label line
     const after = (label) => {
@@ -84,10 +118,14 @@
     const email =
       emails.find((e) => !/anglowindows/i.test(e)) || emails[0] || "";
 
-    // rep: "Jayson Hitge Tel: 0824133301"
-    const repM = text.match(/([A-Z][a-zA-Z]+\s+[A-Z][a-zA-Z]+)\s+Tel:\s*(\d[\d\s]{6,})/);
-    const rep = repM ? repM[1].trim() : "";
-    const repTel = repM ? repM[2].replace(/\s+/g, "") : "";
+    // rep: "Jayson Hitge Tel: 0824133301" / "Anglo Estimating Dept. Tel: 0219828477"
+    let rep = "", repTel = "";
+    for (const m of text.matchAll(/([A-Z][A-Za-z.&-]+(?:[^\S\n]+[A-Z][A-Za-z.&-]+){1,3})[^\S\n]+Tel:\s*(\d[\d\s]{6,}?)(?=\s|$)/g)) {
+      if (/fax|e-?mail/i.test(m[1])) continue;
+      rep = m[1].trim();
+      repTel = m[2].replace(/\s+/g, "");
+      break;
+    }
 
     // client phone: prefer the number paired with the client email line
     let clientPhone = "";
@@ -97,43 +135,88 @@
       if (pm) clientPhone = pm[1].replace(/\s+/g, "");
     }
 
-    // job type / scope: the descriptive supply-scope line
-    const jobType =
-      (lines.find((l) => /supply\s*(and|&)?\s*(install|fit|only)/i.test(l)) || "")
-        .trim();
+    // quote ref: labeled ("Quote Ref: C8549"), footer ("Quote: C8549"),
+    // or — in PyMuPDF text order — the line right before the label
+    let quoteRef =
+      get(/Quote Ref:\s*([A-Z]{1,3}\d{3,6})\b/i) ||
+      get(/^Quote:\s*([A-Z]{1,3}\d{3,6})\b/im);
+    if (!quoteRef) {
+      const li = lines.findIndex((l) => /^Quote Ref:/i.test(l.trim()));
+      if (li > 0) {
+        const m = lines[li - 1].trim().match(/^([A-Z]{1,3}\d{3,6})$/);
+        if (m) quoteRef = m[1];
+      }
+    }
 
-    // site address: usually the line right after the scope line —
-    // looks like a street address, isn't a bare phone number or email
+    // job type / scope: header-region line describing the work —
+    // "EX WOOD TO WHITE ALU SUPPLY AND INSTALL" or "- EX NEW TO PEBBLE GREY - …"
+    let jobType = "";
+    for (const l of header) {
+      const t = l.trim();
+      if (/Supply and Fit:/i.test(t)) continue;
+      if (/supply\s*(and|&)?\s*(install|fit|only)/i.test(t) || /\bEX\s+\w+.*\bTO\s+/i.test(t)) {
+        jobType = t.replace(/^[-•\s]+/, "").trim();
+        break;
+      }
+    }
+
+    // header spec bullets ("- HINGED DOORS INCLUDE PARLIAMENT HINGES" …)
+    const headerNotes = header
+      .map((l) => l.trim())
+      .filter((t) => /^[-•]\s*\S/.test(t))
+      .map((t) => t.replace(/^[-•\s]+/, "").trim())
+      .filter((t) => t && t !== jobType);
+
+    // site address: header-region line near the scope line that looks like
+    // a street address (digits + words, not a phone, email, or size)
     let address = "";
-    const jtIdx = lines.findIndex((l) => l.trim() === jobType);
+    const jtIdx = jobType ? header.findIndex((l) => l.includes(jobType)) : -1;
     if (jtIdx !== -1) {
-      for (let j = jtIdx + 1; j < Math.min(lines.length, jtIdx + 4); j++) {
-        const t = lines[j].trim();
+      for (let j = jtIdx + 1; j < Math.min(header.length, jtIdx + 4); j++) {
+        const t = header[j].trim();
         if (!t || /@/.test(t) || /^[\d\s+\-()]+$/.test(t)) continue;
-        if (/thank you|colour note|quote|prepared/i.test(t)) break;
+        if (/overall\s*size|thank you|colour note|quote|prepared|tel:|fax:/i.test(t)) continue;
+        if (/^[-•]/.test(t)) continue; // spec bullet, not an address
         if (/\d/.test(t) && /[A-Za-z]{2,}/.test(t)) { address = t; break; }
       }
     }
 
-    // quote title/reference (e.g. "JH532611 D2161 MAIN HOUSE"); may arrive with
-    // a leading "Your Ref:" / "To:" / "Attention" label merged onto the row.
+    // client: "Attention Gail" — a fuller name ("Gail & Cecile") often sits
+    // elsewhere in the header (above or below, depending on text layout)
+    let client = get(/Attention\s+([A-Z][^\n]*)/);
+    client = client.replace(/\s+(your ref\b|to:).*$/i, "").trim();
+    if (client) {
+      for (const l of header) {
+        const t = l.trim();
+        if (!t || t.length <= client.length || t.length > 60) continue;
+        if (/@/.test(t) || /^[-•]/.test(t)) continue;
+        if (/^(your ref|to:|attention|quote|date|prepared|tel|fax|e-?mail)/i.test(t)) continue;
+        if (/overall|supply|ref:|\(pty\)/i.test(t)) continue;
+        if (t.toUpperCase().startsWith(client.toUpperCase() + " ") ||
+            t.toUpperCase().startsWith(client.toUpperCase() + " &") ||
+            (t.toUpperCase().includes(client.toUpperCase()) && /&/.test(t))) {
+          client = t;
+          break;
+        }
+      }
+    }
+
+    // quote title/reference (e.g. "JH532611 D2161 MAIN HOUSE")
     let quoteTitle =
-      get(/\b([A-Z]{2}\d{3,}\b[^\n]*?D\d+[^\n]*)/) ||
       after("To:") ||
+      get(/\b([A-Z]{2,}[A-Z0-9]*\d{3,}\b[^\n]*?\([A-Z]?\d+\)[^\n]*)/) ||
+      get(/\b([A-Z]{2}\d{3,}\b[^\n]*?D\d+[^\n]*)/) ||
       after("Your Ref:");
     quoteTitle = quoteTitle
       .replace(/^(your ref:|attention|to:)\s*/i, "")
       .trim();
 
-    // client: "Attention ANNEMIE BRUCE"
-    let client = get(/Attention\s+([A-Z][^\n]+)/);
-    client = client.replace(/\s+(your ref\b|to:).*$/i, "").trim();
-
     return {
       jobType,
+      headerNotes,
       address,
-      quoteRef: get(/Quote Ref:\s*(D\d{3,5})/i) || get(/\b(D\d{3,5})\b/),
-      date: get(/\b(\d{4}-\d{2}-\d{2})\b/),
+      quoteRef,
+      date: get(/Date:\s*\n?\s*(\d{4}-\d{2}-\d{2})/i) || get(/\b(\d{4}-\d{2}-\d{2})\b/),
       quoteTitle,
       client,
       email,
@@ -150,8 +233,7 @@
 
   function parseLines(allLines) {
     // Clamp to the drawn-items region: everything before the totals /
-    // terms-and-conditions / additional-items block. Prevents the final
-    // line item's glass/colour scan from scooping up page-footer prose.
+    // terms-and-conditions / additional-items block.
     const stopRe = /^(Total cost of drawn items|Add VAT|Total VAT Inclusive|Total:|We require full payment|Addition(al)? Items|CUSTOMER ACCEPTANCE)/i;
     let stop = allLines.findIndex((l) => stopRe.test(l.trim()));
     if (stop === -1) stop = allLines.length;
@@ -168,14 +250,13 @@
     const rowRe = /^(.*?\S)\s+(\d{1,3})\s+(?:Set|Sets|No|Each|Unit|Lot)\b.*R/i;
     const qtyOnlyRe = /^(\d{1,3})\s+(?:Set|Sets|No|Each|Unit|Lot)\b.*R/i;
 
-    // nearest meaningful line above `from` (skips junk / money / blank /
-    // qty-price rows) — used to recover a code that sits on its own line.
+    // nearest meaningful line above `from` — recovers a code on its own line
     function codeAbove(from) {
       for (let j = from; j >= 0; j--) {
         const t = lines[j].trim();
         if (!t || isJunk(t) || isMoney(t)) continue;
         if (qtyOnlyRe.test(t) || rowRe.test(t)) continue;
-        if (/Supply and Fit:/i.test(t)) continue;
+        if (/Supply and Fit:|Overall\s*size:/i.test(t)) continue;
         return t;
       }
       return "";
@@ -185,6 +266,13 @@
     anchors.forEach((idx, n) => {
       const supplyLine = lines[idx];
       const prev = (lines[idx - 1] || "").trim();
+
+      // block end = next anchor (or end of region). The next item's code /
+      // qty-price rows sit just above the next anchor; the block-level
+      // regexes below are immune to them.
+      const end = n + 1 < anchors.length ? anchors[n + 1] : lines.length;
+      const blockLines = lines.slice(idx, end);
+      const blockText = blockLines.join("\n");
 
       // ---- item code (ref/location) + qty -------------------------
       let location = "";
@@ -201,26 +289,32 @@
         location = codeAbove(idx - 1);
       }
 
-      // block end = next anchor (or end of region)
-      const end = n + 1 < anchors.length ? anchors[n + 1] : lines.length;
-
-      // fallback qty: a standalone integer line before the prices
+      // fallback qty: a standalone integer line inside the block, or a
+      // qty-price row inside the block (wrapped-description layout)
       if (qty == null) {
-        for (let j = idx + 1; j < end; j++) {
-          if (isQty(lines[j])) { qty = parseInt(lines[j].trim(), 10); break; }
-          if (isMoney(lines[j])) break;
+        for (let j = 1; j < blockLines.length; j++) {
+          const t = blockLines[j].trim();
+          if (isQty(t)) { qty = parseInt(t, 10); break; }
+          const qm = t.match(qtyOnlyRe);
+          if (qm) { qty = parseInt(qm[1], 10); break; }
+          if (isMoney(t)) break;
         }
       }
       if (qty == null) qty = 1;
 
-      // ---- size + product ----------------------------------------
-      const sizeM = supplyLine.match(/Overall size:\s*(\d+)\s*[xX×]\s*(\d+)/);
+      // ---- size: block-level so wrapped "Overall \n size:" works ----
+      const sizeM = blockText.replace(/\n/g, " ").match(/Overall\s*size:\s*(\d+)\s*[xX×]\s*(\d+)/);
       const quoteWidth = sizeM ? parseInt(sizeM[1], 10) : null;
       const quoteHeight = sizeM ? parseInt(sizeM[2], 10) : null;
 
-      let { type, tags } = productType(supplyLine);
-      // light inference when the quote carries no recognisable product tag,
-      // so fewer rows land as "Needs type". Rep can still change it.
+      // ---- description: "Supply and Fit:" up to "Overall size:" -----
+      const descM = blockText.replace(/\n/g, " ")
+        .match(/Supply and Fit:\s*(.*?)\s*(?:TOP|BOTTOM)?\s*Overall\s*size:/i);
+      const desc = (descM ? descM[1] : supplyLine.replace(/.*Supply and Fit:\s*/i, ""))
+        .replace(/\s+/g, " ").trim();
+
+      let { type, tags } = productType(desc);
+      // light inference when no recognisable product tag
       if (!type) {
         const ref = (location || "").toUpperCase();
         if (/^D\d|DOOR/.test(ref) || (quoteHeight && quoteHeight >= 1900)) {
@@ -230,29 +324,23 @@
         }
       }
 
-      // ---- glass + colour ----------------------------------------
-      // glass specs sit between the supply line and the colour/Windload row.
-      const glass = [];
+      // ---- colour + glass ------------------------------------------
       let colour = "";
-      for (let j = idx + 1; j < end; j++) {
-        const t = lines[j].trim();
-        if (!t || isJunk(t) || isMoney(t)) continue;
-        if (/Windload|View from Outside/i.test(t)) {
-          // colour is the leading token(s) on this row, before "Windload"
+      const glass = [];
+      for (let j = 1; j < blockLines.length; j++) {
+        const t = blockLines[j].trim();
+        if (!t || isMoney(t) || isQty(t)) continue;
+        if (/Supply and Fit:|Overall\s*size:/i.test(t)) continue;
+        // colour merged into the Windload row ("WHITE Windload: 1000 Pa …")
+        if (/Windload/i.test(t)) {
           const c = t.split(/Windload/i)[0].trim();
-          if (c) colour = c;
-          break; // colour row ends this item's spec block
+          if (c && !colour && isColourLine(c)) colour = c;
+          continue;
         }
+        if (isJunk(t)) continue;
+        if (!colour && isColourLine(t)) { colour = t; continue; }
         if (/(mm|glass|float|laminat|safety|obs|clad|slat|spandrel|panel)/i.test(t)) {
           glass.push(t);
-        }
-      }
-      if (!colour) {
-        // fallback: a known colour word anywhere in the block
-        for (let j = idx + 1; j < end; j++) {
-          const up = lines[j].trim().toUpperCase();
-          const hit = COLOURS.find((c) => up.startsWith(c));
-          if (hit) { colour = lines[j].trim().split(/\s{2,}|Windload/i)[0].trim(); break; }
         }
       }
 
@@ -264,7 +352,7 @@
         location: location || "",
         product: type,
         productTags: tags,
-        rawDescription: supplyLine.replace(/\s+/g, " ").trim(),
+        rawDescription: desc,
         // quote size = reference only (read-only); NOT the final RC size
         quoteWidth,
         quoteHeight,
@@ -288,7 +376,7 @@
   function parseQuote(rawText) {
     const lines = String(rawText)
       .split(/\r?\n/)
-      .map((l) => l.replace(/ /g, " ").replace(/[ \t]+$/g, ""))
+      .map((l) => l.replace(/ /g, " ").replace(/[ \t]+$/g, ""))
       .filter((l) => l.trim().length > 0);
 
     return {
@@ -297,7 +385,7 @@
     };
   }
 
-  const api = { parseQuote, productType, parseHeader, parseLines };
+  const api = { parseQuote, productType, parseHeader, parseLines, isColourLine };
   if (typeof module !== "undefined" && module.exports) {
     module.exports = api;
   } else {

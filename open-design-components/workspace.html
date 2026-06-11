@@ -144,7 +144,7 @@
       background: color-mix(in oklab, var(--surface) 62%, var(--surface-3));
       display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
-    .type-cell .diag svg { max-width: 100%; max-height: 100%; }
+    .type-cell .diag svg, .type-cell .diag img { max-width: 100%; max-height: 100%; object-fit: contain; }
     .type-name { font-size: 12.5px; line-height: 1.25; }
     .type-name .code { display: block; }
     .qref { font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
@@ -193,7 +193,7 @@
       background: color-mix(in oklab, var(--surface) 62%, var(--surface-3));
       display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
-    .editor-diag svg { max-width: 100%; max-height: 100%; }
+    .editor-diag svg, .editor-diag img { max-width: 100%; max-height: 100%; object-fit: contain; }
     .editor-size-row { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
     .editor-size-row label { display: grid; gap: 5px; }
     .editor-size-row input { width: 110px; min-height: 46px; font-size: 17px; text-align: center; }
@@ -301,6 +301,7 @@
           <label><span class="label">Floor #</span><input class="input" data-site="floor" inputmode="numeric" /></label>
         </div>
         <div class="note-banner hidden" id="colourNote"></div>
+        <div class="note-banner hidden" id="quoteNotes"></div>
       </section>
 
       <!-- ════ LINE TABLE — one row per opening, like the paper grid ════ -->
@@ -360,6 +361,7 @@
               </div>
               <button class="secondary" id="edPickWindow">Pick window…</button>
               <button class="secondary" id="edPickDoor">Pick door…</button>
+              <button class="secondary" id="edOpenBuilder">Builder…</button>
             </div>
           </div>
 
@@ -432,7 +434,16 @@
     let editingIndex = -1;
 
     // ---------- persistence ----------
-    function save() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+    function save() {
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      } catch (e) {
+        // storage full — drop the bulky quote diagram crops and retry
+        state.lines.forEach((l) => { delete l.quoteDiagPNG; });
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+        catch (e2) { console.error("save failed:", e2); }
+      }
+    }
     function load() {
       try {
         const raw = localStorage.getItem(STORE_KEY);
@@ -446,30 +457,81 @@
       }));
     }
 
-    // ---------- PDF text extraction ----------
-    async function extractText(file) {
-      const buf = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-      const pages = [];
+    // ---------- PDF text extraction (rows keep page + y for diagram crops) ----------
+    async function extractRows(pdf) {
+      const pageRows = [];
       for (let p = 1; p <= pdf.numPages; p++) {
         const page = await pdf.getPage(p);
         const content = await page.getTextContent();
-        const rows = {};
+        const rowsMap = {};
         content.items.forEach((it) => {
           const y = Math.round(it.transform[5] / 2) * 2;
-          (rows[y] = rows[y] || []).push({ x: it.transform[4], s: it.str });
+          (rowsMap[y] = rowsMap[y] || []).push({ x: it.transform[4], s: it.str });
         });
-        const lineText = Object.keys(rows)
+        const rows = Object.keys(rowsMap).map(Number)
           .sort((a, b) => b - a)
-          .map((y) =>
-            rows[y].sort((a, b) => a.x - b.x).map((i) => i.s).join(" ")
-              .replace(/\s+/g, " ").trim()
-          )
-          .filter(Boolean)
-          .join("\n");
-        pages.push(lineText);
+          .map((y) => ({
+            y,
+            text: rowsMap[y].sort((a, b) => a.x - b.x).map((i) => i.s).join(" ")
+              .replace(/\s+/g, " ").trim(),
+          }))
+          .filter((r) => r.text);
+        pageRows.push(rows);
       }
-      return pages.join("\n");
+      return pageRows;
+    }
+
+    // Crop each item's elevation drawing out of the quote PDF.
+    // Bizman draws it on the left of the item band (x ≈ 20–152pt), between
+    // the item-code row and the "Windload … View from Outside" row.
+    async function attachQuoteDiagrams(pdf, pageRows, lines) {
+      const anchors = [];
+      pageRows.forEach((rows, pi) => {
+        rows.forEach((r) => {
+          if (/Supply and Fit:/i.test(r.text)) anchors.push({ pi, y: r.y, rows });
+        });
+      });
+      const n = Math.min(anchors.length, lines.length);
+      const SCALE = 1.6;
+      const rendered = {};
+      for (let k = 0; k < n; k++) {
+        const a = anchors[k];
+        if (!rendered[a.pi]) {
+          const page = await pdf.getPage(a.pi + 1);
+          const vp = page.getViewport({ scale: SCALE });
+          const c = document.createElement("canvas");
+          c.width = Math.ceil(vp.width);
+          c.height = Math.ceil(vp.height);
+          // guard: never let a stuck render block forever
+          await Promise.race([
+            page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise,
+            new Promise((_, rej) => setTimeout(() => rej(new Error("page render timeout")), 20000)),
+          ]);
+          rendered[a.pi] = c;
+        }
+        const c = rendered[a.pi];
+        const pageH = c.height / SCALE; // back to PDF units
+        // band bottom = nearest Windload/View row below this anchor
+        let vfoY = null;
+        for (const r of a.rows) {
+          if (r.y < a.y && /Windload|View from Outside/i.test(r.text)) {
+            if (vfoY === null || r.y > vfoY) vfoY = r.y;
+          } else if (r.y < a.y && /Supply and Fit:/i.test(r.text)) {
+            break; // next item's band — stop looking
+          }
+        }
+        const topPdf = a.y + 16;
+        const botPdf = (vfoY !== null ? vfoY : a.y - 100) - 6;
+        const cy1 = Math.max(0, (pageH - topPdf) * SCALE);
+        const cy2 = Math.min(c.height, (pageH - botPdf) * SCALE);
+        const cx1 = 14 * SCALE, cx2 = 122 * SCALE;
+        if (cy2 - cy1 < 30) continue;
+        const out = document.createElement("canvas");
+        out.width = Math.round(cx2 - cx1);
+        out.height = Math.round(cy2 - cy1);
+        out.getContext("2d").drawImage(c, cx1, cy1, out.width, out.height, 0, 0, out.width, out.height);
+        lines[k].quoteDiagPNG = out.toDataURL("image/jpeg", 0.78);
+      }
     }
 
     // ---------- import flow ----------
@@ -479,21 +541,46 @@
         return;
       }
       try {
-        const text = await extractText(file);
-        loadQuoteText(text);
+        const buf = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+        const pageRows = await extractRows(pdf);
+        const text = pageRows.map((rows) => rows.map((r) => r.text).join("\n")).join("\n");
+        const parsed = QuoteParser.parseQuote(text);
+        // show the data immediately; diagram crops attach in the background
+        applyParsedQuote(parsed);
+        attachQuoteDiagrams(pdf, pageRows, state.lines)
+          .then(() => {
+            save();
+            state.lines.forEach((_, i) => refreshRowChrome(i));
+            if (editingIndex >= 0) renderEditor();
+          })
+          .catch((e) => console.warn("Diagram extraction failed (import is unaffected):", e));
       } catch (e) {
         console.error(e);
         alert("Could not read that PDF: " + e.message);
       }
     }
 
-    function siteFromJob(j) {
+    function siteFromJob(j, lines) {
       const jt = (j.jobType || "").toUpperCase();
       const material =
         /EX\s*WOOD/.test(jt) ? "EX WOOD" :
         /EX\s*STEEL/.test(jt) ? "EX STEEL" :
-        /EX\s*ALU/.test(jt) ? "EX ALU" : "";
+        /EX\s*ALU/.test(jt) ? "EX ALU" :
+        /EX\s*NEW/.test(jt) ? "NEW OPENING" : "";
+      // site colour: standard name in the scope line, else derive from the
+      // line colours (special powder-coat codes -> SPECIAL)
       const colourM = jt.match(/TO\s+(WHITE|BRONZE|CHARCOAL|BLACK|SILVER)/);
+      let colour = colourM ? colourM[1] : "";
+      if (!colour) {
+        const c0 = ((lines || []).map((l) => l.colour).find(Boolean) || "").toUpperCase();
+        if (c0) {
+          const std = ["WHITE", "BRONZE", "CHARCOAL", "BLACK", "SILVER"].find((c) => c0.startsWith(c));
+          colour = std || "SPECIAL";
+        } else if (/\b(CPO|RAL)\s*\d|SPECIAL/.test(jt)) {
+          colour = "SPECIAL";
+        }
+      }
       return {
         jobRef: j.quoteRef || "",
         date: j.date || "",
@@ -505,23 +592,30 @@
         building: "",
         material,
         wall: "",
-        colour: colourM ? colourM[1] : "",
+        colour,
         floor: "",
       };
     }
 
-    function loadQuoteText(text) {
-      const parsed = QuoteParser.parseQuote(text);
+    function applyParsedQuote(parsed) {
       state.job = parsed.job;
       state.lines = parsed.lines.map((l) => ({ notes: "", diagSVG: "", code: "", ...l }));
       // quote pre-fills site details; rep completes the rest on site
-      const fromQuote = siteFromJob(parsed.job);
+      const fromQuote = siteFromJob(parsed.job, parsed.lines);
       SITE_FIELDS.forEach((f) => { if (fromQuote[f]) state.site[f] = fromQuote[f]; });
       editingIndex = -1;
       save();
       renderAll();
     }
+    function loadQuoteText(text) { applyParsedQuote(QuoteParser.parseQuote(text)); }
     window.__loadQuoteText = loadQuoteText;
+
+    // line diagram: user-picked SVG wins, else the crop from the quote PDF
+    function lineDiagHTML(l) {
+      if (l.diagSVG) return l.diagSVG;
+      if (l.quoteDiagPNG) return `<img src="${l.quoteDiagPNG}" alt="quote diagram" />`;
+      return '<span class="label" style="font-size:9px">—</span>';
+    }
 
     // ---------- line status ----------
     function lineStatus(l) {
@@ -544,6 +638,14 @@
         note.classList.remove("hidden");
       } else {
         note.classList.add("hidden");
+      }
+      // header spec bullets from the quote (kickplates, hinges, handles…)
+      const qn = document.getElementById("quoteNotes");
+      if (j && j.headerNotes && j.headerNotes.length) {
+        qn.innerHTML = "<strong>Quote notes:</strong> " + j.headerNotes.join(" • ");
+        qn.classList.remove("hidden");
+      } else {
+        qn.classList.add("hidden");
       }
     }
 
@@ -568,7 +670,7 @@
         ? `<div class="qref">Quote: ${l.quoteSize}
              <button class="usequote" data-i="${i}" title="Copy quote size into final size">use</button></div>`
         : "";
-      const diag = l.diagSVG ? l.diagSVG : '<span class="label" style="font-size:9px">—</span>';
+      const diag = lineDiagHTML(l);
       const spec = [l.glass, l.colour].filter(Boolean).join("<br>") || "—";
       return `
         <td><strong class="mono">${l.ref || i + 1}</strong></td>
@@ -627,8 +729,7 @@
       tr.querySelector(".room-cell").textContent = l.location || "—";
       tr.querySelector(".spec-cell").innerHTML =
         [l.glass, l.colour].filter(Boolean).join("<br>") || "—";
-      const diag = l.diagSVG || '<span class="label" style="font-size:9px">—</span>';
-      tr.querySelector(".type-cell .diag").innerHTML = diag;
+      tr.querySelector(".type-cell .diag").innerHTML = lineDiagHTML(l);
       tr.querySelector(".type-name").innerHTML =
         (l.product || '<span style="color:var(--accent)">Tap to set</span>') +
         (l.code ? `<span class="code label">${l.code}</span>` : "");
@@ -777,8 +878,7 @@
       setVal("edNotes", l.notes);
       document.getElementById("edTypeName").textContent = l.product || "Not set";
       document.getElementById("edTypeCode").textContent = l.code || "";
-      document.getElementById("edDiag").innerHTML =
-        l.diagSVG || '<span class="label" style="font-size:9px">no diagram</span>';
+      document.getElementById("edDiag").innerHTML = lineDiagHTML(l);
       document.getElementById("edQuoteSize").textContent =
         l.quoteSize ? `Quote: ${l.quoteSize}` : "No quote size";
       const cBtn = document.getElementById("edConfirm");
@@ -842,6 +942,7 @@
       document.getElementById("edClose").addEventListener("click", closeEditor);
       document.getElementById("edPickWindow").addEventListener("click", () => openPicker("window"));
       document.getElementById("edPickDoor").addEventListener("click", () => openPicker("door"));
+      document.getElementById("edOpenBuilder").addEventListener("click", () => openPicker("builder"));
     }
     function stepEditor(d) {
       if (editingIndex < 0) return;
@@ -861,7 +962,10 @@
         quoteW: l.quoteWidth || l.width || null,
         quoteH: l.quoteHeight || l.height || null,
       }));
-      location.href = kind === "door" ? "door-picker.html" : "window-picker.html";
+      location.href =
+        kind === "door" ? "door-picker.html" :
+        kind === "builder" ? "window-builder.html" :
+        "window-picker.html";
     }
     function consumePickerResult() {
       let res = null;
