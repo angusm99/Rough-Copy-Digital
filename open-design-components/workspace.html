@@ -29,72 +29,55 @@
       color: var(--fg);
       font-family: var(--font-body);
     }
-    .app {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      min-height: 100vh;
-    }
+    .app { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
     .sidebar {
-      padding: 20px;
+      padding: 18px;
       border-right: 1px solid color-mix(in oklab, var(--border) 82%, white 18%);
       background: color-mix(in oklab, var(--surface) 96%, black 4%);
       display: grid;
-      gap: 18px;
+      gap: 16px;
       align-content: start;
     }
     .brand {
-      display: grid;
-      gap: 8px;
-      padding: 14px;
-      border-radius: 16px;
+      display: grid; gap: 6px; padding: 13px; border-radius: 14px;
       background: color-mix(in oklab, var(--surface-2) 96%, black 4%);
       border: 1px solid color-mix(in oklab, var(--border) 78%, var(--accent) 22%);
     }
-    .brand-title { font-family: var(--font-display); font-size: 26px; }
+    .brand-title { font-family: var(--font-display); font-size: 24px; }
     .label, .mono, .nav small, th {
       font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.13em;
       color: var(--muted);
     }
     .nav a, .quick {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 14px;
-      border-radius: 12px;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 11px 13px; border-radius: 11px;
       background: color-mix(in oklab, var(--surface) 72%, var(--surface-2));
       border: 1px solid transparent;
-      color: var(--fg);
-      text-decoration: none;
+      color: var(--fg); text-decoration: none;
     }
     .nav a.active {
       border-color: color-mix(in oklab, var(--accent) 50%, var(--border));
       background: color-mix(in oklab, var(--accent) 14%, var(--surface-2));
     }
-    .workspace { padding: 20px; display: grid; gap: 18px; align-content: start; }
-    .header, .job-card, .table-card, .drawer {
+    .workspace { padding: 18px; display: grid; gap: 16px; align-content: start; min-width: 0; }
+    .header, .site-card, .table-card, .editor-card, .drawer {
       background: color-mix(in oklab, var(--surface) 92%, black 8%);
       border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
-      border-radius: 18px;
+      border-radius: 16px;
     }
     .header {
-      padding: 18px 20px;
-      display: grid;
-      grid-template-columns: 1.2fr auto;
-      gap: 16px;
-      align-items: center;
+      padding: 16px 18px;
+      display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center;
     }
-    .header h1 { margin: 6px 0 0; font-size: 34px; font-family: var(--font-display); }
-    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: end; }
+    .header h1 { margin: 4px 0 0; font-size: 28px; font-family: var(--font-display); }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 9px; justify-content: end; }
     button, .link-btn {
-      border: 0;
-      border-radius: 10px;
-      padding: 11px 14px;
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
+      border: 0; border-radius: 10px; padding: 11px 14px;
+      font: inherit; font-weight: 700; cursor: pointer;
+      min-height: 42px;
     }
     .primary { background: var(--accent); color: var(--bg); }
     .primary:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -103,124 +86,136 @@
       color: var(--fg);
       border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
     }
-    .job-card {
-      padding: 18px 20px;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
+    /* ── site details (paper RC header) ── */
+    .site-card { padding: 14px 18px; display: grid; gap: 12px; }
+    .site-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .site-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+    .site-grid label { display: grid; gap: 4px; min-width: 0; }
+    .input, select, textarea {
+      width: 100%;
+      background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
+      color: var(--fg);
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      border-radius: 9px;
+      padding: 10px 11px;
+      font: inherit; font-size: 14px;
+      min-height: 42px;
     }
-    .field {
-      padding: 12px;
-      border-radius: 12px;
-      background: color-mix(in oklab, var(--surface-2) 94%, black 6%);
-      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
-    }
-    .field strong { display: block; margin-top: 5px; font-size: 15px; word-break: break-word; }
+    textarea { min-height: 70px; resize: vertical; }
     .note-banner {
-      grid-column: 1 / -1;
-      padding: 10px 14px;
-      border-radius: 12px;
+      padding: 9px 13px; border-radius: 11px; font-size: 13px;
       background: color-mix(in oklab, var(--accent) 12%, var(--surface-2));
       border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--border));
-      font-size: 13px;
     }
+    /* ── line table ── */
     .table-card { overflow: hidden; }
-    .table-head, .table-tools { padding: 16px 18px; }
+    .table-scroll { overflow-x: auto; }
+    .table-head, .table-tools { padding: 13px 16px; }
     .table-tools {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
+      display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
       border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
       border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
       background: color-mix(in oklab, var(--surface-2) 86%, black 14%);
     }
-    .summary { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .summary { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border-radius: 999px;
-      padding: 7px 11px;
-      font-size: 13px;
-      font-weight: 600;
+      display: inline-flex; align-items: center; gap: 6px;
+      border-radius: 999px; padding: 6px 10px;
+      font-size: 12px; font-weight: 600; white-space: nowrap;
     }
     .status.ready { background: color-mix(in oklab, var(--success) 22%, var(--surface-2)); color: color-mix(in oklab, var(--success) 78%, white 22%); }
     .status.warn { background: color-mix(in oklab, var(--accent) 18%, var(--surface-2)); color: color-mix(in oklab, var(--accent) 76%, white 24%); }
     .status.info { background: color-mix(in oklab, var(--info) 18%, var(--surface-2)); color: color-mix(in oklab, var(--info) 76%, white 24%); }
     .status.danger { background: color-mix(in oklab, var(--danger) 22%, var(--surface-2)); color: color-mix(in oklab, var(--danger) 80%, white 20%); }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 720px; }
     th, td {
-      padding: 12px 14px;
+      padding: 10px 10px;
       border-bottom: 1px solid color-mix(in oklab, var(--border) 90%, white 10%);
-      vertical-align: middle;
-      text-align: left;
+      vertical-align: middle; text-align: left;
     }
-    .size-inputs { display: flex; align-items: center; gap: 6px; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover { background: color-mix(in oklab, var(--accent) 6%, transparent); }
+    tbody tr.editing { background: color-mix(in oklab, var(--accent) 11%, var(--surface-2)); }
+    .type-cell { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .type-cell .diag {
+      width: 46px; height: 36px; flex: none;
+      border: 1px solid color-mix(in oklab, var(--border) 72%, var(--accent) 28%);
+      border-radius: 7px;
+      background: color-mix(in oklab, var(--surface) 62%, var(--surface-3));
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .type-cell .diag svg { max-width: 100%; max-height: 100%; }
+    .type-name { font-size: 12.5px; line-height: 1.25; }
+    .type-name .code { display: block; }
+    .qref { font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .usequote {
+      padding: 4px 9px; min-height: 26px; font-size: 11px; font-weight: 600; border-radius: 6px;
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      background: color-mix(in oklab, var(--surface-3) 80%, black 20%);
+      color: var(--fg);
+    }
+    .size-inputs { display: flex; align-items: center; gap: 5px; }
     .size-inputs input {
-      width: 64px;
+      width: 66px; min-height: 40px;
       background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
       color: var(--fg);
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
-      border-radius: 8px;
-      padding: 7px 8px;
-      font: inherit;
-      text-align: center;
+      border-radius: 8px; padding: 7px 6px; font: inherit; text-align: center;
     }
     .size-inputs input.unconfirmed {
       border-color: color-mix(in oklab, var(--accent) 60%, var(--border));
       background: color-mix(in oklab, var(--accent) 10%, var(--surface));
     }
     .confirm-btn {
-      padding: 7px 11px;
-      font-size: 12px;
-      border-radius: 8px;
+      padding: 7px 10px; min-height: 40px; font-size: 12px; border-radius: 8px;
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
       background: color-mix(in oklab, var(--surface-3) 88%, black 12%);
-      color: var(--fg);
+      color: var(--fg); font-weight: 600;
     }
     .confirm-btn.done { background: color-mix(in oklab, var(--success) 30%, var(--surface-2)); border-color: color-mix(in oklab, var(--success) 50%, var(--border)); }
     .confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .qref {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 5px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .spec-cell { font-size: 11.5px; color: var(--muted); line-height: 1.4; max-width: 150px; }
+    .empty-state { padding: 42px 22px; text-align: center; color: var(--muted); }
+    /* ── line editor (paper-cell capture flow) ── */
+    .editor-card { padding: 16px 18px; display: grid; gap: 14px; border-color: color-mix(in oklab, var(--accent) 38%, var(--border)); }
+    .editor-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .editor-head h3 { margin: 0; font-size: 19px; font-family: var(--font-display); }
+    .editor-nav { display: flex; gap: 8px; }
+    .editor-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .editor-grid label, .editor-type { display: grid; gap: 5px; min-width: 0; }
+    .editor-grid .wide { grid-column: span 2; }
+    .editor-grid .full { grid-column: 1 / -1; }
+    .editor-type-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .editor-diag {
+      width: 92px; height: 72px; flex: none;
+      border: 1px solid color-mix(in oklab, var(--border) 72%, var(--accent) 28%);
+      border-radius: 10px;
+      background: color-mix(in oklab, var(--surface) 62%, var(--surface-3));
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
-    .usequote {
-      padding: 2px 7px;
-      font-size: 10px;
-      font-weight: 600;
-      border-radius: 6px;
-      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
-      background: color-mix(in oklab, var(--surface-3) 80%, black 20%);
-      color: var(--fg);
-    }
-    .empty-state {
-      padding: 48px 24px;
-      text-align: center;
-      color: var(--muted);
-    }
-    .drawer { padding: 16px 18px; }
-    .detail-card { padding: 4px; }
-    .detail-card h3 { margin: 0 0 12px; font-size: 18px; }
-    .export-menu { display: grid; gap: 10px; margin-top: 12px; }
+    .editor-diag svg { max-width: 100%; max-height: 100%; }
+    .editor-size-row { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+    .editor-size-row label { display: grid; gap: 5px; }
+    .editor-size-row input { width: 110px; min-height: 46px; font-size: 17px; text-align: center; }
+    .drawer { padding: 14px 18px; }
+    .export-menu { display: grid; gap: 9px; margin-top: 10px; }
     .export-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 14px;
-      border-radius: 12px;
+      display: flex; justify-content: space-between; padding: 11px 13px; border-radius: 11px;
       background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
     }
     .hidden { display: none !important; }
     @media (max-width: 1100px) {
       .app { grid-template-columns: 1fr; }
-      .sidebar { border-right: 0; border-bottom: 1px solid color-mix(in oklab, var(--border) 82%, white 18%); }
-      .job-card, .header { grid-template-columns: 1fr 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid color-mix(in oklab, var(--border) 82%, white 18%);
+                 grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+      .site-grid, .editor-grid { grid-template-columns: repeat(2, 1fr); }
+      .header { grid-template-columns: 1fr; }
+      .toolbar { justify-content: start; }
+    }
+    @media (max-width: 560px) {
+      .site-grid, .editor-grid { grid-template-columns: 1fr; }
+      .editor-grid .wide { grid-column: auto; }
     }
   </style>
 </head>
@@ -230,18 +225,17 @@
       <div class="brand">
         <div class="label">Anglo Windows</div>
         <div class="brand-title">Digital Rough Copy</div>
-        <div>Quote-driven manufacturing prep for windows and doors.</div>
+        <div style="font-size:13px">Quote-driven manufacturing prep for windows and doors.</div>
       </div>
-      <nav class="nav" style="display:grid;gap:10px">
+      <nav class="nav" style="display:grid;gap:9px">
         <a class="active" href="workspace.html"><span>Quote workspace</span><small id="navLineCount">0 lines</small></a>
         <a href="window-picker.html"><span>Window picker</span><small>Ctrl+P</small></a>
         <a href="window-builder.html"><span>Custom builder</span><small>Ctrl+B</small></a>
         <a href="door-picker.html"><span>Door picker</span><small>Ctrl+D</small></a>
-        <a href="validation-report.html"><span>Validation report</span><small>7 issues</small></a>
       </nav>
       <div class="quick">
-        <span>Road rep mode</span>
-        <strong>Tablet-ready</strong>
+        <span>Open items</span>
+        <strong id="navIssueCount">0</strong>
       </div>
       <div class="quick">
         <span>Bizman import</span>
@@ -264,75 +258,178 @@
         </div>
       </header>
 
-      <section class="job-card" id="jobCard">
-        <div class="note-banner" id="emptyJobBanner">
-          Import a Bizman quotation PDF to auto-populate customer &amp; job details.
-          Sizes will need on-site confirmation before you can export the rough copy.
+      <!-- ════ SITE DETAILS — mirrors the paper rough copy header ════ -->
+      <section class="site-card">
+        <div class="site-head">
+          <div>
+            <div class="label">Site details — fill in before measuring</div>
+          </div>
+          <span class="status info" id="siteStatus">0 of 8 captured</span>
+        </div>
+        <div class="site-grid" id="siteGrid">
+          <label><span class="label">Job ref</span><input class="input" data-site="jobRef" /></label>
+          <label><span class="label">Date</span><input class="input" type="date" data-site="date" /></label>
+          <label><span class="label">Client</span><input class="input" data-site="client" /></label>
+          <label><span class="label">Phone</span><input class="input" type="tel" data-site="phone" /></label>
+          <label class="wide"><span class="label">Site address</span><input class="input" data-site="address" /></label>
+          <label><span class="label">Email</span><input class="input" type="email" data-site="email" /></label>
+          <label><span class="label">Rep</span><input class="input" data-site="rep" /></label>
+          <label><span class="label">Building type</span>
+            <select data-site="building">
+              <option value="">— select —</option>
+              <option>NEW</option><option>HOUSE</option><option>FLAT</option><option>COMMERCIAL</option>
+            </select>
+          </label>
+          <label><span class="label">Material (existing)</span>
+            <select data-site="material">
+              <option value="">— select —</option>
+              <option>EX WOOD</option><option>EX STEEL</option><option>EX ALU</option><option>NEW OPENING</option>
+            </select>
+          </label>
+          <label><span class="label">Wall type</span>
+            <select data-site="wall">
+              <option value="">— select —</option>
+              <option>PLASTER</option><option>FC-BRICK</option><option>BAGGED</option><option>CLADDING</option>
+            </select>
+          </label>
+          <label><span class="label">Colour</span>
+            <select data-site="colour">
+              <option value="">— select —</option>
+              <option>WHITE</option><option>BRONZE</option><option>CHARCOAL</option><option>BLACK</option><option>SILVER</option><option>SPECIAL</option>
+            </select>
+          </label>
+          <label><span class="label">Floor #</span><input class="input" data-site="floor" inputmode="numeric" /></label>
+        </div>
+        <div class="note-banner hidden" id="colourNote"></div>
+      </section>
+
+      <!-- ════ LINE TABLE — one row per opening, like the paper grid ════ -->
+      <section class="table-card">
+        <div class="table-head">
+          <div class="label">Openings</div>
+          <h2 style="margin:5px 0 0;font-size:21px">Tap a line to capture it: room → type → size → spec.</h2>
+        </div>
+        <div class="table-tools">
+          <div class="summary" id="summary"><span class="status info">No lines</span></div>
+          <div class="summary"><span class="status warn" id="confirmTracker">0 of 0 sizes confirmed</span></div>
+        </div>
+        <div class="table-scroll">
+          <table id="lineTable">
+            <thead>
+              <tr>
+                <th>Ref</th>
+                <th>Room</th>
+                <th>Type</th>
+                <th>Size (mm) — confirm on site</th>
+                <th>Qty</th>
+                <th>Spec</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="lineBody"></tbody>
+          </table>
         </div>
       </section>
 
-      <section class="table-card">
-        <div class="table-head">
-          <div class="label">Quote line list</div>
-          <h2 style="margin:6px 0 0;font-size:24px">Scan, confirm sizes, and complete each opening.</h2>
-        </div>
-        <div class="table-tools">
-          <div class="summary" id="summary">
-            <span class="status info">No lines</span>
-          </div>
-          <div class="summary">
-            <span class="status warn" id="confirmTracker">0 of 0 sizes confirmed</span>
+      <!-- ════ LINE EDITOR — paper-cell capture order ════ -->
+      <section class="editor-card hidden" id="editorCard">
+        <div class="editor-head">
+          <h3 id="editorTitle">Line</h3>
+          <div class="editor-nav">
+            <button class="secondary" id="edPrev">← Prev</button>
+            <button class="secondary" id="edNext">Next →</button>
+            <button class="secondary" id="edClose">Done</button>
           </div>
         </div>
-        <table id="lineTable">
-          <thead>
-            <tr>
-              <th>Ref</th>
-              <th>Location</th>
-              <th>Product</th>
-              <th>Size (mm) — confirm on site</th>
-              <th>Qty</th>
-              <th>Glass</th>
-              <th>Colour</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="lineBody">
-            <tr><td colspan="8" class="empty-state">No lines yet — import a Bizman quote to begin.</td></tr>
-          </tbody>
-        </table>
+
+        <div class="editor-grid">
+          <!-- 1. where -->
+          <label class="wide"><span class="label">1 · Room / location</span>
+            <input class="input" id="edRoom" placeholder="e.g. Kitchen east" /></label>
+          <label><span class="label">Ref</span><input class="input" id="edRef" /></label>
+          <label><span class="label">Qty</span><input class="input" id="edQty" type="number" min="1" inputmode="numeric" /></label>
+
+          <!-- 2. what -->
+          <div class="editor-type full">
+            <span class="label">2 · Unit type</span>
+            <div class="editor-type-row">
+              <div class="editor-diag" id="edDiag">—</div>
+              <div style="flex:1;min-width:140px">
+                <div id="edTypeName" style="font-weight:600">Not set</div>
+                <div class="label" id="edTypeCode" style="margin-top:3px"></div>
+              </div>
+              <button class="secondary" id="edPickWindow">Pick window…</button>
+              <button class="secondary" id="edPickDoor">Pick door…</button>
+            </div>
+          </div>
+
+          <!-- 3. how big -->
+          <div class="full">
+            <span class="label">3 · Size — quote vs final site measurement</span>
+            <div class="editor-size-row" style="margin-top:6px">
+              <div class="qref" id="edQuoteSize" style="margin:0 8px 12px 0"></div>
+              <label><span class="label">Final W</span><input class="input" id="edW" type="number" inputmode="numeric" /></label>
+              <label><span class="label">Final H</span><input class="input" id="edH" type="number" inputmode="numeric" /></label>
+              <button class="confirm-btn" id="edConfirm" style="min-height:46px">Confirm</button>
+            </div>
+          </div>
+
+          <!-- 4. spec -->
+          <label class="wide"><span class="label">4 · Glass</span>
+            <select id="edGlass">
+              <option value="">— select —</option>
+              <option>4mm Clear</option><option>4mm Obscure</option>
+              <option>6.38 Clear Lam</option><option>6.38 Safety</option><option>Bronze</option>
+            </select>
+          </label>
+          <label class="wide"><span class="label">Colour</span>
+            <select id="edColour">
+              <option value="">— select —</option>
+              <option>WHITE</option><option>BRONZE</option><option>CHARCOAL</option><option>BLACK</option><option>SILVER</option><option>SPECIAL</option>
+            </select>
+          </label>
+
+          <!-- 5. notes -->
+          <label class="full"><span class="label">5 · Notes (handles, burglar bars, access, sashes)</span>
+            <textarea id="edNotes" placeholder="Anything the workshop or installer must know about this opening"></textarea>
+          </label>
+        </div>
       </section>
 
       <section class="drawer">
-        <article class="detail-card" style="width:100%">
-          <div class="label">Output and next actions</div>
-          <h3 id="exportHeading">Export package — locked until sizes confirmed</h3>
-          <div class="export-menu">
-            <div class="export-item"><span>Rough copy PDF</span><strong>Landscape A4</strong></div>
-            <div class="export-item"><span>Workshop Excel</span><strong>Line data + glass notes</strong></div>
-            <div class="export-item"><span>Rep summary</span><strong>Mobile-friendly PDF</strong></div>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-            <button class="secondary" onclick="location.href='window-picker.html'">Open window picker</button>
-            <button class="secondary" onclick="location.href='window-builder.html'">Open builder</button>
-            <button class="secondary" onclick="location.href='door-picker.html'">Open door picker</button>
-          </div>
-        </article>
+        <div class="label">Output and next actions</div>
+        <h3 id="exportHeading" style="margin:8px 0 0;font-size:17px">Export package — locked until sizes confirmed</h3>
+        <div class="export-menu">
+          <div class="export-item"><span>Rough copy PDF</span><strong>Landscape A4</strong></div>
+          <div class="export-item"><span>Workshop Excel</span><strong>Line data + glass notes</strong></div>
+          <div class="export-item"><span>Rep summary</span><strong>Mobile-friendly PDF</strong></div>
+        </div>
       </section>
     </section>
   </main>
 
-  <!-- PDF.js for client-side text extraction -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- pdf.js — local vendor copy so import works offline on site -->
+  <script src="vendor/pdf.min.js"></script>
+  <script>
+    // CDN fallback if the vendor copy is missing
+    if (!window.pdfjsLib) {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>');
+    }
+  </script>
   <script src="quote-parser.js"></script>
   <script>
     if (window.pdfjsLib) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";
     }
 
     const STORE_KEY = "aw_rc_job";
-    let state = { job: null, lines: [] };
+    const CTX_KEY = "aw_picker_ctx";
+    const RESULT_KEY = "aw_picker_result";
+
+    const SITE_FIELDS = ["jobRef","date","client","phone","address","email","rep","building","material","wall","colour","floor"];
+
+    let state = { job: null, site: {}, lines: [] };
+    let editingIndex = -1;
 
     // ---------- persistence ----------
     function save() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
@@ -340,7 +437,13 @@
       try {
         const raw = localStorage.getItem(STORE_KEY);
         if (raw) state = JSON.parse(raw);
-      } catch (e) { /* ignore */ }
+      } catch (e) { /* corrupted state — start fresh */ }
+      if (!state || typeof state !== "object") state = {};
+      state.job = state.job || null;
+      state.site = state.site || {};
+      state.lines = (state.lines || []).map((l) => ({
+        notes: "", diagSVG: "", code: "", ...l,
+      }));
     }
 
     // ---------- PDF text extraction ----------
@@ -351,14 +454,13 @@
       for (let p = 1; p <= pdf.numPages; p++) {
         const page = await pdf.getPage(p);
         const content = await page.getTextContent();
-        // group text items into visual lines by y-coordinate
         const rows = {};
         content.items.forEach((it) => {
           const y = Math.round(it.transform[5] / 2) * 2;
           (rows[y] = rows[y] || []).push({ x: it.transform[4], s: it.str });
         });
         const lineText = Object.keys(rows)
-          .sort((a, b) => b - a) // top (high y) to bottom
+          .sort((a, b) => b - a)
           .map((y) =>
             rows[y].sort((a, b) => a.x - b.x).map((i) => i.s).join(" ")
               .replace(/\s+/g, " ").trim()
@@ -373,7 +475,7 @@
     // ---------- import flow ----------
     async function importFile(file) {
       if (!window.pdfjsLib) {
-        alert("PDF reader failed to load (no internet?). Cannot import.");
+        alert("PDF reader failed to load. Cannot import.");
         return;
       }
       try {
@@ -385,157 +487,238 @@
       }
     }
 
-    // exposed for testing + used by import flow
+    function siteFromJob(j) {
+      const jt = (j.jobType || "").toUpperCase();
+      const material =
+        /EX\s*WOOD/.test(jt) ? "EX WOOD" :
+        /EX\s*STEEL/.test(jt) ? "EX STEEL" :
+        /EX\s*ALU/.test(jt) ? "EX ALU" : "";
+      const colourM = jt.match(/TO\s+(WHITE|BRONZE|CHARCOAL|BLACK|SILVER)/);
+      return {
+        jobRef: j.quoteRef || "",
+        date: j.date || "",
+        client: j.client || "",
+        phone: j.clientPhone || "",
+        address: j.address || "",
+        email: j.email || "",
+        rep: j.rep ? j.rep + (j.repTel ? " " + j.repTel : "") : "",
+        building: "",
+        material,
+        wall: "",
+        colour: colourM ? colourM[1] : "",
+        floor: "",
+      };
+    }
+
     function loadQuoteText(text) {
       const parsed = QuoteParser.parseQuote(text);
-      state = parsed;
+      state.job = parsed.job;
+      state.lines = parsed.lines.map((l) => ({ notes: "", diagSVG: "", code: "", ...l }));
+      // quote pre-fills site details; rep completes the rest on site
+      const fromQuote = siteFromJob(parsed.job);
+      SITE_FIELDS.forEach((f) => { if (fromQuote[f]) state.site[f] = fromQuote[f]; });
+      editingIndex = -1;
       save();
       renderAll();
     }
     window.__loadQuoteText = loadQuoteText;
 
-    // ---------- rendering ----------
-    function renderJob() {
-      const card = document.getElementById("jobCard");
-      const j = state.job;
-      if (!j) {
-        card.innerHTML =
-          '<div class="note-banner" id="emptyJobBanner">Import a Bizman quotation PDF to auto-populate customer &amp; job details. Sizes will need on-site confirmation before you can export the rough copy.</div>';
-        document.getElementById("jobTitle").textContent = "No quote loaded";
-        document.getElementById("quickQuoteRef").textContent = "—";
-        return;
-      }
-      document.getElementById("jobTitle").textContent =
-        j.quoteTitle || j.client || j.quoteRef || "Imported quote";
-      document.getElementById("quickQuoteRef").textContent = j.quoteRef || "—";
+    // ---------- line status ----------
+    function lineStatus(l) {
+      if (!l.product) return ["warn", "Needs type"];
+      if (!l.sizeConfirmed) return ["danger", "Needs size"];
+      return ["ready", "Ready"];
+    }
+    function lineReady(l) { return !!l.product && !!l.sizeConfirmed; }
 
-      const fields = [
-        ["Client", j.client],
-        ["Quote no.", j.quoteRef],
-        ["Quote ref", j.quoteTitle],
-        ["Quote date", j.date],
-        ["Prepared by", j.preparedBy],
-        ["Sales rep", j.rep ? j.rep + (j.repTel ? " • " + j.repTel : "") : ""],
-        ["Site contact", j.clientPhone],
-        ["Email", j.email],
-      ];
-      let html = fields
-        .map(
-          ([k, v]) =>
-            `<div class="field"><span class="label">${k}</span><strong>${v || "—"}</strong></div>`
-        )
-        .join("");
-      if (j.colourNote) {
-        html += `<div class="note-banner"><strong>Colour note:</strong> ${j.colourNote}</div>`;
+    // ---------- rendering ----------
+    function renderJobTitle() {
+      const j = state.job;
+      document.getElementById("jobTitle").textContent =
+        (j && (j.quoteTitle || j.client || j.quoteRef)) ||
+        state.site.client || "New rough copy";
+      document.getElementById("quickQuoteRef").textContent = (j && j.quoteRef) || "—";
+      const note = document.getElementById("colourNote");
+      if (j && j.colourNote) {
+        note.innerHTML = "<strong>Colour note:</strong> " + j.colourNote;
+        note.classList.remove("hidden");
+      } else {
+        note.classList.add("hidden");
       }
-      card.innerHTML = html;
+    }
+
+    function renderSite() {
+      document.querySelectorAll("#siteGrid [data-site]").forEach((el) => {
+        el.value = state.site[el.dataset.site] || "";
+      });
+      updateSiteStatus();
+    }
+    function updateSiteStatus() {
+      const filled = SITE_FIELDS.filter((f) => (state.site[f] || "").trim()).length;
+      const el = document.getElementById("siteStatus");
+      el.textContent = `${filled} of ${SITE_FIELDS.length} captured`;
+      el.className = "status " + (filled === SITE_FIELDS.length ? "ready" : "info");
+    }
+
+    function rowHTML(l, i) {
+      const [cls, txt] = lineStatus(l);
+      const inputCls = l.sizeConfirmed ? "" : "unconfirmed";
+      const hasFinal = l.width && l.height;
+      const qref = l.quoteSize
+        ? `<div class="qref">Quote: ${l.quoteSize}
+             <button class="usequote" data-i="${i}" title="Copy quote size into final size">use</button></div>`
+        : "";
+      const diag = l.diagSVG ? l.diagSVG : '<span class="label" style="font-size:9px">—</span>';
+      const spec = [l.glass, l.colour].filter(Boolean).join("<br>") || "—";
+      return `
+        <td><strong class="mono">${l.ref || i + 1}</strong></td>
+        <td class="room-cell">${l.location || "—"}</td>
+        <td>
+          <div class="type-cell">
+            <div class="diag">${diag}</div>
+            <div class="type-name">${l.product || '<span style="color:var(--accent)">Tap to set</span>'}
+              ${l.code ? `<span class="code label">${l.code}</span>` : ""}</div>
+          </div>
+        </td>
+        <td>
+          ${qref}
+          <div class="size-inputs">
+            <input type="number" inputmode="numeric" class="w ${inputCls}" value="${l.width || ""}" placeholder="${l.quoteWidth || "W"}" data-i="${i}" data-f="width" />
+            <span>×</span>
+            <input type="number" inputmode="numeric" class="h ${inputCls}" value="${l.height || ""}" placeholder="${l.quoteHeight || "H"}" data-i="${i}" data-f="height" />
+            <button class="confirm-btn ${l.sizeConfirmed ? "done" : ""}" data-i="${i}" ${!l.sizeConfirmed && !hasFinal ? "disabled" : ""}>
+              ${l.sizeConfirmed ? "✓" : "Confirm"}
+            </button>
+          </div>
+        </td>
+        <td>${l.qty || 1}</td>
+        <td class="spec-cell">${spec}</td>
+        <td class="status-cell"><span class="status ${cls}">${txt}</span></td>`;
     }
 
     function renderTable() {
       const body = document.getElementById("lineBody");
       if (!state.lines.length) {
         body.innerHTML =
-          '<tr><td colspan="8" class="empty-state">No lines yet — import a Bizman quote to begin.</td></tr>';
+          '<tr><td colspan="7" class="empty-state">No lines yet — import a Bizman quote or tap Add Line.</td></tr>';
         return;
       }
       body.innerHTML = state.lines
-        .map((l, i) => {
-          const confirmed = l.sizeConfirmed;
-          const hasFinal = l.width && l.height;
-          const statusChip = !l.product
-            ? '<span class="status warn">Needs type</span>'
-            : confirmed
-            ? '<span class="status ready">Ready</span>'
-            : '<span class="status danger">Confirm size</span>';
-          const cls = confirmed ? "" : "unconfirmed";
-          const qref = l.quoteSize
-            ? `<div class="qref">Quote: ${l.quoteSize}
-                 <button class="usequote" data-i="${i}" title="Copy quote size into the final size fields">use</button>
-               </div>`
-            : "";
-          return `
-            <tr data-i="${i}">
-              <td><strong class="mono">${l.ref || i + 1}</strong></td>
-              <td>${l.location || "—"}</td>
-              <td>${l.product || '<span style="color:var(--accent)">Needs type</span>'}</td>
-              <td>
-                ${qref}
-                <div class="size-inputs">
-                  <input type="number" class="w ${cls}" value="${l.width || ""}" placeholder="${l.quoteWidth || "W"}" data-i="${i}" data-f="width" />
-                  <span>×</span>
-                  <input type="number" class="h ${cls}" value="${l.height || ""}" placeholder="${l.quoteHeight || "H"}" data-i="${i}" data-f="height" />
-                  <button class="confirm-btn ${confirmed ? "done" : ""}" data-i="${i}" ${!confirmed && !hasFinal ? "disabled" : ""}>
-                    ${confirmed ? "✓ Confirmed" : "Confirm"}
-                  </button>
-                </div>
-              </td>
-              <td>${l.qty || 1}</td>
-              <td style="max-width:220px">${l.glass || "—"}</td>
-              <td>${l.colour || "—"}</td>
-              <td>${statusChip}</td>
-            </tr>`;
-        })
+        .map((l, i) => `<tr data-i="${i}" class="${i === editingIndex ? "editing" : ""}">${rowHTML(l, i)}</tr>`)
         .join("");
+      wireTable();
+    }
 
-      // wire size inputs
+    // Surgical row refresh — never rebuilds an element the user is typing in.
+    // Updates status chip, confirm button, spec/room/type cells of one row.
+    function refreshRowChrome(i) {
+      const tr = document.querySelector(`#lineBody tr[data-i="${i}"]`);
+      if (!tr) return;
+      const l = state.lines[i];
+      const [cls, txt] = lineStatus(l);
+      tr.querySelector(".status-cell").innerHTML = `<span class="status ${cls}">${txt}</span>`;
+      const btn = tr.querySelector(".confirm-btn");
+      btn.classList.toggle("done", !!l.sizeConfirmed);
+      btn.textContent = l.sizeConfirmed ? "✓" : "Confirm";
+      btn.disabled = !l.sizeConfirmed && !(l.width && l.height);
+      tr.querySelectorAll(".size-inputs input").forEach((inp) =>
+        inp.classList.toggle("unconfirmed", !l.sizeConfirmed)
+      );
+      tr.querySelector(".room-cell").textContent = l.location || "—";
+      tr.querySelector(".spec-cell").innerHTML =
+        [l.glass, l.colour].filter(Boolean).join("<br>") || "—";
+      const diag = l.diagSVG || '<span class="label" style="font-size:9px">—</span>';
+      tr.querySelector(".type-cell .diag").innerHTML = diag;
+      tr.querySelector(".type-name").innerHTML =
+        (l.product || '<span style="color:var(--accent)">Tap to set</span>') +
+        (l.code ? `<span class="code label">${l.code}</span>` : "");
+      // sync table size inputs from state unless that input is focused
+      tr.querySelectorAll(".size-inputs input").forEach((inp) => {
+        if (document.activeElement !== inp) {
+          inp.value = state.lines[i][inp.dataset.f] || "";
+        }
+      });
+    }
+
+    function setLineSize(i, f, val) {
+      const l = state.lines[i];
+      l[f] = val ? +val : null;
+      l.size = l.width && l.height ? `${l.width} × ${l.height}` : "";
+      // a changed measurement must be re-confirmed
+      if (l.sizeConfirmed) l.sizeConfirmed = false;
+      save();
+      refreshRowChrome(i);
+      renderSummary();
+      syncEditor(i);
+    }
+
+    function toggleConfirm(i) {
+      const l = state.lines[i];
+      if (!l.sizeConfirmed && !(l.width && l.height)) return;
+      l.sizeConfirmed = !l.sizeConfirmed;
+      save();
+      refreshRowChrome(i);
+      renderSummary();
+      syncEditor(i);
+    }
+
+    function useQuoteSize(i) {
+      const l = state.lines[i];
+      if (!l.quoteWidth || !l.quoteHeight) return;
+      l.width = l.quoteWidth;
+      l.height = l.quoteHeight;
+      l.size = l.quoteSize;
+      l.sizeConfirmed = false;
+      save();
+      refreshRowChrome(i);
+      renderSummary();
+      syncEditor(i);
+    }
+
+    function wireTable() {
+      const body = document.getElementById("lineBody");
       body.querySelectorAll('input[type="number"]').forEach((inp) => {
-        inp.addEventListener("input", () => {
-          const i = +inp.dataset.i, f = inp.dataset.f;
-          state.lines[i][f] = inp.value ? +inp.value : null;
-          state.lines[i].size =
-            state.lines[i].width && state.lines[i].height
-              ? `${state.lines[i].width} × ${state.lines[i].height}`
-              : "";
-          // editing a size un-confirms it (must re-confirm the new measurement)
-          if (state.lines[i].sizeConfirmed) {
-            state.lines[i].sizeConfirmed = false;
-            renderTable();
-            renderSummary();
+        inp.addEventListener("input", () => setLineSize(+inp.dataset.i, inp.dataset.f, inp.value));
+        inp.addEventListener("keydown", (e) => {
+          if (e.key !== "Enter") return;
+          const i = +inp.dataset.i;
+          if (inp.dataset.f === "width") {
+            inp.closest("tr").querySelector(".h").focus();
+          } else {
+            // Enter in height = confirm + jump to next line's width (walk the sheet)
+            if (state.lines[i].width && state.lines[i].height && !state.lines[i].sizeConfirmed) toggleConfirm(i);
+            const next = document.querySelector(`#lineBody tr[data-i="${i + 1}"] .w`);
+            if (next) { next.focus(); next.select(); }
           }
-          save();
-          // toggle the confirm button's enabled state live
-          const btn = body.querySelector(`.confirm-btn[data-i="${i}"]`);
-          if (btn) btn.disabled = !(state.lines[i].width && state.lines[i].height);
         });
       });
-      // "use quote size" quick-fill
-      body.querySelectorAll(".usequote").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const i = +btn.dataset.i;
-          state.lines[i].width = state.lines[i].quoteWidth;
-          state.lines[i].height = state.lines[i].quoteHeight;
-          state.lines[i].size = state.lines[i].quoteSize;
-          save();
-          renderTable();
-          renderSummary();
-        });
-      });
-      // wire confirm buttons
-      body.querySelectorAll(".confirm-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const i = +btn.dataset.i;
-          if (!state.lines[i].sizeConfirmed && !(state.lines[i].width && state.lines[i].height)) {
-            return; // can't confirm without a final size
-          }
-          state.lines[i].sizeConfirmed = !state.lines[i].sizeConfirmed;
-          save();
-          renderTable();
-          renderSummary();
-        });
-      });
+      body.querySelectorAll(".usequote").forEach((btn) =>
+        btn.addEventListener("click", (e) => { e.stopPropagation(); useQuoteSize(+btn.dataset.i); })
+      );
+      body.querySelectorAll(".confirm-btn").forEach((btn) =>
+        btn.addEventListener("click", (e) => { e.stopPropagation(); toggleConfirm(+btn.dataset.i); })
+      );
+      body.querySelectorAll("tr[data-i]").forEach((tr) =>
+        tr.addEventListener("click", (e) => {
+          if (e.target.closest("input, button, select")) return;
+          openEditor(+tr.dataset.i);
+        })
+      );
     }
 
     function renderSummary() {
       const total = state.lines.length;
       const confirmed = state.lines.filter((l) => l.sizeConfirmed).length;
       const needsType = state.lines.filter((l) => !l.product).length;
+      const open = state.lines.filter((l) => !lineReady(l)).length;
 
       document.getElementById("navLineCount").textContent = total + " lines";
+      document.getElementById("navIssueCount").textContent = open;
 
       const sum = document.getElementById("summary");
       sum.innerHTML = total
-        ? `<span class="status ready">${confirmed} confirmed</span>` +
-          `<span class="status danger">${total - confirmed} to confirm</span>` +
+        ? `<span class="status ready">${total - open} ready</span>` +
+          (confirmed < total ? `<span class="status danger">${total - confirmed} need size</span>` : "") +
           (needsType ? `<span class="status warn">${needsType} need type</span>` : "")
         : '<span class="status info">No lines</span>';
 
@@ -543,15 +726,161 @@
       tracker.textContent = `${confirmed} of ${total} sizes confirmed`;
       tracker.className = "status " + (total && confirmed === total ? "ready" : "warn");
 
-      const allConfirmed = total > 0 && confirmed === total;
-      const btn = document.getElementById("exportBtn");
-      btn.disabled = !allConfirmed;
-      document.getElementById("exportHeading").textContent = allConfirmed
+      const allReady = total > 0 && open === 0;
+      document.getElementById("exportBtn").disabled = !allReady;
+      document.getElementById("exportHeading").textContent = allReady
         ? "Export package — ready"
-        : `Export package — locked (${total - confirmed} size${total - confirmed === 1 ? "" : "s"} to confirm)`;
+        : `Export package — locked (${open} line${open === 1 ? "" : "s"} to complete)`;
     }
 
-    function renderAll() { renderJob(); renderTable(); renderSummary(); }
+    function renderAll() {
+      renderJobTitle();
+      renderSite();
+      renderTable();
+      renderSummary();
+      renderEditor();
+    }
+
+    // ---------- line editor (paper capture flow) ----------
+    function openEditor(i) {
+      editingIndex = i;
+      document.querySelectorAll("#lineBody tr").forEach((tr) =>
+        tr.classList.toggle("editing", +tr.dataset.i === i)
+      );
+      renderEditor();
+      const card = document.getElementById("editorCard");
+      card.classList.remove("hidden");
+      card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+    function closeEditor() {
+      editingIndex = -1;
+      document.getElementById("editorCard").classList.add("hidden");
+      document.querySelectorAll("#lineBody tr").forEach((tr) => tr.classList.remove("editing"));
+    }
+    function renderEditor() {
+      const card = document.getElementById("editorCard");
+      if (editingIndex < 0 || !state.lines[editingIndex]) {
+        card.classList.add("hidden");
+        return;
+      }
+      const l = state.lines[editingIndex];
+      card.classList.remove("hidden");
+      document.getElementById("editorTitle").textContent =
+        `Line ${l.ref || editingIndex + 1} — ${l.location || "unnamed room"}`;
+      setVal("edRoom", l.location);
+      setVal("edRef", l.ref);
+      setVal("edQty", l.qty || 1);
+      setVal("edW", l.width);
+      setVal("edH", l.height);
+      setSelect("edGlass", l.glass);
+      setSelect("edColour", l.colour);
+      setVal("edNotes", l.notes);
+      document.getElementById("edTypeName").textContent = l.product || "Not set";
+      document.getElementById("edTypeCode").textContent = l.code || "";
+      document.getElementById("edDiag").innerHTML =
+        l.diagSVG || '<span class="label" style="font-size:9px">no diagram</span>';
+      document.getElementById("edQuoteSize").textContent =
+        l.quoteSize ? `Quote: ${l.quoteSize}` : "No quote size";
+      const cBtn = document.getElementById("edConfirm");
+      cBtn.classList.toggle("done", !!l.sizeConfirmed);
+      cBtn.textContent = l.sizeConfirmed ? "✓ Confirmed" : "Confirm size";
+      cBtn.disabled = !l.sizeConfirmed && !(l.width && l.height);
+    }
+    function setVal(id, v) {
+      const el = document.getElementById(id);
+      if (document.activeElement !== el) el.value = v == null ? "" : v;
+    }
+    function setSelect(id, v) {
+      const el = document.getElementById(id);
+      if (!v) { el.value = ""; return; }
+      // keep imported free-text values (e.g. "4mm Glass - 01-CLEAR") selectable
+      if (![...el.options].some((o) => o.value === v)) {
+        const o = document.createElement("option");
+        o.value = o.textContent = v;
+        el.appendChild(o);
+      }
+      el.value = v;
+    }
+    // editor edits → state + table row (the table row's inputs aren't focused, safe to sync)
+    function syncEditor(i) { if (i === editingIndex) renderEditor(); }
+
+    function wireEditor() {
+      const bind = (id, fn) =>
+        document.getElementById(id).addEventListener("input", (e) => {
+          if (editingIndex < 0) return;
+          fn(state.lines[editingIndex], e.target.value);
+          save();
+          refreshRowChrome(editingIndex);
+          renderSummary();
+        });
+      bind("edRoom", (l, v) => { l.location = v; });
+      bind("edRef", (l, v) => { l.ref = v; });
+      bind("edQty", (l, v) => { l.qty = v ? +v : 1; });
+      bind("edGlass", (l, v) => { l.glass = v; });
+      bind("edColour", (l, v) => { l.colour = v; });
+      bind("edNotes", (l, v) => { l.notes = v; });
+      ["edW", "edH"].forEach((id, idx) =>
+        document.getElementById(id).addEventListener("input", (e) => {
+          if (editingIndex < 0) return;
+          setLineSize(editingIndex, idx === 0 ? "width" : "height", e.target.value);
+          const cBtn = document.getElementById("edConfirm");
+          const l = state.lines[editingIndex];
+          cBtn.disabled = !l.sizeConfirmed && !(l.width && l.height);
+        })
+      );
+      document.getElementById("edH").addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" || editingIndex < 0) return;
+        const l = state.lines[editingIndex];
+        if (l.width && l.height && !l.sizeConfirmed) toggleConfirm(editingIndex);
+        stepEditor(1);
+      });
+      document.getElementById("edConfirm").addEventListener("click", () => {
+        if (editingIndex >= 0) toggleConfirm(editingIndex);
+      });
+      document.getElementById("edPrev").addEventListener("click", () => stepEditor(-1));
+      document.getElementById("edNext").addEventListener("click", () => stepEditor(1));
+      document.getElementById("edClose").addEventListener("click", closeEditor);
+      document.getElementById("edPickWindow").addEventListener("click", () => openPicker("window"));
+      document.getElementById("edPickDoor").addEventListener("click", () => openPicker("door"));
+    }
+    function stepEditor(d) {
+      if (editingIndex < 0) return;
+      const n = editingIndex + d;
+      if (n < 0 || n >= state.lines.length) return;
+      openEditor(n);
+    }
+
+    // ---------- picker round-trip ----------
+    function openPicker(kind) {
+      if (editingIndex < 0) return;
+      const l = state.lines[editingIndex];
+      localStorage.setItem(CTX_KEY, JSON.stringify({
+        i: editingIndex,
+        ref: l.ref || "",
+        room: l.location || "",
+        quoteW: l.quoteWidth || l.width || null,
+        quoteH: l.quoteHeight || l.height || null,
+      }));
+      location.href = kind === "door" ? "door-picker.html" : "window-picker.html";
+    }
+    function consumePickerResult() {
+      let res = null;
+      try { res = JSON.parse(localStorage.getItem(RESULT_KEY) || "null"); } catch (e) {}
+      localStorage.removeItem(RESULT_KEY);
+      if (!res || typeof res.i !== "number" || !state.lines[res.i]) return;
+      const l = state.lines[res.i];
+      l.product = res.name || res.code || l.product;
+      l.code = res.code || "";
+      if (res.family) l.family = res.family;
+      if (res.glass) l.glass = res.glass;
+      if (res.colour) l.colour = res.colour;
+      if (res.svg) l.diagSVG = res.svg;
+      if (res.note && !(l.notes || "").includes(res.note)) {
+        l.notes = (l.notes ? l.notes + "\n" : "") + res.note;
+      }
+      save();
+      editingIndex = res.i;
+    }
 
     // ---------- events ----------
     document.getElementById("importBtn").addEventListener("click", () =>
@@ -562,37 +891,49 @@
     });
     document.getElementById("addLineBtn").addEventListener("click", () => {
       state.lines.push({
-        ref: "NEW", location: "", product: "",
+        ref: "", location: "", product: "", code: "", family: "",
         quoteWidth: null, quoteHeight: null, quoteSize: "",
         width: null, height: null, size: "",
-        qty: 1, glass: "", colour: "", sizeConfirmed: false,
+        qty: 1, glass: "", colour: "", notes: "", diagSVG: "",
+        sizeConfirmed: false,
       });
       save();
       renderTable();
       renderSummary();
+      openEditor(state.lines.length - 1);
+      document.getElementById("edRoom").focus();
     });
     document.getElementById("clearBtn").addEventListener("click", () => {
-      if (!state.job && !state.lines.length) return;
-      if (!confirm("Clear the current job and all lines?")) return;
-      state = { job: null, lines: [] };
+      if (!state.job && !state.lines.length && !Object.keys(state.site).length) return;
+      if (!confirm("Clear the current job, site details, and all lines?")) return;
+      state = { job: null, site: {}, lines: [] };
+      editingIndex = -1;
       save();
       renderAll();
     });
     document.getElementById("exportBtn").addEventListener("click", () => {
-      const unconfirmed = state.lines.filter((l) => !l.sizeConfirmed);
-      if (unconfirmed.length) {
-        alert(
-          "Cannot export yet. Confirm sizes for: " +
-            unconfirmed.map((l) => l.ref).join(", ")
-        );
+      const open = state.lines.filter((l) => !lineReady(l));
+      if (open.length) {
+        alert("Cannot export yet. Complete: " + open.map((l) => l.ref || "?").join(", "));
         return;
       }
-      location.href = "validation-report.html";
+      alert("All lines ready. PDF/Excel generation is the next build phase.");
+    });
+    document.querySelectorAll("#siteGrid [data-site]").forEach((el) => {
+      el.addEventListener("input", () => {
+        state.site[el.dataset.site] = el.value;
+        save();
+        updateSiteStatus();
+        renderJobTitle();
+      });
     });
 
     // ---------- init ----------
     load();
+    consumePickerResult();
+    wireEditor();
     renderAll();
+    if (editingIndex >= 0) openEditor(editingIndex);
   </script>
 </body>
 </html>

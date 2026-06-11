@@ -102,6 +102,19 @@
       (lines.find((l) => /supply\s*(and|&)?\s*(install|fit|only)/i.test(l)) || "")
         .trim();
 
+    // site address: usually the line right after the scope line —
+    // looks like a street address, isn't a bare phone number or email
+    let address = "";
+    const jtIdx = lines.findIndex((l) => l.trim() === jobType);
+    if (jtIdx !== -1) {
+      for (let j = jtIdx + 1; j < Math.min(lines.length, jtIdx + 4); j++) {
+        const t = lines[j].trim();
+        if (!t || /@/.test(t) || /^[\d\s+\-()]+$/.test(t)) continue;
+        if (/thank you|colour note|quote|prepared/i.test(t)) break;
+        if (/\d/.test(t) && /[A-Za-z]{2,}/.test(t)) { address = t; break; }
+      }
+    }
+
     // quote title/reference (e.g. "JH532611 D2161 MAIN HOUSE"); may arrive with
     // a leading "Your Ref:" / "To:" / "Attention" label merged onto the row.
     let quoteTitle =
@@ -118,6 +131,7 @@
 
     return {
       jobType,
+      address,
       quoteRef: get(/Quote Ref:\s*(D\d{3,5})/i) || get(/\b(D\d{3,5})\b/),
       date: get(/\b(\d{4}-\d{2}-\d{2})\b/),
       quoteTitle,

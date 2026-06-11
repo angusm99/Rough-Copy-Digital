@@ -73,7 +73,8 @@
       gap: 14px;
       align-content: start;
       overflow-y: auto;
-      max-height: 400px;
+      max-height: calc(100vh - 290px);
+      min-height: 320px;
     }
     .side {
       border-left: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
@@ -151,7 +152,7 @@
 <body>
   <div class="wrap">
     <header class="head">
-      <div class="label">Line 04 • Patio • 2400 × 2100</div>
+      <div class="label" id="lineCtx">No line selected — browsing</div>
       <h1>Pick the right door configuration.</h1>
       <div class="families" id="familyTabs">
         <button class="option active" data-family="patio">Patio Sliding</button>
@@ -295,10 +296,18 @@
     let currentFamily = 'patio';
     let selectedDoor = null;
 
+    // dispatch to the right SVG renderer with its real signature
+    function doorSVG(door, W, H) {
+      if (door.panels) return slidingSVG(door.panels, W, H);
+      if (door.leaves) return foldingSVG(door.leaves, W, H);
+      if (door.bars)   return colonialSVG(!!door.double, door.bars, W, H);
+      return hingedSVG(!!door.double, W, H);
+    }
+
     function renderCatalog(family) {
       const catalog = DOORS[family];
       const cardsHtml = catalog.map(door => {
-        const svgContent = door.svg(door.panels || door.leaves || false, 100, 80);
+        const svgContent = doorSVG(door, 100, 80);
         return `
           <article class="door-card" data-id="${door.id}">
             <div class="door-graphic">${svgContent}</div>
@@ -364,21 +373,42 @@
         return;
       }
 
-      const selection = {
-        doorId: selectedDoor.id,
-        family: selectedDoor.family,
-        code: selectedDoor.code,
-        config: selectedDoor.config,
-        lock: selectedDoor.lock,
-        open: selectedDoor.open,
-        glass: document.getElementById('glassField').value,
-        colour: document.getElementById('colourField').value,
-        timestamp: new Date().toISOString()
-      };
-
-      localStorage.setItem('aw_picker_selection', JSON.stringify(selection));
+      if (CTX && typeof CTX.i === 'number') {
+        const noteBits = [selectedDoor.config, selectedDoor.lock && 'lock ' + selectedDoor.lock,
+                          selectedDoor.open].filter(Boolean).join(' • ');
+        localStorage.setItem('aw_picker_result', JSON.stringify({
+          i: CTX.i, kind: 'door',
+          code: selectedDoor.code,
+          name: selectedDoor.label,
+          family: selectedDoor.family,
+          config: selectedDoor.config || '',
+          note: noteBits,
+          glass: document.getElementById('glassField').value,
+          colour: document.getElementById('colourField').value,
+          svg: doorSVG(selectedDoor, 88, 64)
+        }));
+      }
+      localStorage.removeItem('aw_picker_ctx');
       location.href = 'workspace.html';
     }
+
+    // ── Line context from workspace (picker round-trip) ────────────────
+    let CTX = null;
+    try { CTX = JSON.parse(localStorage.getItem('aw_picker_ctx') || 'null'); } catch (e) {}
+    if (CTX) {
+      const bits = [];
+      if (CTX.ref) bits.push('Line ' + CTX.ref);
+      if (CTX.room) bits.push(CTX.room);
+      if (CTX.quoteW && CTX.quoteH) bits.push('quote ' + CTX.quoteW + ' × ' + CTX.quoteH);
+      document.getElementById('lineCtx').textContent = bits.join(' • ') || 'Pick for current line';
+    }
+
+    // ── Keyboard: Enter confirms • Esc returns ──────────────────────────
+    document.addEventListener('keydown', (e) => {
+      if (e.target.closest('input, select, textarea')) return;
+      if (e.key === 'Enter') { e.preventDefault(); saveDoorSelection(); }
+      else if (e.key === 'Escape') { location.href = 'workspace.html'; }
+    });
 
     renderCatalog('patio');
   </script>

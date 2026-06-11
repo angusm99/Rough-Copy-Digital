@@ -134,7 +134,7 @@
 <div class="modal">
   <header class="head">
     <div>
-      <div class="label">Line 03 • Main bath • 900 × 600</div>
+      <div class="label" id="lineCtx">No line selected — browsing</div>
       <h1>Pick the right window configuration.</h1>
     </div>
     <div class="actions">
@@ -206,7 +206,7 @@
     <div class="label">Enter confirms • B opens builder • Esc returns to workspace</div>
     <div class="actions">
       <button class="secondary" onclick="location.href='workspace.html'">Cancel</button>
-      <button class="primary" id="useBtn" onclick="location.href='workspace.html'">Use selected window</button>
+      <button class="primary" id="useBtn" onclick="useSelected()">Use selected window</button>
     </div>
   </footer>
 </div>
@@ -257,7 +257,7 @@ function fixedSVG(W, H) {
   for (let i=0; i<W+H; i+=10)
     s += `<line x1="${i}" y1="0" x2="${i-H}" y2="${H}" stroke="${clr}" stroke-width=".5" opacity=".25"/>`;
   s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="#f5b800" stroke-width="1.8"/>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${s}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
 }
 
 function sidelightSVG(W, H) {
@@ -266,7 +266,7 @@ function sidelightSVG(W, H) {
   const mid = Math.round(H*.45);
   s += `<line x1="4" y1="${mid}" x2="${W-4}" y2="${mid}" stroke="${clr}" stroke-width="1" stroke-dasharray="4,3"/>`;
   s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="#f5b800" stroke-width="1.8"/>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${s}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
 }
 
 function toplightSVG(W, H) {
@@ -275,7 +275,7 @@ function toplightSVG(W, H) {
   for (let hx=5; hx<W; hx+=5)
     s += `<line x1="${hx}" y1="2" x2="${hx-4}" y2="${H-2}" stroke="${clr}" stroke-width=".5" opacity=".4"/>`;
   s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="#f5b800" stroke-width="1.8"/>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${s}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
 }
 
 // ── Window catalog — based on actual WB_PRESETS from rough-copy-digital_6 ──
@@ -436,6 +436,50 @@ function selectCard(code) {
   document.getElementById('sizeField').value = `${w.W} × ${w.H}`;
   document.getElementById('configNote').textContent = w.note;
 }
+
+// ── Line context from workspace (picker round-trip) ─────────────────────
+let CTX = null;
+try { CTX = JSON.parse(localStorage.getItem('aw_picker_ctx') || 'null'); } catch (e) {}
+if (CTX) {
+  const bits = [];
+  if (CTX.ref) bits.push('Line ' + CTX.ref);
+  if (CTX.room) bits.push(CTX.room);
+  if (CTX.quoteW && CTX.quoteH) bits.push('quote ' + CTX.quoteW + ' × ' + CTX.quoteH);
+  document.getElementById('lineCtx').textContent = bits.join(' • ') || 'Pick for current line';
+}
+
+// ── Save selection back to the workspace line ───────────────────────────
+function useSelected() {
+  const w = CATALOG.find(x => x.code === selectedCode);
+  if (!w) { alert('Select a window first.'); return; }
+  // thumbnail for the workspace diagram cell
+  const tW = 88, tH = Math.max(40, Math.min(96, Math.round(tW * w.H / w.W)));
+  let svg;
+  if (w.svgFn === 'fixed')          svg = fixedSVG(tW, tH);
+  else if (w.svgFn === 'toplight')  svg = toplightSVG(tW, tH);
+  else if (w.svgFn === 'sidelight') svg = sidelightSVG(tW, tH);
+  else svg = presetSVG(w, tW, tH);
+
+  if (CTX && typeof CTX.i === 'number') {
+    localStorage.setItem('aw_picker_result', JSON.stringify({
+      i: CTX.i, kind: 'window',
+      code: w.code, name: w.name, family: w.family,
+      glass: document.getElementById('glassField').value,
+      colour: document.getElementById('colourField').value,
+      svg
+    }));
+  }
+  localStorage.removeItem('aw_picker_ctx');
+  location.href = 'workspace.html';
+}
+
+// ── Keyboard: Enter confirms • B opens builder • Esc returns ────────────
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input, select, textarea')) return;
+  if (e.key === 'Enter') { e.preventDefault(); useSelected(); }
+  else if (e.key === 'Escape') { location.href = 'workspace.html'; }
+  else if (e.key === 'b' || e.key === 'B') { location.href = 'window-builder.html'; }
+});
 
 // ── Init ─────────────────────────────────────────────────────────────────
 renderCatalog();
