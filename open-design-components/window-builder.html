@@ -9,15 +9,11 @@
       --bg: oklch(15.1% 0.009 239.8);
       --surface: oklch(19% 0.012 246);
       --surface-2: oklch(24% 0.014 248);
-      --surface-3: oklch(31% 0.015 252.3);
+      --surface-3: oklch(27% 0.015 250);
       --fg: oklch(92.5% 0.007 88.6);
       --muted: oklch(70.4% 0.031 87.6);
       --border: oklch(31% 0.015 252.3);
       --accent: oklch(87.1% 0.178 91.8);
-      --fixed: oklch(68% 0.07 228);
-      --hung: oklch(82% 0.14 91);
-      --side: oklch(73% 0.14 150);
-      --toplight: oklch(76% 0.11 18);
       --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
       --font-body: "Segoe UI", "Segoe UI Variable Text", Inter, system-ui, sans-serif;
       --font-mono: "Cascadia Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
@@ -29,218 +25,403 @@
       background: linear-gradient(180deg, oklch(17% 0.01 245), var(--bg));
       color: var(--fg);
       font-family: var(--font-body);
-    }
-    .page {
-      width: min(1320px, calc(100% - 28px));
-      margin: 18px auto;
       display: grid;
-      grid-template-columns: 360px 1fr 320px;
-      gap: 16px;
+      place-items: center;
+      padding: 16px;
     }
-    .panel {
+    .modal {
+      width: min(1240px, 100%);
       background: color-mix(in oklab, var(--surface) 92%, black 8%);
-      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
-      border-radius: 20px;
-      padding: 18px;
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      border-radius: 22px;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+    }
+    .head {
+      padding: 16px 20px;
+      border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+      display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; flex-wrap: wrap;
     }
     .label {
       color: var(--muted);
       font-family: var(--font-mono);
-      font-size: 12px;
-      letter-spacing: 0.15em;
+      font-size: 11px;
+      letter-spacing: .14em;
       text-transform: uppercase;
     }
-    h1, h2 { margin: 8px 0 0; }
-    h1 { font-size: 34px; font-family: var(--font-display); }
-    h2 { font-size: 20px; }
-    .stack, .legend, .actions { display: grid; gap: 12px; }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 12px;
+    h1 { margin: 5px 0 0; font-size: 27px; font-family: var(--font-display); }
+    button {
+      border: 0; border-radius: 10px; padding: 10px 14px;
+      font: inherit; font-weight: 700; cursor: pointer; min-height: 42px;
     }
-    .input, select, textarea, button {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
-      background: color-mix(in oklab, var(--surface-2) 92%, black 8%);
+    .primary { background: var(--accent); color: var(--bg); }
+    .secondary {
+      background: color-mix(in oklab, var(--surface-3) 88%, black 12%);
       color: var(--fg);
-      font: inherit;
+      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
     }
-    .input, select, textarea { padding: 10px 12px; }
-    button { padding: 11px 14px; cursor: pointer; font-weight: 700; }
-    .primary { background: var(--accent); color: var(--bg); border: 0; }
-    .builder-shell {
-      display: grid;
-      gap: 14px;
-      align-content: start;
+    .mini {
+      min-height: 34px; padding: 6px 11px; font-size: 13px; border-radius: 8px;
     }
-    .dimension-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
-      border-radius: 14px;
+    .toolbar {
+      padding: 12px 20px;
+      display: flex; gap: 16px; align-items: end; flex-wrap: wrap;
+      background: color-mix(in oklab, var(--surface-2) 82%, black 18%);
+      border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+    }
+    .tool-group { display: grid; gap: 5px; }
+    .tool-row { display: flex; gap: 8px; align-items: center; }
+    .input {
+      width: 92px; padding: 9px 10px; border-radius: 9px;
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      background: color-mix(in oklab, var(--surface) 72%, var(--surface-2));
+      color: var(--fg); font: inherit; text-align: center; min-height: 42px;
+    }
+    .count { min-width: 26px; text-align: center; font-weight: 700; }
+    .body { display: grid; grid-template-columns: 1fr 300px; min-height: 0; }
+    .canvas-wrap {
+      padding: 20px; display: flex; align-items: center; justify-content: center;
+      min-height: 420px;
+    }
+    #canvasBox { width: 100%; display: flex; justify-content: center; }
+    #canvasBox svg { max-width: 100%; height: auto; cursor: pointer; }
+    .side {
+      border-left: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+      background: color-mix(in oklab, var(--surface) 88%, black 12%);
+      padding: 16px; display: grid; gap: 13px; align-content: start;
+      overflow-y: auto; max-height: calc(100vh - 320px);
+    }
+    .panel {
+      padding: 13px; border-radius: 13px;
+      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
       background: color-mix(in oklab, var(--surface-2) 92%, black 8%);
-      font-family: var(--font-mono);
     }
-    .canvas {
-      aspect-ratio: 1.1 / 1;
-      border-radius: 20px;
-      border: 1px solid color-mix(in oklab, var(--border) 82%, var(--accent) 18%);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.02), transparent),
-        color-mix(in oklab, var(--surface) 76%, black 24%);
-      padding: 24px;
-      display: grid;
-      gap: 10px;
+    .dim-list { display: grid; gap: 7px; margin-top: 8px; }
+    .dim-row { display: flex; gap: 6px; align-items: center; }
+    .dim-row .label { width: 38px; }
+    .dim-row input {
+      flex: 1; min-width: 0; padding: 7px 8px; border-radius: 8px; min-height: 38px;
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      background: color-mix(in oklab, var(--surface) 72%, var(--surface-2));
+      color: var(--fg); font: inherit; text-align: center;
     }
-    .dims {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      text-align: center;
-      font-family: var(--font-mono);
-      font-size: 12px;
+    .snapbtn {
+      min-height: 38px; padding: 4px 8px; font-size: 11px; font-weight: 600; border-radius: 7px;
+      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      background: color-mix(in oklab, var(--surface-3) 80%, black 20%);
       color: var(--muted);
     }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      grid-template-rows: 0.7fr 1fr;
-      gap: 8px;
-      min-height: 260px;
+    .legend { display: grid; gap: 7px; font-size: 13px; }
+    .legend span { display: inline-block; width: 13px; height: 13px; border-radius: 3px; margin-right: 8px; vertical-align: -2px; }
+    .spec { font-family: var(--font-mono); font-size: 11px; line-height: 1.6; color: var(--muted); word-break: break-all; }
+    .foot {
+      padding: 13px 20px;
+      display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
     }
-    .cell {
-      border-radius: 12px;
-      border: 2px solid transparent;
-      display: grid;
-      place-items: center;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-      padding: 10px;
-    }
-    .fixed { background: color-mix(in oklab, var(--fixed) 22%, var(--surface-2)); border-color: color-mix(in oklab, var(--fixed) 64%, black 36%); }
-    .top-hung { background: color-mix(in oklab, var(--hung) 22%, var(--surface-2)); border-color: color-mix(in oklab, var(--hung) 72%, black 28%); }
-    .side-hung { background: color-mix(in oklab, var(--side) 22%, var(--surface-2)); border-color: color-mix(in oklab, var(--side) 70%, black 30%); }
-    .toplight { background: color-mix(in oklab, var(--toplight) 24%, var(--surface-2)); border-color: color-mix(in oklab, var(--toplight) 68%, black 32%); }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 11px 12px;
-      border-radius: 12px;
-      background: color-mix(in oklab, var(--surface-2) 90%, black 10%);
-      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
-    }
-    .swatch {
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-    }
-    textarea { min-height: 120px; resize: vertical; }
-    @media (max-width: 1120px) {
-      .page { grid-template-columns: 1fr; }
+    @media (max-width: 900px) {
+      .body { grid-template-columns: 1fr; }
+      .side { border-left: 0; border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%); max-height: none; }
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <section class="panel stack">
-      <div>
-        <div class="label">Builder context</div>
-        <h1>Combination Builder</h1>
-      </div>
-      <p style="margin:0;line-height:1.55">Use this for custom grids when the imported Bizman line does not match a standard picker option. The builder keeps sizes, sash counts, and diagram intent on one working surface.</p>
-      <div class="form-grid">
-        <label><span class="label">Overall width</span><input class="input" id="widthInput" value="2100" /></label>
-        <label><span class="label">Overall height</span><input class="input" id="heightInput" value="1500" /></label>
-        <label><span class="label">Columns</span><select><option>3</option><option>2</option><option>4</option></select></label>
-        <label><span class="label">Rows</span><select><option>2</option><option>1</option><option>3</option></select></label>
-        <label><span class="label">Glass</span><select><option>6.38 Clear Lam / 4 mm Obscure</option><option>6.38 Clear Lam</option></select></label>
-        <label><span class="label">Colour</span><select><option>Natural anodised</option><option>Matt Charcoal</option></select></label>
-      </div>
-      <label><span class="label">Notes</span><textarea>Lower centre light fixed. Top row vents aligned to kitchen counter line. Confirm mullion packer for stone reveal.</textarea></label>
-      <div class="actions">
-        <button class="primary">Apply to line 02</button>
-        <button onclick="location.href='workspace.html'">Return to workspace</button>
-      </div>
-    </section>
+<div class="modal">
+  <header class="head">
+    <div>
+      <div class="label" id="lineCtx">No line selected — browsing</div>
+      <h1>Build a custom window.</h1>
+    </div>
+    <div style="display:flex;gap:9px">
+      <button class="secondary" onclick="location.href='window-picker.html'">← Presets</button>
+      <button class="secondary" onclick="location.href='workspace.html'">Back to workspace</button>
+    </div>
+  </header>
 
-    <section class="panel builder-shell">
-      <div class="dimension-bar">
-        <span class="label" style="color:var(--fg)">Generated diagram</span>
-        <span id="summaryText">2 top hung • 3 fixed • 0 side hung</span>
+  <nav class="toolbar">
+    <div class="tool-group">
+      <span class="label">Overall size (mm)</span>
+      <div class="tool-row">
+        <input class="input" id="owInput" type="number" inputmode="numeric" />
+        <span>×</span>
+        <input class="input" id="ohInput" type="number" inputmode="numeric" />
       </div>
-      <div class="canvas">
-        <div class="dims">
-          <span>700</span>
-          <span>700</span>
-          <span>700</span>
-        </div>
-        <div class="grid" id="builderGrid">
-          <button class="cell top-hung" data-state="top-hung">Top Hung<br><small>700 × 500</small></button>
-          <button class="cell top-hung" data-state="top-hung">Top Hung<br><small>700 × 500</small></button>
-          <button class="cell fixed" data-state="fixed">Fixed<br><small>700 × 500</small></button>
-          <button class="cell fixed" data-state="fixed">Fixed<br><small>700 × 1000</small></button>
-          <button class="cell fixed" data-state="fixed">Fixed<br><small>700 × 1000</small></button>
-          <button class="cell side-hung" data-state="side-hung">Side Hung<br><small>700 × 1000</small></button>
-        </div>
-        <div class="dims">
-          <span>500</span>
-          <span>1000</span>
-          <span style="grid-column: 2 / span 2; text-align:right">Overall: <strong id="overallSize">2100 × 1500</strong></span>
-        </div>
+    </div>
+    <div class="tool-group">
+      <span class="label">Mullions (vertical splits)</span>
+      <div class="tool-row">
+        <button class="secondary mini" onclick="changeCols(-1)">−</button>
+        <span class="count" id="colCount">0</span>
+        <button class="secondary mini" onclick="changeCols(1)">+</button>
       </div>
-    </section>
+    </div>
+    <div class="tool-group">
+      <span class="label">Transoms (horizontal splits)</span>
+      <div class="tool-row">
+        <button class="secondary mini" onclick="changeRows(-1)">−</button>
+        <span class="count" id="rowCount">0</span>
+        <button class="secondary mini" onclick="changeRows(1)">+</button>
+      </div>
+    </div>
+    <div class="tool-group">
+      <span class="label">Layout</span>
+      <div class="tool-row">
+        <button class="secondary mini" onclick="equalise()">Equalise</button>
+        <button class="secondary mini" onclick="snapAll()">Snap 300/600/900</button>
+      </div>
+    </div>
+    <div class="tool-group" style="margin-left:auto">
+      <span class="label">Tap a cell to cycle its type</span>
+      <div class="legend" style="display:flex;gap:14px">
+        <small><span style="background:#3a6bc2"></span>Fixed</small>
+        <small><span style="background:#2e9e68"></span>Top hung</small>
+        <small><span style="background:#c28a2e"></span>Side hung</small>
+        <small><span style="background:#7a5ea8"></span>Toplight</small>
+      </div>
+    </div>
+  </nav>
 
-    <aside class="panel legend">
-      <div>
-        <div class="label">Cell types</div>
-        <h2>Click any cell to cycle panel behavior.</h2>
+  <section class="body">
+    <div class="canvas-wrap"><div id="canvasBox"></div></div>
+    <aside class="side">
+      <div class="panel">
+        <div class="label">Column widths (mm)</div>
+        <div class="dim-list" id="colDims"></div>
       </div>
-      <div class="legend-item"><span class="swatch" style="background:color-mix(in oklab, var(--hung) 75%, black 25%)"></span><div><strong>Top Hung</strong><div>Upper-opening vent</div></div></div>
-      <div class="legend-item"><span class="swatch" style="background:color-mix(in oklab, var(--side) 75%, black 25%)"></span><div><strong>Side Hung</strong><div>Side-opening sash</div></div></div>
-      <div class="legend-item"><span class="swatch" style="background:color-mix(in oklab, var(--fixed) 75%, black 25%)"></span><div><strong>Fixed</strong><div>Non-opening glazed light</div></div></div>
-      <div class="legend-item"><span class="swatch" style="background:color-mix(in oklab, var(--toplight) 75%, black 25%)"></span><div><strong>Toplight</strong><div>Shallow upper transom</div></div></div>
-      <button onclick="location.href='window-picker.html'">Back to window picker</button>
-      <button onclick="location.href='door-picker.html'">Switch to door picker</button>
+      <div class="panel">
+        <div class="label">Row heights (mm)</div>
+        <div class="dim-list" id="rowDims"></div>
+      </div>
+      <div class="panel">
+        <div class="label">Design spec</div>
+        <div class="spec" id="specText"></div>
+      </div>
     </aside>
-  </main>
-  <script>
-    const states = ["fixed", "top-hung", "side-hung", "toplight"];
-    const labels = {
-      "fixed": "Fixed",
-      "top-hung": "Top Hung",
-      "side-hung": "Side Hung",
-      "toplight": "Toplight"
-    };
-    const grid = Array.from(document.querySelectorAll(".cell"));
-    const summaryText = document.getElementById("summaryText");
-    const overallSize = document.getElementById("overallSize");
-    function recount() {
-      const count = { "fixed": 0, "top-hung": 0, "side-hung": 0, "toplight": 0 };
-      grid.forEach((cell) => { count[cell.dataset.state] += 1; });
-      summaryText.textContent = `${count["top-hung"]} top hung • ${count["fixed"]} fixed • ${count["side-hung"]} side hung • ${count["toplight"]} toplight`;
-      overallSize.textContent = `${document.getElementById("widthInput").value} × ${document.getElementById("heightInput").value}`;
+  </section>
+
+  <footer class="foot">
+    <div class="label" style="align-self:center">Enter confirms • Esc returns to workspace</div>
+    <div style="display:flex;gap:10px">
+      <button class="secondary" onclick="location.href='workspace.html'">Cancel</button>
+      <button class="primary" onclick="useDesign()">Use this design</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ── colours match rough-copy-digital_6 WB_COLOURS ─────────────────────────
+const CLR = { FIXED:'#3a6bc2', TOP:'#2e9e68', SIDE:'#c28a2e', TOPLIGHT:'#7a5ea8' };
+const CYCLE = ['FIXED','TOP','SIDE','TOPLIGHT'];
+const STD = [300, 600, 900];
+const MIN_CELL = 150;
+
+// ── builder state (mirrors _6's mWB) ──────────────────────────────────────
+let wb = {
+  W: 1200, H: 900,
+  cols: 2, rows: 2,
+  colW: [600, 600],
+  rowH: [600, 300],
+  types: ['TOP','TOP','FIXED','FIXED'],
+};
+
+// ── line context from workspace ───────────────────────────────────────────
+let CTX = null;
+try { CTX = JSON.parse(localStorage.getItem('aw_picker_ctx') || 'null'); } catch (e) {}
+if (CTX) {
+  const bits = [];
+  if (CTX.ref) bits.push('Line ' + CTX.ref);
+  if (CTX.room) bits.push(CTX.room);
+  if (CTX.quoteW && CTX.quoteH) bits.push('quote ' + CTX.quoteW + ' × ' + CTX.quoteH);
+  document.getElementById('lineCtx').textContent = bits.join(' • ') || 'Pick for current line';
+  if (CTX.quoteW && CTX.quoteH) {
+    wb.W = +CTX.quoteW; wb.H = +CTX.quoteH;
+    wb.colW = split(wb.W, wb.cols);
+    wb.rowH = split(wb.H, wb.rows);
+  }
+}
+
+// ── helpers ───────────────────────────────────────────────────────────────
+function split(total, n) {
+  const base = Math.floor(total / n);
+  const arr = Array(n).fill(base);
+  arr[n - 1] += total - base * n; // last absorbs remainder
+  return arr;
+}
+function fixTotals(arr, total) {
+  const sum = arr.reduce((a, b) => a + b, 0);
+  arr[arr.length - 1] += total - sum;
+  if (arr[arr.length - 1] < MIN_CELL) {
+    // pull the shortfall from the largest cell
+    const need = MIN_CELL - arr[arr.length - 1];
+    const bigI = arr.indexOf(Math.max(...arr.slice(0, -1)));
+    arr[bigI] -= need;
+    arr[arr.length - 1] = MIN_CELL;
+  }
+}
+function regrid(newCols, newRows) {
+  const old = { cols: wb.cols, rows: wb.rows, types: wb.types.slice() };
+  wb.cols = newCols; wb.rows = newRows;
+  wb.colW = split(wb.W, newCols);
+  wb.rowH = split(wb.H, newRows);
+  wb.types = [];
+  for (let r = 0; r < newRows; r++)
+    for (let c = 0; c < newCols; c++)
+      wb.types.push(
+        (r < old.rows && c < old.cols) ? old.types[r * old.cols + c] : 'FIXED'
+      );
+}
+
+// ── toolbar actions ───────────────────────────────────────────────────────
+function changeCols(d) {
+  const n = Math.min(6, Math.max(1, wb.cols + d));
+  if (n !== wb.cols) { regrid(n, wb.rows); render(); }
+}
+function changeRows(d) {
+  const n = Math.min(4, Math.max(1, wb.rows + d));
+  if (n !== wb.rows) { regrid(wb.cols, n); render(); }
+}
+function equalise() {
+  wb.colW = split(wb.W, wb.cols);
+  wb.rowH = split(wb.H, wb.rows);
+  render();
+}
+function snapAll() {
+  const snap = (v) => STD.reduce((a, b) => Math.abs(b - v) < Math.abs(a - v) ? b : a, STD[0]);
+  wb.colW = wb.colW.map(snap); fixTotals(wb.colW, wb.W);
+  wb.rowH = wb.rowH.map(snap); fixTotals(wb.rowH, wb.H);
+  render();
+}
+function resizeOverall(newW, newH) {
+  newW = Math.max(MIN_CELL * wb.cols, Math.min(6000, newW || wb.W));
+  newH = Math.max(MIN_CELL * wb.rows, Math.min(3000, newH || wb.H));
+  // redistribute proportionally
+  wb.colW = wb.colW.map((w) => Math.round(w * newW / wb.W));
+  wb.rowH = wb.rowH.map((h) => Math.round(h * newH / wb.H));
+  wb.W = newW; wb.H = newH;
+  fixTotals(wb.colW, wb.W);
+  fixTotals(wb.rowH, wb.H);
+  render();
+}
+function cycleCell(i) {
+  wb.types[i] = CYCLE[(CYCLE.indexOf(wb.types[i]) + 1) % CYCLE.length];
+  render();
+}
+function setDim(axis, i, v) {
+  const arr = axis === 'col' ? wb.colW : wb.rowH;
+  const total = axis === 'col' ? wb.W : wb.H;
+  v = Math.max(MIN_CELL, Math.min(total - MIN_CELL * (arr.length - 1), +v || arr[i]));
+  arr[i] = v;
+  fixTotals(arr, total);
+  render();
+}
+
+// ── SVG render (same drawing language as the window picker) ──────────────
+function drawSVG(W, H, interactive) {
+  let colXs = [0]; wb.colW.forEach((w) => colXs.push(colXs[colXs.length - 1] + w));
+  let rowYs = [0]; wb.rowH.forEach((h) => rowYs.push(rowYs[rowYs.length - 1] + h));
+  const scX = W / wb.W, scY = H / wb.H;
+  let s = '';
+  for (let r = 0; r < wb.rows; r++) for (let c = 0; c < wb.cols; c++) {
+    const i = r * wb.cols + c;
+    const t = wb.types[i];
+    const x1 = Math.round(colXs[c] * scX + .5), y1 = Math.round(rowYs[r] * scY + .5);
+    const x2 = Math.round(colXs[c + 1] * scX - .5), y2 = Math.round(rowYs[r + 1] * scY - .5);
+    const clr = CLR[t];
+    s += `<rect data-i="${i}" x="${x1}" y="${y1}" width="${x2 - x1}" height="${y2 - y1}" fill="${clr}28" stroke="${clr}" stroke-width="1.6"/>`;
+    if (t === 'TOP') {
+      const hy = y1 + Math.round((y2 - y1) * .38);
+      s += `<line x1="${x1 + 4}" y1="${hy}" x2="${x2 - 4}" y2="${hy}" stroke="${clr}" stroke-width="1" stroke-dasharray="3,2.5" pointer-events="none"/>`;
+      s += `<line x1="${x1 + 4}" y1="${y1 + 3}" x2="${x1 + 4}" y2="${hy}" stroke="${clr}" stroke-width="1.1" pointer-events="none"/>`;
+      s += `<line x1="${x2 - 4}" y1="${y1 + 3}" x2="${x2 - 4}" y2="${hy}" stroke="${clr}" stroke-width="1.1" pointer-events="none"/>`;
     }
-    grid.forEach((cell) => {
-      cell.addEventListener("click", () => {
-        const current = states.indexOf(cell.dataset.state);
-        const next = states[(current + 1) % states.length];
-        cell.dataset.state = next;
-        cell.className = `cell ${next}`;
-        cell.innerHTML = `${labels[next]}<br><small>${cell.querySelector("small").textContent}</small>`;
-        recount();
-      });
-    });
-    document.getElementById("widthInput").addEventListener("input", recount);
-    document.getElementById("heightInput").addEventListener("input", recount);
-    recount();
-  </script>
+    if (t === 'SIDE') {
+      const vx = x1 + Math.round((x2 - x1) * .35);
+      s += `<line x1="${vx}" y1="${y1 + 4}" x2="${vx}" y2="${y2 - 4}" stroke="${clr}" stroke-width="1" stroke-dasharray="3,2.5" pointer-events="none"/>`;
+      s += `<line x1="${x1 + 3}" y1="${y1 + 4}" x2="${vx}" y2="${y1 + 4}" stroke="${clr}" stroke-width="1.1" pointer-events="none"/>`;
+      s += `<line x1="${x1 + 3}" y1="${y2 - 4}" x2="${vx}" y2="${y2 - 4}" stroke="${clr}" stroke-width="1.1" pointer-events="none"/>`;
+    }
+    if (t === 'TOPLIGHT') {
+      for (let hx = x1 + 6; hx < x2; hx += 6)
+        s += `<line x1="${hx}" y1="${y1 + 2}" x2="${hx - 5}" y2="${y2 - 2}" stroke="${clr}" stroke-width=".6" opacity=".4" pointer-events="none"/>`;
+    }
+    if (interactive) {
+      // cell label: type + mm
+      s += `<text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-family="monospace" fill="${clr}" opacity=".85" pointer-events="none">${t}</text>`;
+      s += `<text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 + 14}" text-anchor="middle" font-size="9.5" font-family="monospace" fill="#8a9ab0" pointer-events="none">${wb.colW[c]}×${wb.rowH[r]}</text>`;
+    }
+  }
+  s += `<rect x="1" y="1" width="${W - 2}" height="${H - 2}" fill="none" stroke="#f5b800" stroke-width="2.2" pointer-events="none"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
+}
+
+function specString() {
+  const cells = wb.types.map((t, i) => {
+    const c = i % wb.cols, r = Math.floor(i / wb.cols);
+    return `${t}@${wb.colW[c]}×${wb.rowH[r]}`;
+  });
+  return `${wb.W}×${wb.H} • ${wb.cols}×${wb.rows} grid\ncols: ${wb.colW.join(' | ')}\nrows: ${wb.rowH.join(' | ')}\n${cells.join(', ')}`;
+}
+
+// ── render everything ─────────────────────────────────────────────────────
+function render() {
+  // canvas: fit within ~640×460 keeping aspect
+  const maxW = 640, maxH = 460;
+  let cw = maxW, ch = Math.round(maxW * wb.H / wb.W);
+  if (ch > maxH) { ch = maxH; cw = Math.round(maxH * wb.W / wb.H); }
+  document.getElementById('canvasBox').innerHTML = drawSVG(cw, ch, true);
+
+  document.getElementById('colCount').textContent = wb.cols - 1;
+  document.getElementById('rowCount').textContent = wb.rows - 1;
+  const ow = document.getElementById('owInput'), oh = document.getElementById('ohInput');
+  if (document.activeElement !== ow) ow.value = wb.W;
+  if (document.activeElement !== oh) oh.value = wb.H;
+
+  const dimRows = (axis, arr) => arr.map((v, i) => `
+    <div class="dim-row">
+      <span class="label">${axis === 'col' ? 'C' : 'R'}${i + 1}</span>
+      <input type="number" inputmode="numeric" value="${v}"
+        onchange="setDim('${axis}', ${i}, this.value)" />
+      ${STD.map((s) => `<button class="snapbtn" onclick="setDim('${axis}', ${i}, ${s})">${s}</button>`).join('')}
+    </div>`).join('');
+  document.getElementById('colDims').innerHTML = dimRows('col', wb.colW);
+  document.getElementById('rowDims').innerHTML = dimRows('row', wb.rowH);
+  document.getElementById('specText').textContent = specString();
+}
+
+// cell tap (event delegation on the svg container)
+document.getElementById('canvasBox').addEventListener('click', (e) => {
+  const i = e.target.dataset && e.target.dataset.i;
+  if (i !== undefined) cycleCell(+i);
+});
+document.getElementById('owInput').addEventListener('change', (e) => resizeOverall(+e.target.value, wb.H));
+document.getElementById('ohInput').addEventListener('change', (e) => resizeOverall(wb.W, +e.target.value));
+
+// ── confirm: send the design back to the workspace line ──────────────────
+function useDesign() {
+  const code = `WB-${wb.W}x${wb.H}-${wb.cols}x${wb.rows}`;
+  const tW = 88, tH = Math.max(40, Math.min(96, Math.round(tW * wb.H / wb.W)));
+  if (CTX && typeof CTX.i === 'number') {
+    localStorage.setItem('aw_picker_result', JSON.stringify({
+      i: CTX.i, kind: 'window',
+      code,
+      name: `Custom ${wb.W}×${wb.H} (${wb.cols}×${wb.rows})`,
+      family: 'custom',
+      note: 'Builder: ' + specString().replace(/\n/g, ' · '),
+      svg: drawSVG(tW, tH, false),
+    }));
+  }
+  localStorage.removeItem('aw_picker_ctx');
+  location.href = 'workspace.html';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input, select, textarea')) return;
+  if (e.key === 'Enter') { e.preventDefault(); useDesign(); }
+  else if (e.key === 'Escape') { location.href = 'workspace.html'; }
+});
+
+render();
+</script>
 </body>
 </html>

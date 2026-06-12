@@ -227,6 +227,64 @@
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
     }
     .hidden { display: none !important; }
+
+    /* ════ PRINT / PDF EXPORT — landscape A4 rough copy ════ */
+    #printView { display: none; }
+    @media print {
+      @page { size: A4 landscape; margin: 9mm; }
+      html, body { background: #fff !important; }
+      .app { display: none !important; }
+      #printView {
+        display: block;
+        color: #111;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        font-size: 11px;
+      }
+      #printView .p-hdr {
+        display: flex; align-items: center; gap: 14px;
+        border-bottom: 2.5px solid #111; padding-bottom: 8px; margin-bottom: 8px;
+      }
+      #printView .p-hdr img { height: 44px; }
+      #printView .p-title h1 { margin: 0; font-size: 19px; font-family: Georgia, serif; }
+      #printView .p-title div { font-size: 12px; margin-top: 2px; }
+      #printView .p-meta { margin-left: auto; text-align: right; font-size: 10.5px; line-height: 1.5; }
+      #printView .p-site {
+        display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px 10px;
+        border: 1px solid #999; border-radius: 4px; padding: 6px 8px; margin-bottom: 6px;
+      }
+      #printView .p-site .f { font-size: 10px; }
+      #printView .p-site .f b { display: block; font-size: 8px; text-transform: uppercase; letter-spacing: .08em; color: #555; }
+      #printView .p-notes { font-size: 9.5px; margin: 0 0 6px; color: #333; }
+      #printView table { width: 100%; border-collapse: collapse; }
+      #printView th {
+        font-size: 8.5px; text-transform: uppercase; letter-spacing: .07em;
+        text-align: left; border-bottom: 1.5px solid #111; padding: 3px 5px; color: #333;
+      }
+      #printView td {
+        border-bottom: 1px solid #bbb; padding: 4px 5px; vertical-align: middle;
+        font-size: 10.5px;
+      }
+      #printView tr { break-inside: avoid; }
+      #printView thead { display: table-header-group; }
+      #printView .p-diag { width: 64px; height: 52px; display: flex; align-items: center; }
+      #printView .p-diag img, #printView .p-diag svg { max-width: 64px; max-height: 52px; object-fit: contain; }
+      #printView .p-size { font-weight: 700; white-space: nowrap; }
+      #printView .p-mono { font-family: ui-monospace, monospace; font-size: 9px; color: #444; }
+      #printView .p-tally {
+        display: flex; gap: 8px; margin-top: 10px; break-inside: avoid;
+        border-top: 2px solid #111; padding-top: 8px;
+      }
+      #printView .p-tally .t {
+        flex: 1; border: 1px solid #999; border-radius: 4px; text-align: center; padding: 6px 4px;
+      }
+      #printView .p-tally .t strong { display: block; font-size: 18px; }
+      #printView .p-tally .t span { font-size: 8px; text-transform: uppercase; letter-spacing: .07em; color: #444; }
+      #printView .p-foot {
+        display: flex; justify-content: space-between; margin-top: 12px;
+        font-size: 9.5px; color: #444; break-inside: avoid;
+      }
+    }
+
     @media (max-width: 1100px) {
       .app { grid-template-columns: 1fr; }
       .sidebar { border-right: 0; border-bottom: 1px solid color-mix(in oklab, var(--border) 82%, white 18%);
@@ -300,6 +358,12 @@
             <select data-site="building">
               <option value="">— select —</option>
               <option>NEW</option><option>HOUSE</option><option>FLAT</option><option>COMMERCIAL</option>
+            </select>
+          </label>
+          <label id="enclosureField" class="hidden"><span class="label">Enclosure type → wrap</span>
+            <select data-site="enclosure">
+              <option value="">— select —</option>
+              <option>NEW BUILDING</option><option>ENCLOSURE</option>
             </select>
           </label>
           <label><span class="label">Material (existing)</span>
@@ -412,6 +476,13 @@
               <option>WHITE</option><option>BRONZE</option><option>CHARCOAL</option><option>BLACK</option><option>SILVER</option><option>SPECIAL</option>
             </select>
           </label>
+          <label class="wide"><span class="label">Wrap</span>
+            <select id="edWrap">
+              <option value="">Auto (site rule)</option>
+              <option>WRAP</option>
+              <option>NO-WRAP</option>
+            </select>
+          </label>
 
           <!-- 5. notes -->
           <label class="full"><span class="label">5 · Notes (handles, burglar bars, access, sashes)</span>
@@ -428,13 +499,40 @@
         <div class="label" style="margin-top:16px">Output and next actions</div>
         <h3 id="exportHeading" style="margin:8px 0 0;font-size:17px">Export package — locked until sizes confirmed</h3>
         <div class="export-menu">
-          <div class="export-item"><span>Rough copy PDF</span><strong>Landscape A4</strong></div>
-          <div class="export-item"><span>Workshop Excel</span><strong>Line data + glass notes</strong></div>
-          <div class="export-item"><span>Rep summary</span><strong>Mobile-friendly PDF</strong></div>
+          <div class="export-item"><span>Rough copy PDF</span><strong>Landscape A4 — print / save as PDF, tally at foot</strong></div>
+          <div class="export-item"><span>Workshop Excel</span><strong>Planned — line data + glass notes</strong></div>
         </div>
       </section>
     </section>
   </main>
+
+  <!-- ════ PRINT VIEW — landscape A4 rough copy (populated on export) ════ -->
+  <div id="printView" aria-hidden="true">
+    <header class="p-hdr">
+      <img id="pLogo" alt="Anglo Windows" />
+      <div class="p-title">
+        <h1>Rough Copy — Site Measurements</h1>
+        <div id="pJobTitle"></div>
+      </div>
+      <div class="p-meta" id="pMeta"></div>
+    </header>
+    <section class="p-site" id="pSite"></section>
+    <div class="p-notes" id="pNotes"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Ref</th><th>Room</th><th>Diagram</th><th>Type</th>
+          <th>Final size (mm)</th><th>Qty</th><th>Glass</th><th>Colour</th><th>Wrap</th><th>Notes</th>
+        </tr>
+      </thead>
+      <tbody id="pBody"></tbody>
+    </table>
+    <section class="p-tally" id="pTally"></section>
+    <footer class="p-foot">
+      <div id="pFootLeft"></div>
+      <div>Rep signature: ______________________&nbsp;&nbsp;&nbsp;Date: ______________</div>
+    </footer>
+  </div>
 
   <!-- pdf.js — local vendor copy so import works offline on site -->
   <script src="vendor/pdf.min.js"></script>
@@ -454,7 +552,7 @@
     const CTX_KEY = "aw_picker_ctx";
     const RESULT_KEY = "aw_picker_result";
 
-    const SITE_FIELDS = ["jobRef","date","client","phone","address","email","rep","building","material","wall","colour","floor"];
+    const SITE_FIELDS = ["jobRef","date","client","phone","address","email","rep","building","enclosure","material","wall","colour","floor"];
 
     let state = { job: null, site: {}, lines: [] };
     let editingIndex = -1;
@@ -528,9 +626,11 @@
           const c = document.createElement("canvas");
           c.width = Math.ceil(vp.width);
           c.height = Math.ceil(vp.height);
-          // guard: never let a stuck render block forever
+          // intent:"print" renders without requestAnimationFrame, so the
+          // crop still completes if the tab is backgrounded mid-import;
+          // the timeout guard means a stuck render can never block forever
           await Promise.race([
-            page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise,
+            page.render({ canvasContext: c.getContext("2d"), viewport: vp, intent: "print" }).promise,
             new Promise((_, rej) => setTimeout(() => rej(new Error("page render timeout")), 20000)),
           ]);
           rendered[a.pi] = c;
@@ -679,13 +779,44 @@
       document.querySelectorAll("#siteGrid [data-site]").forEach((el) => {
         el.value = state.site[el.dataset.site] || "";
       });
+      // _6 cascade: enclosure type only applies to NEW buildings
+      document.getElementById("enclosureField")
+        .classList.toggle("hidden", state.site.building !== "NEW");
       updateSiteStatus();
     }
+    function activeSiteFields() {
+      return SITE_FIELDS.filter((f) => f !== "enclosure" || state.site.building === "NEW");
+    }
     function updateSiteStatus() {
-      const filled = SITE_FIELDS.filter((f) => (state.site[f] || "").trim()).length;
+      const fields = activeSiteFields();
+      const filled = fields.filter((f) => (state.site[f] || "").trim()).length;
       const el = document.getElementById("siteStatus");
-      el.textContent = `${filled} of ${SITE_FIELDS.length} captured`;
-      el.className = "status " + (filled === SITE_FIELDS.length ? "ready" : "info");
+      el.textContent = `${filled} of ${fields.length} captured`;
+      el.className = "status " + (filled === fields.length ? "ready" : "info");
+    }
+
+    // _6 cascade: NEW BUILDING → WRAP all round; ENCLOSURE → NO-WRAP.
+    // A line can override via its Wrap field.
+    function siteWrap() {
+      if (state.site.building !== "NEW") return "";
+      if (state.site.enclosure === "NEW BUILDING") return "WRAP";
+      if (state.site.enclosure === "ENCLOSURE") return "NO-WRAP";
+      return "";
+    }
+    function resolvedWrap(l) { return l.wrap || siteWrap(); }
+
+    // _6 rule: doors always get safety glass
+    function isDoorLine(l) {
+      if (["patio", "multislide", "vistafold", "hinged"].includes((l.family || "").toLowerCase())) return true;
+      return /DOOR|STABLE|PALACE|VISTAFOLD|PIVOT/i.test(l.product || "");
+    }
+    function isSafetyGlass(g) { return /safety|laminat|6\.38/i.test(g || ""); }
+    function enforceDoorGlass(l) {
+      if (isDoorLine(l) && !isSafetyGlass(l.glass)) {
+        l.glass = "6.38 Safety";
+        return true;
+      }
+      return false;
     }
 
     function rowHTML(l, i) {
@@ -857,8 +988,8 @@
       } else if (["fixed", "sidelight", "toplight"].includes(fam) ||
                  /FIXED PANEL|SIDELIGHT|TOPLIGHT|\bFX-|\bTL-\d/.test(blob)) {
         t.fixed = qty;
-      } else if (/WINDOW|CASEMENT|TOP HUNG|SIDE HUNG|BOABAB|BAOBAB|\b\d{4}D?T{1,2}\b|SHOPFRONT/.test(blob) ||
-                 ["tophung", "tophung-fixed", "sidehung"].includes(fam)) {
+      } else if (/WINDOW|CASEMENT|TOP HUNG|SIDE HUNG|BOABAB|BAOBAB|\b\d{4}D?T{1,2}\b|SHOPFRONT|\bWB-|CUSTOM/.test(blob) ||
+                 ["tophung", "tophung-fixed", "sidehung", "custom"].includes(fam)) {
         t.windows = qty;
       } else {
         t.other = qty; // needs a type before it can be tallied
@@ -952,6 +1083,8 @@
       }
       const l = state.lines[editingIndex];
       card.classList.remove("hidden");
+      // doors always safety glass (_6 rule) — correct silently if needed
+      if (enforceDoorGlass(l)) { save(); refreshRowChrome(editingIndex); }
       document.getElementById("editorTitle").textContent =
         `Line ${l.ref || editingIndex + 1} — ${l.location || "unnamed room"}`;
       setVal("edRoom", l.location);
@@ -962,6 +1095,13 @@
       setSelect("edGlass", l.glass);
       setSelect("edColour", l.colour);
       setVal("edNotes", l.notes);
+      // glass locked on doors; wrap select shows the live site rule
+      const glassEl = document.getElementById("edGlass");
+      glassEl.disabled = isDoorLine(l);
+      glassEl.title = glassEl.disabled ? "Doors always use safety glass" : "";
+      const wrapEl = document.getElementById("edWrap");
+      wrapEl.options[0].textContent = siteWrap() ? `Auto (${siteWrap()})` : "Auto (site rule)";
+      if (document.activeElement !== wrapEl) wrapEl.value = l.wrap || "";
       document.getElementById("edTypeName").textContent = l.product || "Not set";
       document.getElementById("edTypeCode").textContent = l.code || "";
       document.getElementById("edDiag").innerHTML = lineDiagHTML(l);
@@ -1004,6 +1144,7 @@
       bind("edQty", (l, v) => { l.qty = v ? +v : 1; });
       bind("edGlass", (l, v) => { l.glass = v; });
       bind("edColour", (l, v) => { l.colour = v; });
+      bind("edWrap", (l, v) => { l.wrap = v; });
       bind("edNotes", (l, v) => { l.notes = v; });
       ["edW", "edH"].forEach((id, idx) =>
         document.getElementById(id).addEventListener("input", (e) => {
@@ -1068,6 +1209,7 @@
       if (res.note && !(l.notes || "").includes(res.note)) {
         l.notes = (l.notes ? l.notes + "\n" : "") + res.note;
       }
+      enforceDoorGlass(l);
       save();
       editingIndex = res.i;
     }
@@ -1101,20 +1243,103 @@
       save();
       renderAll();
     });
-    document.getElementById("exportBtn").addEventListener("click", () => {
+    // ---------- PDF export (print view → browser Save as PDF) ----------
+    let logoLoaded = false;
+    async function loadLogo() {
+      if (logoLoaded) return;
+      try {
+        const b64 = await (await fetch("vendor/anglo-logo.b64")).text();
+        document.getElementById("pLogo").src = b64.trim();
+        logoLoaded = true;
+      } catch (e) {
+        document.getElementById("pLogo").style.display = "none";
+      }
+    }
+
+    function buildPrintView() {
+      const s = state.site, j = state.job || {};
+      document.getElementById("pJobTitle").textContent =
+        document.getElementById("jobTitle").textContent;
+      document.getElementById("pMeta").innerHTML =
+        `<strong>${s.jobRef || "—"}</strong><br>` +
+        `${s.date || ""}<br>` +
+        `${state.lines.length} lines • printed ${new Date().toISOString().slice(0, 10)}`;
+
+      const f = (k, v) => `<div class="f"><b>${k}</b>${v || "—"}</div>`;
+      document.getElementById("pSite").innerHTML =
+        f("Client", s.client) + f("Phone", s.phone) + f("Email", s.email) +
+        f("Site address", s.address) + f("Rep", s.rep) +
+        f("Building", s.building + (s.building === "NEW" && s.enclosure ? " • " + s.enclosure : "")) +
+        f("Wrap rule", siteWrap() || "per line") +
+        f("Material", s.material) + f("Wall", s.wall) +
+        f("Colour", s.colour) + f("Floor", s.floor) +
+        f("Quote ref", j.quoteRef) + f("Quote date", j.date) + f("Glass note", "Doors: safety glass");
+
+      const notes = [];
+      if (j.colourNote) notes.push("Colour note: " + j.colourNote);
+      if (j.headerNotes && j.headerNotes.length) notes.push("Quote notes: " + j.headerNotes.join(" • "));
+      document.getElementById("pNotes").textContent = notes.join("   |   ");
+
+      document.getElementById("pBody").innerHTML = state.lines
+        .map((l, i) => `
+          <tr>
+            <td><strong>${l.ref || i + 1}</strong></td>
+            <td>${l.location || ""}</td>
+            <td><div class="p-diag">${lineDiagHTML(l)}</div></td>
+            <td>${l.product || ""}${l.code ? `<div class="p-mono">${l.code}</div>` : ""}</td>
+            <td class="p-size">${l.width || "?"} × ${l.height || "?"}${l.sizeConfirmed ? "" : " ⚠"}</td>
+            <td>${l.qty || 1}</td>
+            <td>${l.glass || ""}</td>
+            <td>${l.colour || ""}</td>
+            <td>${resolvedWrap(l) || "—"}</td>
+            <td style="font-size:9px">${(l.notes || "").replace(/\n/g, "<br>")}</td>
+          </tr>`)
+        .join("");
+
+      // material tally — same numbers as the on-screen panel
+      const total = { hinged: 0, windows: 0, palace: 0, folding: 0, sliding: 0, fixed: 0, other: 0 };
+      state.lines.forEach((l) => {
+        const t = tallyFor(l);
+        Object.keys(total).forEach((k) => { total[k] += t[k]; });
+      });
+      const boxes = [
+        ["Hinged door panels", total.hinged],
+        ["Windows (units)", total.windows],
+        ["Palace door panels", total.palace],
+        ["Folding door panels", total.folding],
+        ["Sliding panels", total.sliding],
+        ["Fixed frames", total.fixed],
+      ];
+      document.getElementById("pTally").innerHTML = boxes
+        .map(([k, v]) => `<div class="t"><strong>${v}</strong><span>${k}</span></div>`)
+        .join("");
+      document.getElementById("pFootLeft").textContent =
+        `Anglo Windows Manufacturing (Pty) Ltd • ${s.jobRef || ""} ${s.client || ""} — material totals for the planner above`;
+    }
+
+    async function exportPDF() {
       const open = state.lines.filter((l) => !lineReady(l));
       if (open.length) {
         alert("Cannot export yet. Complete: " + open.map((l) => l.ref || "?").join(", "));
         return;
       }
-      alert("All lines ready. PDF/Excel generation is the next build phase.");
-    });
+      await loadLogo();
+      buildPrintView();
+      window.print();
+    }
+
+    document.getElementById("exportBtn").addEventListener("click", exportPDF);
     document.querySelectorAll("#siteGrid [data-site]").forEach((el) => {
       el.addEventListener("input", () => {
         state.site[el.dataset.site] = el.value;
+        if (el.dataset.site === "building") {
+          document.getElementById("enclosureField")
+            .classList.toggle("hidden", el.value !== "NEW");
+        }
         save();
         updateSiteStatus();
         renderJobTitle();
+        if (editingIndex >= 0) renderEditor(); // wrap auto-label follows site rule
       });
     });
 
