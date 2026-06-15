@@ -226,6 +226,10 @@
       background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
     }
+    #enclosureField.needs-selection select {
+      border-color: color-mix(in oklab, var(--accent) 68%, var(--border));
+      box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 36%, transparent);
+    }
     .hidden { display: none !important; }
 
     /* ════ PRINT / PDF EXPORT — landscape A4 rough copy ════ */
@@ -366,7 +370,7 @@
               <option>NEW BUILDING</option><option>ENCLOSURE</option>
             </select>
           </label>
-          <label><span class="label">Material (existing)</span>
+          <label id="materialField"><span class="label">Material (existing)</span>
             <select data-site="material">
               <option value="">— select —</option>
               <option>EX WOOD</option><option>EX STEEL</option><option>EX ALU</option><option>NEW OPENING</option>
@@ -386,6 +390,7 @@
           </label>
           <label><span class="label">Floor #</span><input class="input" data-site="floor" inputmode="numeric" /></label>
         </div>
+        <div class="note-banner hidden" id="siteRuleNote"></div>
         <div class="note-banner hidden" id="colourNote"></div>
         <div class="note-banner hidden" id="quoteNotes"></div>
       </section>
@@ -779,13 +784,15 @@
       document.querySelectorAll("#siteGrid [data-site]").forEach((el) => {
         el.value = state.site[el.dataset.site] || "";
       });
-      // _6 cascade: enclosure type only applies to NEW buildings
-      document.getElementById("enclosureField")
-        .classList.toggle("hidden", state.site.building !== "NEW");
+      syncSiteFields();
       updateSiteStatus();
     }
     function activeSiteFields() {
-      return SITE_FIELDS.filter((f) => f !== "enclosure" || state.site.building === "NEW");
+      return SITE_FIELDS.filter((f) => {
+        if (f === "enclosure") return state.site.building === "NEW";
+        if (f === "material") return state.site.building !== "NEW";
+        return true;
+      });
     }
     function updateSiteStatus() {
       const fields = activeSiteFields();
@@ -804,6 +811,62 @@
       return "";
     }
     function resolvedWrap(l) { return l.wrap || siteWrap(); }
+    function clearLineWrapOverrides() {
+      let changed = false;
+      state.lines.forEach((l) => {
+        if (l.wrap) {
+          l.wrap = "";
+          changed = true;
+        }
+      });
+      return changed;
+    }
+    function syncSiteFields() {
+      const isNew = state.site.building === "NEW";
+      const enclosureField = document.getElementById("enclosureField");
+      const materialField = document.getElementById("materialField");
+      const enclosureSelect = enclosureField.querySelector("select");
+      enclosureField.classList.toggle("hidden", !isNew);
+      materialField.classList.toggle("hidden", isNew);
+
+      if (!isNew) {
+        state.site.enclosure = "";
+        if (enclosureSelect) enclosureSelect.value = "";
+      }
+
+      enclosureField.classList.toggle("needs-selection", isNew && !state.site.enclosure);
+
+      const siteRuleNote = document.getElementById("siteRuleNote");
+      if (!state.site.building) {
+        siteRuleNote.classList.add("hidden");
+        siteRuleNote.textContent = "";
+        return;
+      }
+
+      if (isNew && !state.site.enclosure) {
+        siteRuleNote.innerHTML = "<strong>New hole opening:</strong> choose <strong>NEW BUILDING</strong> or <strong>ENCLOSURE</strong> so the wrap rule is applied correctly.";
+        siteRuleNote.classList.remove("hidden");
+        return;
+      }
+
+      if (isNew) {
+        const rule = siteWrap();
+        siteRuleNote.innerHTML = `<strong>Site wrap rule:</strong> ${rule} applies to all lines by default. Use a line's Wrap field only if that opening needs an exception.`;
+        siteRuleNote.classList.remove("hidden");
+        return;
+      }
+
+      siteRuleNote.innerHTML = "<strong>Existing opening:</strong> outer-frame material applies at site level. Wrap is optional per line only when needed.";
+      siteRuleNote.classList.remove("hidden");
+    }
+    function applyEnclosureWrapRule() {
+      const changed = clearLineWrapOverrides();
+      save();
+      renderTable();
+      renderSummary();
+      if (editingIndex >= 0) renderEditor();
+      return changed;
+    }
 
     // _6 rule: doors always get safety glass
     function isDoorLine(l) {
@@ -1329,18 +1392,31 @@
     }
 
     document.getElementById("exportBtn").addEventListener("click", exportPDF);
-    document.querySelectorAll("#siteGrid [data-site]").forEach((el) => {
-      el.addEventListener("input", () => {
-        state.site[el.dataset.site] = el.value;
-        if (el.dataset.site === "building") {
-          document.getElementById("enclosureField")
-            .classList.toggle("hidden", el.value !== "NEW");
+    function handleSiteFieldChange(el) {
+      const key = el.dataset.site;
+      state.site[key] = el.value;
+
+      if (key === "building") {
+        if (el.value !== "NEW") state.site.enclosure = "";
+        syncSiteFields();
+      }
+
+      if (key === "enclosure") {
+        syncSiteFields();
+        if (state.site.building === "NEW" && state.site.enclosure) {
+          applyEnclosureWrapRule();
         }
-        save();
-        updateSiteStatus();
-        renderJobTitle();
-        if (editingIndex >= 0) renderEditor(); // wrap auto-label follows site rule
-      });
+      }
+
+      save();
+      updateSiteStatus();
+      renderJobTitle();
+      if (editingIndex >= 0) renderEditor(); // wrap auto-label follows site rule
+    }
+
+    document.querySelectorAll("#siteGrid [data-site]").forEach((el) => {
+      const evt = el.tagName === "SELECT" ? "change" : "input";
+      el.addEventListener(evt, () => handleSiteFieldChange(el));
     });
 
     // ---------- init ----------
