@@ -1,52 +1,78 @@
-# Open Design Components — Digital Rough Copy
+# Open Design Components - Digital Rough Copy
 
-Built by Open Design (Claude Sonnet 4.5) on 2026-05-28 / 2026-05-29.
-All files are vanilla HTML/CSS/JS. No framework. Same stack as rough-copy-digital_6.html.
+This folder is now the active build path for Rough Copy Digital. It began as Open Design output, but the current project direction is to build and test here first.
+
+Use `workspace.html` as the app entry point. Treat `rough-copy-digital_6.html` in the repo root as legacy/reference unless Angus explicitly asks to compare or port something from it.
+
+All files are vanilla HTML/CSS/JS. No framework. No build step.
 
 ## Files
 
 | File | Description |
 |------|-------------|
-| `digital-rough-copy-index.html` | Home dashboard — 4 screen overview, open/new quote |
-| `workspace.html` | Quote workspace — 18-line example, Import Bizman, Add Line, Validate, Export PDF/Excel |
-| `window-picker.html` | Window picker modal — Common sizes, product family tabs (Top Hung, Side Hung, Fixed, etc.), selection preview |
-| `window-builder.html` | Custom window builder — Grid editor, mullion/transom assignment, per-cell type |
-| `door-picker.html` | Door picker — Family tabs: Sliding/Patio, Elite Sliders, Hinged, Folding/Vistafold, Palace, Pivot; panel configs XO/OX/OXX/XXO/OXXO |
-| `validation-report.html` | Validation report — 7 issue summary, per-line issue list |
-| `brand-spec.md` | Anglo Windows brand spec — colours, typography, CSS variables |
+| `workspace.html` | Active quote workspace: import Bizman, confirm final site sizes, validate, export PDF |
+| `quote-parser.js` | Active Bizman quote parser for multiple 6.3.x PDF layouts |
+| `window-picker.html` | Active window picker: common configs, picker context, workspace round-trip |
+| `window-builder.html` | Active custom window builder: grid editor, mullions/transoms, workspace round-trip |
+| `door-picker.html` | Active door picker: Patio, Palace, Multi-Slide, Vistafold, Hinged |
+| `digital-rough-copy-index.html` | Home dashboard / navigation reference |
+| `validation-report.html` | Validation report reference |
+| `brand-spec.md` | Anglo Windows brand spec: colours, typography, CSS variables |
+| `vendor/` | Local PDF.js worker/lib and logo assets for offline tablet/site use |
 
 ## Design System
 
 Dark gold theme matching Anglo Windows brand:
-- `--bg`: oklch(15.1% 0.009 239.8) — deep dark background
-- `--accent`: oklch(87.1% 0.178 91.8) — gold/amber accent
-- `--font-display`: Iowan Old Style / Palatino (serif headers)
-- `--font-body`: Segoe UI / Inter (sans body)
-- `--font-mono`: Cascadia Mono / JetBrains Mono (codes/labels)
 
-## Status
+- `--bg`: oklch(15.1% 0.009 239.8) - deep dark background
+- `--accent`: oklch(87.1% 0.178 91.8) - gold/amber accent
+- `--font-display`: Iowan Old Style / Palatino serif stack
+- `--font-body`: Segoe UI / Inter-style UI stack
+- `--font-mono`: Cascadia Mono / JetBrains Mono style code stack
 
-These are reference/design components. They contain mock data and static interactions.
-They are NOT merge targets for rough-copy-digital_6.html yet — but are the primary
-design source for porting the new UI and UX patterns into the working base.
+## Current Workspace Flow
 
-## What to Port into _6.html
+- Import Bizman quote PDF.
+- Auto-fill job/site/customer details and line items.
+- Show quote sizes as reference only.
+- Require final site sizes and line type/configuration before export.
+- Let reps repair/confirm lines through window picker, door picker, or custom builder.
+- Export a landscape A4 rough copy PDF via browser print/Save as PDF.
+- Include material tally at the foot of the rough copy.
+- Keep tablet-first touch behavior and offline PDF import.
 
-1. **Window picker modal** — tab filter UX, card grid, right-panel preview, code/size/glass/colour fields
-2. **Door picker** — family tabs (Sliding•Patio, Elite Sliders, Hinged, Folding/Vistafold, Palace, Pivot), panel config cards (XO/OX/OXX/XXO/OXXO), lock side + opening fields
-3. **Workspace table** — column structure, status badges (Ready/Needs input/Builder items), Import Bizman button
-4. **Export package** — Rough copy PDF (Landscape A4), Workshop Excel, Rep summary (mobile PDF)
-5. **Validation report** — per-issue list with line references
-6. **CSS design tokens** — the oklch colour palette and font stack from brand-spec.md
+## Local Test URLs
 
-## Source (Bizman PDFs used as input)
+Local browser:
+
+```text
+http://127.0.0.1:5178/open-design-components/workspace.html
+```
+
+Tablet on same Wi-Fi:
+
+```text
+http://<PC-LAN-IP>:5179/open-design-components/workspace.html
+```
+
+Start servers from the repo root:
+
+```powershell
+python -m http.server 5178 --bind 127.0.0.1
+python -m http.server 5179 --bind 0.0.0.0
+```
+
+## Do Not Commit
+
+Real quote PDFs and extracted quote text fixtures contain customer PII. Keep these local only:
+
+- `_test_quote*.pdf`
+- `_quote*.txt`
+
+## Source Price-List References
 
 - MASTER-PRICE-LIST-305MM-CASEMENT-TOP-AND-SIDE-HUNG.pdf
 - elite-sliders-pricelist.pdf
 - HINGED-DOORS-PRICE-LIST.pdf
 - PALACE---PRICE-LIST.pdf
 - PATIO-DOOR-PRICELIST.pdf
-
----
-*Copied from Open Design project: 28e86d96-4e0e-40dd-aaaf-fe9fa75962b3*
-*Date copied: 2026-05-29*
