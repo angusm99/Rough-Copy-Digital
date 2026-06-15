@@ -14,6 +14,9 @@
       --muted: oklch(70.4% 0.031 87.6);
       --border: oklch(31% 0.015 252.3);
       --accent: oklch(87.1% 0.178 91.8);
+      --outline-gold: color-mix(in oklab, var(--accent) 42%, var(--border));
+      --outline-gold-strong: color-mix(in oklab, var(--accent) 58%, var(--border));
+      --outline-gold-soft: color-mix(in oklab, var(--accent) 24%, var(--border));
       --success: oklch(71% 0.13 152);
       --danger: oklch(67% 0.18 32);
       --info: oklch(68% 0.09 236);
@@ -41,7 +44,7 @@
     .brand {
       display: grid; gap: 6px; padding: 13px; border-radius: 14px;
       background: color-mix(in oklab, var(--surface-2) 96%, black 4%);
-      border: 1px solid color-mix(in oklab, var(--border) 78%, var(--accent) 22%);
+      border: 1px solid var(--outline-gold-soft);
     }
     .brand-title { font-family: var(--font-display); font-size: 24px; }
     .label, .mono, .nav small, th {
@@ -65,8 +68,9 @@
     .workspace { padding: 18px; display: grid; gap: 16px; align-content: start; min-width: 0; }
     .header, .site-card, .table-card, .editor-card, .drawer {
       background: color-mix(in oklab, var(--surface) 92%, black 8%);
-      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
+      border: 1px solid var(--outline-gold);
       border-radius: 16px;
+      box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 10%, transparent);
     }
     .header {
       padding: 16px 18px;
@@ -84,7 +88,7 @@
     .secondary {
       background: color-mix(in oklab, var(--surface-3) 88%, black 12%);
       color: var(--fg);
-      border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
+      border: 1px solid var(--outline-gold-soft);
     }
     /* ── site details (paper RC header) ── */
     .site-card { padding: 14px 18px; display: grid; gap: 12px; }
@@ -95,7 +99,7 @@
       width: 100%;
       background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
       color: var(--fg);
-      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      border: 1px solid var(--outline-gold-soft);
       border-radius: 9px;
       padding: 10px 11px;
       font: inherit; font-size: 14px;
@@ -113,8 +117,8 @@
     .table-head, .table-tools { padding: 13px 16px; }
     .table-tools {
       display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
-      border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
-      border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
+      border-top: 1px solid var(--outline-gold-soft);
+      border-bottom: 1px solid var(--outline-gold-soft);
       background: color-mix(in oklab, var(--surface-2) 86%, black 14%);
     }
     .summary { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -209,7 +213,7 @@
       border-radius: 11px;
       text-align: center;
       background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
-      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      border: 1px solid var(--outline-gold-strong);
     }
     .tally-box strong {
       display: block;
@@ -224,7 +228,7 @@
     .export-item {
       display: flex; justify-content: space-between; padding: 11px 13px; border-radius: 11px;
       background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
-      border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
+      border: 1px solid var(--outline-gold-strong);
     }
     #enclosureField.needs-selection select {
       border-color: color-mix(in oklab, var(--accent) 68%, var(--border));
@@ -334,8 +338,8 @@
           <h1 id="jobTitle">No quote loaded</h1>
         </div>
         <div class="toolbar">
-          <input type="file" id="pdfInput" accept="application/pdf" class="hidden" />
-          <button class="secondary" id="importBtn">Import Bizman quote</button>
+          <input type="file" id="docInput" accept=".pdf,.txt,.doc,.docx,image/*,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden" />
+          <button class="secondary" id="importBtn">Import documents</button>
           <button class="secondary" id="addLineBtn">Add Line</button>
           <button class="secondary" id="clearBtn">Clear</button>
           <button class="primary" id="exportBtn" disabled>Export PDF / Excel</button>
@@ -489,6 +493,34 @@
             </select>
           </label>
 
+          <div class="full hidden" id="doorDecisionFields">
+            <span class="label">4 · Door operation</span>
+            <div class="editor-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));padding:10px 0 0">
+              <label><span class="label">Handle / lead side</span>
+                <select id="edHandleSide">
+                  <option value="">— confirm —</option>
+                  <option>LEFT</option>
+                  <option>RIGHT</option>
+                  <option>CENTRE</option>
+                  <option>CUSTOM</option>
+                </select>
+              </label>
+              <label><span class="label">Opening direction</span>
+                <select id="edOpeningDirection">
+                  <option value="">— confirm —</option>
+                  <option>OPEN IN</option>
+                  <option>OPEN OUT</option>
+                  <option>SLIDE LEFT</option>
+                  <option>SLIDE RIGHT</option>
+                  <option>BI-PART</option>
+                  <option>STACK LEFT</option>
+                  <option>STACK RIGHT</option>
+                  <option>CUSTOM</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
           <!-- 5. notes -->
           <label class="full"><span class="label">5 · Notes (handles, burglar bars, access, sashes)</span>
             <textarea id="edNotes" placeholder="Anything the workshop or installer must know about this opening"></textarea>
@@ -556,11 +588,25 @@
     const STORE_KEY = "aw_rc_job";
     const CTX_KEY = "aw_picker_ctx";
     const RESULT_KEY = "aw_picker_result";
+    const IMPORT_SCRIPT_CACHE = {};
 
     const SITE_FIELDS = ["jobRef","date","client","phone","address","email","rep","building","enclosure","material","wall","colour","floor"];
 
     let state = { job: null, site: {}, lines: [] };
     let editingIndex = -1;
+
+    function blankLine(overrides = {}) {
+      return {
+        ref: "", location: "", product: "", code: "", family: "",
+        quoteWidth: null, quoteHeight: null, quoteSize: "",
+        width: null, height: null, size: "",
+        qty: 1, glass: "", colour: "", wrap: "",
+        notes: "", diagSVG: "",
+        config: "", handleSide: "", openingDirection: "",
+        sizeConfirmed: false,
+        ...overrides,
+      };
+    }
 
     // ---------- persistence ----------
     function save() {
@@ -581,7 +627,7 @@
       if (!state || typeof state !== "object") state = {};
       state.job = state.job || null;
       state.site = state.site || {};
-      state.lines = (state.lines || []).map((l) => ({
+      state.lines = (state.lines || []).map((l) => blankLine({
         notes: "", diagSVG: "", code: "", ...l,
       }));
     }
@@ -666,29 +712,146 @@
     }
 
     // ---------- import flow ----------
-    async function importFile(file) {
-      if (!window.pdfjsLib) {
-        alert("PDF reader failed to load. Cannot import.");
-        return;
+    function loadExternalScript(src, globalName) {
+      if (globalName && window[globalName]) return Promise.resolve(window[globalName]);
+      if (IMPORT_SCRIPT_CACHE[src]) return IMPORT_SCRIPT_CACHE[src];
+      IMPORT_SCRIPT_CACHE[src] = new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = src;
+        s.async = true;
+        s.onload = () => resolve(globalName ? window[globalName] : true);
+        s.onerror = () => reject(new Error(`Failed to load ${src}`));
+        document.head.appendChild(s);
+      });
+      return IMPORT_SCRIPT_CACHE[src];
+    }
+
+    async function extractTextFromPdf(file) {
+      if (!window.pdfjsLib) throw new Error("PDF reader failed to load");
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      const pageRows = await extractRows(pdf);
+      const text = pageRows.map((rows) => rows.map((r) => r.text).join("\n")).join("\n");
+      return { pdf, pageRows, text };
+    }
+
+    async function extractTextFromDocx(file) {
+      await loadExternalScript("https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js", "mammoth");
+      const result = await window.mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+      return result.value || "";
+    }
+
+    async function extractTextFromImage(file) {
+      await loadExternalScript("https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js", "Tesseract");
+      const result = await window.Tesseract.recognize(file, "eng");
+      return result?.data?.text || "";
+    }
+
+    function quoteLikeParsed(parsed) {
+      return !!(parsed && parsed.lines && parsed.lines.length && parsed.job &&
+        (parsed.job.quoteRef || parsed.job.client || parsed.job.quoteTitle));
+    }
+
+    function firstMatch(text, patterns) {
+      for (const re of patterns) {
+        const m = text.match(re);
+        if (m && m[1]) return m[1].trim();
       }
+      return "";
+    }
+
+    function inferSiteColour(text) {
+      const tagged = firstMatch(text, [/(?:colour|color|finish)\s*[:\-]\s*([^\n]+)/i]);
+      if (tagged) return tagged.toUpperCase();
+      const std = ["WHITE", "BRONZE", "CHARCOAL", "BLACK", "SILVER", "SPECIAL"];
+      return std.find((c) => new RegExp(`\\b${c}\\b`, "i").test(text)) || "";
+    }
+
+    function parseGenericDocumentText(text, sourceName) {
+      const compact = (text || "").replace(/\r/g, "").trim();
+      const addressBlock =
+        firstMatch(compact, [/(?:site address|address|installation address)\s*[:\-]\s*([^\n]+(?:\n(?!\s*$|(?:phone|tel|email|rep|colour|color|date|quote|job ref|customer)\b).+)*)/i]) ||
+        "";
+      return {
+        sourceName,
+        site: {
+          jobRef: firstMatch(compact, [/(?:quote ref|job ref|reference|quote no|quote number)\s*[:#\-]?\s*([A-Z0-9\-\/]+)/i]),
+          date: firstMatch(compact, [/\b(\d{4}-\d{2}-\d{2})\b/, /\b(\d{2}[\/-]\d{2}[\/-]\d{4})\b/]),
+          client: firstMatch(compact, [/(?:client|customer|attention|name)\s*[:\-]\s*([^\n]+)/i]),
+          phone: firstMatch(compact, [/(?:phone|tel|telephone|cell|mobile)\s*[:\-]?\s*([+\d][\d\s()\-]{7,})/i]),
+          address: addressBlock.split("\n").map((line) => line.trim()).filter(Boolean).join(", ").replace(/\s+,/g, ","),
+          email: firstMatch(compact, [/([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/i]),
+          rep: firstMatch(compact, [/(?:rep|sales rep|measured by|prepared by)\s*[:\-]\s*([^\n]+)/i]),
+          colour: inferSiteColour(compact),
+        },
+      };
+    }
+
+    function applyGenericImport(data) {
+      const incoming = data.site || {};
+      state.job = {
+        ...(state.job || {}),
+        quoteTitle: incoming.client || data.sourceName || (state.job && state.job.quoteTitle) || "",
+        quoteRef: incoming.jobRef || (state.job && state.job.quoteRef) || "",
+        client: incoming.client || (state.job && state.job.client) || "",
+        headerNotes: [`Imported from ${data.sourceName || "document"}`],
+      };
+      SITE_FIELDS.forEach((field) => {
+        if (incoming[field]) state.site[field] = incoming[field];
+      });
+      save();
+      renderAll();
+      alert("Imported what could be identified from that document. Please review the customer/site fields and complete any missing line details.");
+    }
+
+    async function importFile(file) {
+      const name = (file.name || "document").trim();
+      const ext = name.includes(".") ? name.split(".").pop().toLowerCase() : "";
       try {
-        const buf = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-        const pageRows = await extractRows(pdf);
-        const text = pageRows.map((rows) => rows.map((r) => r.text).join("\n")).join("\n");
-        const parsed = QuoteParser.parseQuote(text);
-        // show the data immediately; diagram crops attach in the background
-        applyParsedQuote(parsed);
-        attachQuoteDiagrams(pdf, pageRows, state.lines)
-          .then(() => {
-            save();
-            state.lines.forEach((_, i) => refreshRowChrome(i));
-            if (editingIndex >= 0) renderEditor();
-          })
-          .catch((e) => console.warn("Diagram extraction failed (import is unaffected):", e));
+        if (file.type === "application/msword" || ext === "doc") {
+          throw new Error("Legacy .doc files are not supported in-browser yet. Save as .docx or PDF and import again.");
+        }
+
+        if (file.type === "application/pdf" || ext === "pdf") {
+          const { pdf, pageRows, text } = await extractTextFromPdf(file);
+          const parsed = QuoteParser.parseQuote(text);
+          if (quoteLikeParsed(parsed)) {
+            applyParsedQuote(parsed);
+            attachQuoteDiagrams(pdf, pageRows, state.lines)
+              .then(() => {
+                save();
+                state.lines.forEach((_, i) => refreshRowChrome(i));
+                if (editingIndex >= 0) renderEditor();
+              })
+              .catch((e) => console.warn("Diagram extraction failed (import is unaffected):", e));
+            return;
+          }
+          applyGenericImport(parseGenericDocumentText(text, name));
+          return;
+        }
+
+        if (file.type.startsWith("image/")) {
+          const text = await extractTextFromImage(file);
+          applyGenericImport(parseGenericDocumentText(text, name));
+          return;
+        }
+
+        if (file.type === "text/plain" || ext === "txt") {
+          const text = await file.text();
+          applyGenericImport(parseGenericDocumentText(text, name));
+          return;
+        }
+
+        if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || ext === "docx") {
+          const text = await extractTextFromDocx(file);
+          applyGenericImport(parseGenericDocumentText(text, name));
+          return;
+        }
+
+        throw new Error("Unsupported document type");
       } catch (e) {
         console.error(e);
-        alert("Could not read that PDF: " + e.message);
+        alert("Could not read that document: " + e.message);
       }
     }
 
@@ -730,7 +893,7 @@
 
     function applyParsedQuote(parsed) {
       state.job = parsed.job;
-      state.lines = parsed.lines.map((l) => ({ notes: "", diagSVG: "", code: "", ...l }));
+      state.lines = parsed.lines.map((l) => blankLine({ notes: "", diagSVG: "", code: "", ...l }));
       // quote pre-fills site details; rep completes the rest on site
       const fromQuote = siteFromJob(parsed.job, parsed.lines);
       SITE_FIELDS.forEach((f) => { if (fromQuote[f]) state.site[f] = fromQuote[f]; });
@@ -752,9 +915,10 @@
     function lineStatus(l) {
       if (!l.product) return ["warn", "Needs type"];
       if (!l.sizeConfirmed) return ["danger", "Needs size"];
+      if (!doorOperationReady(l)) return ["warn", "Needs handing"];
       return ["ready", "Ready"];
     }
-    function lineReady(l) { return !!l.product && !!l.sizeConfirmed; }
+    function lineReady(l) { return !!l.product && !!l.sizeConfirmed && doorOperationReady(l); }
 
     // ---------- rendering ----------
     function renderJobTitle() {
@@ -871,7 +1035,15 @@
     // _6 rule: doors always get safety glass
     function isDoorLine(l) {
       if (["patio", "multislide", "vistafold", "hinged"].includes((l.family || "").toLowerCase())) return true;
-      return /DOOR|STABLE|PALACE|VISTAFOLD|PIVOT/i.test(l.product || "");
+      return /DOOR|STABLE|PALACE|VALENCIA|CLS-?250|HEAVY DUTY|VISTAFOLD|SLIDING FOLDING|PIVOT/i.test(l.product || "");
+    }
+    function needsDoorOperation(l) {
+      const fam = (l.family || "").toLowerCase();
+      if (["hinged", "vistafold"].includes(fam)) return true;
+      return /HINGED|STABLE|VISTAFOLD|FOLDING|PIVOT/i.test(l.product || "");
+    }
+    function doorOperationReady(l) {
+      return !needsDoorOperation(l) || (!!l.handleSide && !!l.openingDirection);
     }
     function isSafetyGlass(g) { return /safety|laminat|6\.38/i.test(g || ""); }
     function enforceDoorGlass(l) {
@@ -891,7 +1063,8 @@
              <button class="usequote" data-i="${i}" title="Copy quote size into final size">use</button></div>`
         : "";
       const diag = lineDiagHTML(l);
-      const spec = [l.glass, l.colour].filter(Boolean).join("<br>") || "—";
+      const op = [l.handleSide, l.openingDirection].filter(Boolean).join(" • ");
+      const spec = [l.glass, l.colour, op].filter(Boolean).join("<br>") || "—";
       return `
         <td><strong class="mono">${l.ref || i + 1}</strong></td>
         <td class="room-cell">${l.location || "—"}</td>
@@ -922,7 +1095,7 @@
       const body = document.getElementById("lineBody");
       if (!state.lines.length) {
         body.innerHTML =
-          '<tr><td colspan="7" class="empty-state">No lines yet — import a Bizman quote or tap Add Line.</td></tr>';
+          '<tr><td colspan="7" class="empty-state">No lines yet — import a document or tap Add Line.</td></tr>';
         return;
       }
       body.innerHTML = state.lines
@@ -1042,7 +1215,7 @@
       // picker-set family is authoritative; quote imports fall back to text
       if (fam === "vistafold" || /VISTAFOLD|FOLDING/.test(blob)) {
         t.folding = (nLeaf || nPanel || 3) * qty;
-      } else if (fam === "multislide" || /PALACE|MULTI-?SLIDE|\bMS-\d/.test(blob)) {
+      } else if (fam === "multislide" || /PALACE|VALENCIA|CLS-?250|HEAVY DUTY|MULTI-?SLIDE|\bMS-\d/.test(blob)) {
         t.palace = (nPanel || 2) * qty;
       } else if (fam === "patio" || /SLIDING|PATIO|\bSL-\d-\w/.test(blob)) {
         t.sliding = (nPanel || 2) * qty;
@@ -1069,7 +1242,7 @@
       const boxes = [
         ["Hinged door panels", total.hinged],
         ["Windows (units)", total.windows],
-        ["Palace door panels", total.palace],
+        ["Heavy Duty Slider panels", total.palace],
         ["Folding door panels", total.folding],
         ["Sliding panels", total.sliding],
         ["Fixed frames", total.fixed],
@@ -1157,6 +1330,8 @@
       setVal("edH", l.height);
       setSelect("edGlass", l.glass);
       setSelect("edColour", l.colour);
+      setSelect("edHandleSide", l.handleSide);
+      setSelect("edOpeningDirection", l.openingDirection);
       setVal("edNotes", l.notes);
       // glass locked on doors; wrap select shows the live site rule
       const glassEl = document.getElementById("edGlass");
@@ -1165,6 +1340,7 @@
       const wrapEl = document.getElementById("edWrap");
       wrapEl.options[0].textContent = siteWrap() ? `Auto (${siteWrap()})` : "Auto (site rule)";
       if (document.activeElement !== wrapEl) wrapEl.value = l.wrap || "";
+      document.getElementById("doorDecisionFields").classList.toggle("hidden", !needsDoorOperation(l));
       document.getElementById("edTypeName").textContent = l.product || "Not set";
       document.getElementById("edTypeCode").textContent = l.code || "";
       document.getElementById("edDiag").innerHTML = lineDiagHTML(l);
@@ -1208,6 +1384,8 @@
       bind("edGlass", (l, v) => { l.glass = v; });
       bind("edColour", (l, v) => { l.colour = v; });
       bind("edWrap", (l, v) => { l.wrap = v; });
+      bind("edHandleSide", (l, v) => { l.handleSide = v; });
+      bind("edOpeningDirection", (l, v) => { l.openingDirection = v; });
       bind("edNotes", (l, v) => { l.notes = v; });
       ["edW", "edH"].forEach((id, idx) =>
         document.getElementById(id).addEventListener("input", (e) => {
@@ -1266,6 +1444,9 @@
       l.product = res.name || res.code || l.product;
       l.code = res.code || "";
       if (res.family) l.family = res.family;
+      if (res.config) l.config = res.config;
+      if (res.handleSide) l.handleSide = res.handleSide;
+      if (res.openingDirection) l.openingDirection = res.openingDirection;
       if (res.glass) l.glass = res.glass;
       if (res.colour) l.colour = res.colour;
       if (res.svg) l.diagSVG = res.svg;
@@ -1279,19 +1460,14 @@
 
     // ---------- events ----------
     document.getElementById("importBtn").addEventListener("click", () =>
-      document.getElementById("pdfInput").click()
+      document.getElementById("docInput").click()
     );
-    document.getElementById("pdfInput").addEventListener("change", (e) => {
+    document.getElementById("docInput").addEventListener("change", (e) => {
       if (e.target.files[0]) importFile(e.target.files[0]);
+      e.target.value = "";
     });
     document.getElementById("addLineBtn").addEventListener("click", () => {
-      state.lines.push({
-        ref: "", location: "", product: "", code: "", family: "",
-        quoteWidth: null, quoteHeight: null, quoteSize: "",
-        width: null, height: null, size: "",
-        qty: 1, glass: "", colour: "", notes: "", diagSVG: "",
-        sizeConfirmed: false,
-      });
+      state.lines.push(blankLine());
       save();
       renderTable();
       renderSummary();
@@ -1421,6 +1597,21 @@
 
     // ---------- init ----------
     load();
+    // Handle params from landing page (?new=1 clears state, ?import=1 auto-triggers import dialog)
+    (function handleNavParams() {
+      const sp = new URLSearchParams(location.search);
+      if (sp.has('new')) {
+        state = { job: null, site: {}, lines: [] };
+        editingIndex = -1;
+        save();
+      }
+      if (sp.has('import')) {
+        setTimeout(() => document.getElementById('importBtn').click(), 350);
+      }
+      if (sp.has('new') || sp.has('import')) {
+        history.replaceState(null, '', location.pathname);
+      }
+    })();
     consumePickerResult();
     wireEditor();
     renderAll();

@@ -5,7 +5,7 @@ This repo is the active Anglo Windows Digital Rough Copy project.
 ## Start Here
 
 - Active app path: `open-design-components/`
-- Main entry point: `open-design-components/workspace.html`
+- Main entry point: `open-design-components/index.html` (landing page → routes to workspace)
 - Parser: `open-design-components/quote-parser.js`
 - Legacy reference only: `rough-copy-digital_6.html`
 - Project note: `C:\Users\angusm\Documents\Obsidian Vault\Rough Copy Digital.md`
@@ -129,6 +129,11 @@ These patterns are in `.gitignore`, but still check `git status` before committi
 ## Current Known Work
 
 - HTC AT01 tablet browser testing is in progress. LAN page testing can use the tablet's current Wi-Fi IP, but ADB is not connected until USB debugging or Wireless debugging pairing is enabled on the tablet.
+- Window picker / builder baseline has moved onto the dark gold review theme. Builder selections now return richer profile-style SVGs to the workspace, not plain placeholder geometry.
+- Door picker category order is now `Hinged`, `Heavy Duty Slider`, `Sliding Folding`, `Pivot`, `Patio Sliding`.
+- Heavy Duty Slider groups are now `Valencia`, `Palace Door`, and `CLS-250 Lift and Slide`.
+- Architectural door SVGs have been supplied in `Anglo-Architectural-Drawings.zip`; door files are useful, window files should be ignored for that pass.
+- Best next SVG integration path: wire `Doors/Anglo-HD*.svg` and `Doors/Anglo-PD*.svg` into `door-picker.html` as asset-backed drawings, keeping generated SVGs as fallback for pivot / sliding folding / decorative hinged variants.
 - Photo/OCR import for handwritten rough copies is still outstanding.
 - Workshop Excel/export-to-external-system is still outstanding.
 - More Bizman product-line quote exports are needed for a fuller preset library.

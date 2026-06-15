@@ -85,6 +85,17 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
     }
+    .catalog-group {
+      display: grid;
+      gap: 12px;
+    }
+    .catalog-group-title {
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
     .door-card {
       padding: 15px;
       border-radius: 16px;
@@ -155,16 +166,17 @@
       <div class="label" id="lineCtx">No line selected — browsing</div>
       <h1>Pick the right door configuration.</h1>
       <div class="families" id="familyTabs">
-        <button class="option active" data-family="patio">Patio Sliding</button>
-        <button class="option" data-family="multislide">Multi-Slide</button>
-        <button class="option" data-family="vistafold">Vistafold</button>
-        <button class="option" data-family="hinged">Hinged</button>
+        <button class="option active" data-family="hinged">Hinged</button>
+        <button class="option" data-family="multislide">Heavy Duty Slider</button>
+        <button class="option" data-family="vistafold">Sliding Folding</button>
+        <button class="option" data-family="pivot">Pivot</button>
+        <button class="option" data-family="patio">Patio Sliding</button>
       </div>
     </header>
     <section class="body">
       <div class="catalog">
-        <div class="label" id="sectionLabel">PATIO SLIDING DOORS</div>
-        <div class="cards" id="doorCards"></div>
+        <div class="label" id="sectionLabel">HINGED DOORS</div>
+        <div id="doorCards"></div>
       </div>
       <aside class="side">
         <div class="panel">
@@ -172,8 +184,12 @@
           <h2 id="doorTitle">---</h2>
           <div class="panel-grid">
             <label><span class="label">Config</span><input id="configField" class="input" readonly /></label>
-            <label><span class="label">Lock side</span><input id="lockField" class="input" readonly /></label>
-            <label><span class="label">Opening</span><input id="openField" class="input" readonly /></label>
+            <label><span class="label">Handle / lead side</span>
+              <select id="handleField" class="input"></select>
+            </label>
+            <label><span class="label">Opening</span>
+              <select id="openField" class="input"></select>
+            </label>
             <label><span class="label">Code</span><input id="codeField" class="input" readonly /></label>
             <label><span class="label">Glass</span><select id="glassField"><option>4mm Clear</option><option>Tinted</option></select></label>
             <label><span class="label">Colour</span><select id="colourField"><option>White</option><option>Aluminium</option></select></label>
@@ -193,72 +209,174 @@
 
   <script>
     // SVG Rendering functions
+    const DOOR_CLR = {
+      frame: '#f5d13a',
+      line: '#d8e0ea',
+      muted: '#7c8aa3',
+      fill: 'rgba(58,107,194,0.12)'
+    };
+
+    function baseDoorSVG(W, H, inner) {
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="${W-2}" height="${H-2}" rx="1" fill="none" stroke="${DOOR_CLR.frame}" stroke-width="1.4"/>
+        <rect x="4" y="4" width="${W-8}" height="${H-8}" fill="${DOOR_CLR.fill}" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>
+        ${inner}
+      </svg>`;
+    }
+
+    function swingLeaf(x, y, w, h, opts = {}) {
+      const hingeLeft = opts.hingeLeft !== false;
+      const inset = 4;
+      const left = x + inset;
+      const right = x + w - inset;
+      const top = y + inset;
+      const bottom = y + h - inset;
+      const midY = top + Math.round((bottom - top) * 0.55);
+      const dash = hingeLeft
+        ? `<line x1="${left}" y1="${top}" x2="${right-6}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.85" stroke-dasharray="4 3"/>`
+        : `<line x1="${right}" y1="${top}" x2="${left+6}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.85" stroke-dasharray="4 3"/>`;
+      let parts = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>${dash}`;
+      if (opts.midrail) {
+        parts += `<line x1="${x}" y1="${midY}" x2="${x+w}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>`;
+      }
+      if (opts.classic) {
+        parts += `<line x1="${x + w/2}" y1="${midY}" x2="${x + w/2}" y2="${bottom}" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
+      }
+      if (opts.cape) {
+        parts += `<line x1="${x + w/3}" y1="${top}" x2="${x + w/3}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
+        parts += `<line x1="${x + (w*2/3)}" y1="${top}" x2="${x + (w*2/3)}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
+        parts += `<line x1="${x + w/2}" y1="${midY}" x2="${x + w/2}" y2="${bottom}" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
+      }
+      if (opts.louvre) {
+        for (let ly = top + 6; ly < bottom - 4; ly += 6) {
+          parts += `<line x1="${x+2}" y1="${ly}" x2="${x+w-2}" y2="${ly+3}" stroke="${DOOR_CLR.line}" stroke-width="0.75" opacity="0.85"/>`;
+        }
+      }
+      if (opts.cladding) {
+        for (let ly = top + 6; ly < bottom - 4; ly += 8) {
+          parts += `<line x1="${x+2}" y1="${ly}" x2="${x+w-2}" y2="${ly}" stroke="${DOOR_CLR.line}" stroke-width="0.8" opacity="0.85"/>`;
+        }
+      }
+      if (opts.handle) {
+        const hx = hingeLeft ? right - 6 : left + 6;
+        parts += `<circle cx="${hx}" cy="${midY}" r="1.5" fill="${DOOR_CLR.line}"/>`;
+      }
+      return parts;
+    }
+
+    function hingedStyleSVG(style, widthClass, W, H) {
+      const doubleLeaf = widthClass === 'double';
+      const gap = 4;
+      const frameX = 10;
+      const frameY = 10;
+      const frameW = W - 20;
+      const frameH = H - 20;
+      let inner = '';
+      if (doubleLeaf) {
+        const leafW = (frameW - gap) / 2;
+        inner += swingLeaf(frameX, frameY, leafW, frameH, {
+          hingeLeft: true,
+          handle: true,
+          midrail: style !== 'large',
+          classic: style === 'classic',
+          cape: style === 'cape',
+          louvre: style === 'louvre',
+          cladding: style === 'cladding'
+        });
+        inner += swingLeaf(frameX + leafW + gap, frameY, leafW, frameH, {
+          hingeLeft: false,
+          handle: true,
+          midrail: style !== 'large',
+          classic: style === 'classic',
+          cape: style === 'cape',
+          louvre: style === 'louvre',
+          cladding: style === 'cladding'
+        });
+      } else if (style === 'stable') {
+        inner += swingLeaf(frameX, frameY, frameW, frameH, { hingeLeft: true, handle: true, midrail: true });
+        const splitY = frameY + frameH / 2;
+        inner += `<line x1="${frameX}" y1="${splitY}" x2="${frameX + frameW}" y2="${splitY}" stroke="${DOOR_CLR.line}" stroke-width="1"/>`;
+      } else {
+        inner += swingLeaf(frameX, frameY, frameW, frameH, {
+          hingeLeft: true,
+          handle: true,
+          midrail: style !== 'large',
+          classic: style === 'classic',
+          cape: style === 'cape',
+          louvre: style === 'louvre',
+          cladding: style === 'cladding'
+        });
+      }
+      return baseDoorSVG(W, H, inner);
+    }
+
+    function pivotDoorSVG(style, W, H) {
+      const x = 24;
+      const y = 10;
+      const w = W - 48;
+      const h = H - 20;
+      let inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>`;
+      inner += `<line x1="${x + w*0.72}" y1="${y}" x2="${x + w*0.28}" y2="${y + h/2}" stroke="${DOOR_CLR.line}" stroke-width="0.85"/>`;
+      inner += `<line x1="${x + w*0.72}" y1="${y+h}" x2="${x + w*0.28}" y2="${y + h/2}" stroke="${DOOR_CLR.line}" stroke-width="0.85"/>`;
+      if (style === 'classic') {
+        const midY = y + h*0.55;
+        inner += `<line x1="${x}" y1="${midY}" x2="${x+w}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>`;
+      }
+      return baseDoorSVG(W, H, inner);
+    }
+
     function slidingSVG(panels, W, H) {
       const panelW = W / panels.length;
       let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
-      svg += `<rect width="${W}" height="${H}" fill="none" stroke="#888" stroke-width="1"/>`;
+      svg += `<rect width="${W}" height="${H}" fill="none" stroke="${DOOR_CLR.frame}" stroke-width="1.2"/>`;
 
       for (let i = 0; i < panels.length; i++) {
         const x = i * panelW;
         const isOpen = panels[i] === 'O';
-        svg += `<rect x="${x}" y="0" width="${panelW}" height="${H}" fill="none" stroke="#ddd" stroke-width="1"/>`;
+        svg += `<rect x="${x}" y="0" width="${panelW}" height="${H}" fill="rgba(58,107,194,0.08)" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>`;
         if (isOpen) {
-          svg += `<text x="${x + panelW/2}" y="${H/2}" text-anchor="middle" dominant-baseline="middle" font-size="24" font-weight="bold" fill="#fff" opacity="0.6">→</text>`;
+          svg += `<text x="${x + panelW/2}" y="${H/2}" text-anchor="middle" dominant-baseline="middle" font-size="24" font-weight="bold" fill="${DOOR_CLR.line}" opacity="0.7">→</text>`;
         }
       }
       svg += `</svg>`;
       return svg;
     }
 
-    function foldingSVG(leaves, W, H) {
+    function foldingSVG(leaves, W, H, activeIndex = 0) {
       const leafW = W / leaves;
       let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
-      svg += `<rect width="${W}" height="${H}" fill="none" stroke="#888" stroke-width="1"/>`;
+      svg += `<rect width="${W}" height="${H}" fill="none" stroke="${DOOR_CLR.frame}" stroke-width="1.2"/>`;
 
       for (let i = 0; i < leaves; i++) {
         const x = i * leafW;
-        svg += `<rect x="${x}" y="0" width="${leafW}" height="${H}" fill="none" stroke="#ddd" stroke-width="1"/>`;
-        svg += `<line x1="${x + leafW - 4}" y1="0" x2="${x + leafW - 4}" y2="${H}" stroke="#fff" stroke-width="2" opacity="0.4"/>`;
-      }
-      svg += `</svg>`;
-      return svg;
-    }
-
-    function hingedSVG(doubleLeaf, W, H) {
-      let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
-      svg += `<rect width="${W}" height="${H}" fill="none" stroke="#888" stroke-width="1"/>`;
-
-      if (doubleLeaf) {
-        const mid = W / 2;
-        svg += `<rect x="0" y="0" width="${mid}" height="${H}" fill="none" stroke="#ddd" stroke-width="1"/>`;
-        svg += `<rect x="${mid}" y="0" width="${mid}" height="${H}" fill="none" stroke="#ddd" stroke-width="1"/>`;
-        svg += `<circle cx="4" cy="${H/2}" r="2" fill="#fff" opacity="0.6"/>`;
-        svg += `<circle cx="${W-4}" cy="${H/2}" r="2" fill="#fff" opacity="0.6"/>`;
-      } else {
-        svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="none" stroke="#ddd" stroke-width="1"/>`;
-        svg += `<circle cx="4" cy="${H/2}" r="2" fill="#fff" opacity="0.6"/>`;
-      }
-      svg += `</svg>`;
-      return svg;
-    }
-
-    function colonialSVG(doubleLeaf, bars, W, H) {
-      let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
-      svg += `<rect width="${W}" height="${H}" fill="none" stroke="#888" stroke-width="1"/>`;
-
-      const barSpacing = H / (bars + 1);
-      for (let i = 1; i <= bars; i++) {
-        svg += `<line x1="0" y1="${i * barSpacing}" x2="${W}" y2="${i * barSpacing}" stroke="#ddd" stroke-width="0.5"/>`;
-      }
-
-      if (doubleLeaf) {
-        svg += `<line x1="${W/2}" y1="0" x2="${W/2}" y2="${H}" stroke="#ddd" stroke-width="1"/>`;
+        svg += `<rect x="${x}" y="0" width="${leafW}" height="${H}" fill="rgba(58,107,194,0.08)" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
+        svg += `<line x1="${x + leafW - 3}" y1="2" x2="${x + leafW - 3}" y2="${H-2}" stroke="${DOOR_CLR.line}" stroke-width="0.7" opacity="0.7"/>`;
+        if (i === activeIndex) {
+          svg += `<line x1="${x + 6}" y1="8" x2="${x + leafW - 6}" y2="${H/2}" stroke="${DOOR_CLR.line}" stroke-width="0.8" stroke-dasharray="4 3"/>`;
+        }
+        if (i > 0) {
+          svg += `<path d="M ${x - 4} ${H+4} l 6 6 l 6 -6" fill="none" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
+        }
       }
       svg += `</svg>`;
       return svg;
     }
 
     const DOORS = {
+      pivot: [
+        { id:'PIV-LP-12', group:'Large Pane Pivot', config:'Pivot', lock:'Custom', open:'Open in', code:'PIV-LP-12', label:'Large Pane Pivot 1200', style:'large', note:'Large pane pivot door, 1200 wide.' },
+        { id:'PIV-LP-15', group:'Large Pane Pivot', config:'Pivot', lock:'Custom', open:'Open in', code:'PIV-LP-15', label:'Large Pane Pivot 1500', style:'large', note:'Large pane pivot door, 1500 wide.' },
+        { id:'SWG-LP-SAOI', group:'Large Pane Swing', config:'SA OI', lock:'Left', open:'Open in', code:'SWG-LP-SAOI', label:'Large Pane Swing SA OI 1200', style:'large', note:'Single active, open-in large pane swing door.' },
+        { id:'SWG-LP-SAOO', group:'Large Pane Swing', config:'SA OO', lock:'Left', open:'Open out', code:'SWG-LP-SAOO', label:'Large Pane Swing SA OO 1200', style:'large', note:'Single active, open-out large pane swing door.' },
+        { id:'SWG-LP-DA12', group:'Large Pane Swing', config:'DA', lock:'Centre', open:'Open in', code:'SWG-LP-DA12', label:'Large Pane Double Active 1200', style:'large-double', note:'Large pane double active swing door, 1200.' },
+        { id:'SWG-LP-DA15', group:'Large Pane Swing', config:'DA', lock:'Centre', open:'Open in', code:'SWG-LP-DA15', label:'Large Pane Double Active 1500', style:'large-double', note:'Large pane double active swing door, 1500.' },
+        { id:'PIV-CL-12', group:'Classic Pivot', config:'Pivot', lock:'Custom', open:'Open in', code:'PIV-CL-12', label:'Classic Pivot 1200', style:'classic', note:'Classic pivot door, 1200 wide.' },
+        { id:'PIV-CL-15', group:'Classic Pivot', config:'Pivot', lock:'Custom', open:'Open in', code:'PIV-CL-15', label:'Classic Pivot 1500', style:'classic', note:'Classic pivot door, 1500 wide.' },
+        { id:'SWG-CL-SAOI', group:'Classic Swing', config:'SA OI', lock:'Left', open:'Open in', code:'SWG-CL-SAOI', label:'Classic Swing SA OI 1200', style:'classic', note:'Classic single active, open-in swing door.' },
+        { id:'SWG-CL-SAOO', group:'Classic Swing', config:'SA OO', lock:'Left', open:'Open out', code:'SWG-CL-SAOO', label:'Classic Swing SA OO 1200', style:'classic', note:'Classic single active, open-out swing door.' },
+        { id:'SWG-CL-DA12', group:'Classic Swing', config:'DA', lock:'Centre', open:'Open in', code:'SWG-CL-DA12', label:'Classic Double Active 1200', style:'classic-double', note:'Classic double active swing door, 1200.' },
+        { id:'SWG-CL-DA15', group:'Classic Swing', config:'DA', lock:'Centre', open:'Open in', code:'SWG-CL-DA15', label:'Classic Double Active 1500', style:'classic-double', note:'Classic double active swing door, 1500.' }
+      ],
       patio: [
         { id: 'SL-2-OX', config: 'OX', lock: 'Left', open: 'Slide right', code: 'SL-2-OX', label: 'Patio Slider OX (2 panel)', panels: ['O', 'X'], svg: slidingSVG },
         { id: 'SL-2-XO', config: 'XO', lock: 'Right', open: 'Slide left', code: 'SL-2-XO', label: 'Patio Slider XO (2 panel)', panels: ['X', 'O'], svg: slidingSVG },
@@ -268,61 +386,134 @@
         { id: 'SL-6', config: '6-panel', lock: 'Custom', open: 'Custom', code: 'SL-6', label: 'Patio 6-Panel', panels: ['O', 'X', 'X', 'X', 'X', 'O'], svg: slidingSVG }
       ],
       multislide: [
-        { id: 'MS-2-OX', config: 'OX', lock: 'Right', open: 'Slide left', code: 'MS-2-OX', label: 'Multi-Slide OX', brand: 'PALACE', panels: ['O', 'X'], svg: slidingSVG },
-        { id: 'MS-2-XO', config: 'XO', lock: 'Left', open: 'Slide right', code: 'MS-2-XO', label: 'Multi-Slide XO', brand: 'PALACE', panels: ['X', 'O'], svg: slidingSVG },
-        { id: 'MS-3-OXX', config: 'OXX', lock: 'Right', open: 'Slide left', code: 'MS-3-OXX', label: 'Multi-Slide OXX', brand: 'VALENCIA', panels: ['O', 'X', 'X'], svg: slidingSVG },
-        { id: 'MS-3-XXO', config: 'XXO', lock: 'Left', open: 'Slide right', code: 'MS-3-XXO', label: 'Multi-Slide XXO', brand: 'VALENCIA', panels: ['X', 'X', 'O'], svg: slidingSVG },
-        { id: 'MS-4-OXXO', config: 'OXXO', lock: 'Centre', open: 'Bi-part', code: 'MS-4-OXXO', label: 'Multi-Slide 4-Panel', brand: 'PALACE', panels: ['O', 'X', 'X', 'O'], svg: slidingSVG }
+        { id: 'HDS-VAL-2-OX', group:'Valencia', config: 'OX', lock: 'Right', open: 'Slide left', code: 'VAL-2-OX', label: 'Valencia OX', brand: 'VALENCIA', panels: ['O', 'X'], svg: slidingSVG },
+        { id: 'HDS-VAL-2-XO', group:'Valencia', config: 'XO', lock: 'Left', open: 'Slide right', code: 'VAL-2-XO', label: 'Valencia XO', brand: 'VALENCIA', panels: ['X', 'O'], svg: slidingSVG },
+        { id: 'HDS-VAL-3-OXX', group:'Valencia', config: 'OXX', lock: 'Right', open: 'Slide left', code: 'VAL-3-OXX', label: 'Valencia OXX', brand: 'VALENCIA', panels: ['O', 'X', 'X'], svg: slidingSVG },
+        { id: 'HDS-VAL-3-XXO', group:'Valencia', config: 'XXO', lock: 'Left', open: 'Slide right', code: 'VAL-3-XXO', label: 'Valencia XXO', brand: 'VALENCIA', panels: ['X', 'X', 'O'], svg: slidingSVG },
+        { id: 'HDS-PAL-2-OX', group:'Palace Door', config: 'OX', lock: 'Right', open: 'Slide left', code: 'PAL-2-OX', label: 'Palace Door OX', brand: 'PALACE', panels: ['O', 'X'], svg: slidingSVG },
+        { id: 'HDS-PAL-2-XO', group:'Palace Door', config: 'XO', lock: 'Left', open: 'Slide right', code: 'PAL-2-XO', label: 'Palace Door XO', brand: 'PALACE', panels: ['X', 'O'], svg: slidingSVG },
+        { id: 'HDS-PAL-4-OXXO', group:'Palace Door', config: 'OXXO', lock: 'Centre', open: 'Bi-part', code: 'PAL-4-OXXO', label: 'Palace Door 4-Panel', brand: 'PALACE', panels: ['O', 'X', 'X', 'O'], svg: slidingSVG },
+        { id: 'HDS-CLS-2-OX', group:'CLS-250 Lift and Slide', config: 'OX', lock: 'Right', open: 'Slide left', code: 'CLS250-2-OX', label: 'CLS-250 OX', brand: 'CLS-250', panels: ['O', 'X'], svg: slidingSVG },
+        { id: 'HDS-CLS-2-XO', group:'CLS-250 Lift and Slide', config: 'XO', lock: 'Left', open: 'Slide right', code: 'CLS250-2-XO', label: 'CLS-250 XO', brand: 'CLS-250', panels: ['X', 'O'], svg: slidingSVG },
+        { id: 'HDS-CLS-3-OXX', group:'CLS-250 Lift and Slide', config: 'OXX', lock: 'Right', open: 'Slide left', code: 'CLS250-3-OXX', label: 'CLS-250 OXX', brand: 'CLS-250', panels: ['O', 'X', 'X'], svg: slidingSVG }
       ],
       vistafold: [
-        { id: 'VF-3L', config: '3-leaf', lock: 'Left', open: 'Stack left', code: 'VF-3L', label: 'Vistafold 3-Leaf', leaves: 3, svg: foldingSVG },
-        { id: 'VF-4L', config: '4-leaf', lock: 'Left', open: 'Stack left', code: 'VF-4L', label: 'Vistafold 4-Leaf', leaves: 4, svg: foldingSVG },
-        { id: 'VF-5L', config: '5-leaf', lock: 'Left', open: 'Stack left', code: 'VF-5L', label: 'Vistafold 5-Leaf', leaves: 5, svg: foldingSVG },
-        { id: 'VF-6L', config: '6-leaf', lock: 'Left', open: 'Stack left', code: 'VF-6L', label: 'Vistafold 6-Leaf', leaves: 6, svg: foldingSVG },
-        { id: 'VF-7L', config: '7-leaf', lock: 'Left', open: 'Stack left', code: 'VF-7L', label: 'Vistafold 7-Leaf', leaves: 7, svg: foldingSVG }
+        { id: 'VF-3L', group:'3 Panel', config: '3-panel', lock: 'Left', open: 'Stack right', code: 'VF-3L', label: 'Sliding Folding 3 Panel', leaves: 3, activeLeaf: 0, note:'Three-panel sliding folding door.' },
+        { id: 'VF-4L', group:'4 Panel', config: '4-panel', lock: 'Left', open: 'Open out', code: 'VF-4L', label: 'Sliding Folding 4 Panel', leaves: 4, activeLeaf: 0, note:'Four-panel sliding folding door.' },
+        { id: 'VF-5L', group:'5 Panel', config: '5-panel', lock: 'Left', open: 'Open out', code: 'VF-5L', label: 'Sliding Folding 5 Panel', leaves: 5, activeLeaf: 0, note:'Five-panel sliding folding door.' },
+        { id: 'VF-6L', group:'6 Panel', config: '6-panel', lock: 'Left', open: 'Open out', code: 'VF-6L', label: 'Sliding Folding 6 Panel', leaves: 6, activeLeaf: 0, note:'Six-panel sliding folding door.' },
+        { id: 'VF-7L', group:'7 Panel', config: '7-panel', lock: 'Left', open: 'Open out', code: 'VF-7L', label: 'Sliding Folding 7 Panel', leaves: 7, activeLeaf: 0, note:'Seven-panel sliding folding door.' },
+        { id: 'VF-8L', group:'8 Panel', config: '8-panel', lock: 'Left', open: 'Open out', code: 'VF-8L', label: 'Sliding Folding 8 Panel', leaves: 8, activeLeaf: 0, note:'Eight-panel sliding folding door. Typical widths 4800 to 7200.' },
+        { id: 'VF-10L', group:'10 Panel', config: '10-panel', lock: 'Centre', open: 'Open out', code: 'VF-10L', label: 'Sliding Folding 10 Panel', leaves: 10, activeLeaf: 4, note:'Ten-panel sliding folding door. Typical widths 6000 to 7200.' }
       ],
       hinged: [
-        { id: 'H-SL', config: 'Single', double: false, midrail: false, code: 'H-SL', label: 'Hinged Single Door', svg: hingedSVG },
-        { id: 'H-DBL', config: 'Double', double: true, midrail: false, code: 'H-DBL', label: 'Hinged Double Door', svg: hingedSVG },
-        { id: 'H-MID', config: 'Single + Midrail', double: false, midrail: true, code: 'H-MID', label: 'Hinged with Midrail', svg: hingedSVG },
-        { id: 'H-DMID', config: 'Double + Midrail', double: true, midrail: true, code: 'H-DMID', label: 'Hinged Double + Midrail', svg: hingedSVG },
-        { id: 'H-CB3S', config: 'Colonial 3-Bar Single', double: false, bars: 3, code: 'H-CB3S', label: 'Colonial 3-Bar Single', svg: colonialSVG },
-        { id: 'H-CB3D', config: 'Colonial 3-Bar Double', double: true, bars: 3, code: 'H-CB3D', label: 'Colonial 3-Bar Double', svg: colonialSVG },
-        { id: 'H-CB4S', config: 'Colonial 4-Bar Single', double: false, bars: 4, code: 'H-CB4S', label: 'Colonial 4-Bar Single', svg: colonialSVG },
-        { id: 'H-CB4D', config: 'Colonial 4-Bar Double', double: true, bars: 4, code: 'H-CB4D', label: 'Colonial 4-Bar Double', svg: colonialSVG }
+        { id:'H-LP-900', group:'Large Pane', config:'Single', lock:'Left', open:'Open in', code:'H-LP-900', label:'Large Pane Single 900', style:'large', widthClass:'single', note:'Large pane single hinged door, 900 wide.' },
+        { id:'H-LP-1000', group:'Large Pane', config:'Single', lock:'Left', open:'Open in', code:'H-LP-1000', label:'Large Pane Single 1000', style:'large', widthClass:'single', note:'Large pane single hinged door, 1000 wide.' },
+        { id:'H-LP-1200', group:'Large Pane', config:'Single', lock:'Left', open:'Open in', code:'H-LP-1200', label:'Large Pane Single 1200', style:'large', widthClass:'single', note:'Large pane single hinged door, 1200 wide.' },
+        { id:'H-LP-1600', group:'Large Pane', config:'Double', lock:'Centre', open:'Open in', code:'H-LP-1600', label:'Large Pane Double 1600', style:'large', widthClass:'double', note:'Large pane double hinged door, 1600 wide.' },
+        { id:'H-LP-1800', group:'Large Pane', config:'Double', lock:'Centre', open:'Open in', code:'H-LP-1800', label:'Large Pane Double 1800', style:'large', widthClass:'double', note:'Large pane double hinged door, 1800 wide.' },
+
+        { id:'H-CL-900', group:'Classic', config:'Single', lock:'Left', open:'Open in', code:'H-CL-900', label:'Classic Single 900', style:'classic', widthClass:'single', note:'Classic single hinged door, 900 wide.' },
+        { id:'H-CL-1000', group:'Classic', config:'Single', lock:'Left', open:'Open in', code:'H-CL-1000', label:'Classic Single 1000', style:'classic', widthClass:'single', note:'Classic single hinged door, 1000 wide.' },
+        { id:'H-CL-1200', group:'Classic', config:'Single', lock:'Left', open:'Open in', code:'H-CL-1200', label:'Classic Single 1200', style:'classic', widthClass:'single', note:'Classic single hinged door, 1200 wide.' },
+        { id:'H-CL-1600', group:'Classic', config:'Double', lock:'Centre', open:'Open in', code:'H-CL-1600', label:'Classic Double 1600', style:'classic', widthClass:'double', note:'Classic double hinged door, 1600 wide.' },
+        { id:'H-CL-1800', group:'Classic', config:'Double', lock:'Centre', open:'Open in', code:'H-CL-1800', label:'Classic Double 1800', style:'classic', widthClass:'double', note:'Classic double hinged door, 1800 wide.' },
+
+        { id:'H-CV-900', group:'Cape Victorian', config:'Single', lock:'Left', open:'Open in', code:'H-CV-900', label:'Cape Victorian Single 900', style:'cape', widthClass:'single', note:'Cape Victorian single hinged door, 900 wide.' },
+        { id:'H-CV-1000', group:'Cape Victorian', config:'Single', lock:'Left', open:'Open in', code:'H-CV-1000', label:'Cape Victorian Single 1000', style:'cape', widthClass:'single', note:'Cape Victorian single hinged door, 1000 wide.' },
+        { id:'H-CV-1200', group:'Cape Victorian', config:'Single', lock:'Left', open:'Open in', code:'H-CV-1200', label:'Cape Victorian Single 1200', style:'cape', widthClass:'single', note:'Cape Victorian single hinged door, 1200 wide.' },
+        { id:'H-CV-1600', group:'Cape Victorian', config:'Double', lock:'Centre', open:'Open in', code:'H-CV-1600', label:'Cape Victorian Double 1600', style:'cape', widthClass:'double', note:'Cape Victorian double hinged door, 1600 wide.' },
+        { id:'H-CV-1800', group:'Cape Victorian', config:'Double', lock:'Centre', open:'Open in', code:'H-CV-1800', label:'Cape Victorian Double 1800', style:'cape', widthClass:'double', note:'Cape Victorian double hinged door, 1800 wide.' },
+
+        { id:'H-ST-GL', group:'Stable', config:'Glass', lock:'Left', open:'Open in', code:'H-ST-GL', label:'Stable Glass 900', style:'stable', widthClass:'single', note:'Stable door with glazed upper and lower leaves.' },
+        { id:'H-ST-CL', group:'Stable', config:'Cladding', lock:'Left', open:'Open in', code:'H-ST-CL', label:'Stable Cladding 900', style:'cladding', widthClass:'single', note:'Stable-style cladding door.' },
+        { id:'H-ST-YL', group:'Stable', config:'Y-Louvre Inserts', lock:'Left', open:'Open in', code:'H-ST-YL', label:'Stable Y-Louvre 900', style:'louvre', widthClass:'single', note:'Stable door with Y-louvre inserts.' },
+        { id:'H-ST-HC', group:'Stable', config:'1/2 Glass & 1/2 Cladding', lock:'Left', open:'Open in', code:'H-ST-HC', label:'Stable Half Glass / Half Cladding 900', style:'classic', widthClass:'single', note:'Stable door with half glass and half cladding.' },
+
+        { id:'H-LV-900', group:'Louvre / Cladding', config:'Single Louvre', lock:'Left', open:'Open in', code:'H-LV-900', label:'Louvre Single 900', style:'louvre', widthClass:'single', note:'Single louvre door, 900 wide.' },
+        { id:'H-LV-1000', group:'Louvre / Cladding', config:'Single Louvre', lock:'Left', open:'Open in', code:'H-LV-1000', label:'Louvre Single 1000', style:'louvre', widthClass:'single', note:'Single louvre door, 1000 wide.' },
+        { id:'H-LV-1600', group:'Louvre / Cladding', config:'Double Louvre', lock:'Centre', open:'Open in', code:'H-LV-1600', label:'Louvre Double 1600', style:'louvre', widthClass:'double', note:'Double louvre door, 1600 wide.' },
+        { id:'H-LV-1800', group:'Louvre / Cladding', config:'Double Louvre', lock:'Centre', open:'Open in', code:'H-LV-1800', label:'Louvre Double 1800', style:'louvre', widthClass:'double', note:'Double louvre door, 1800 wide.' },
+        { id:'H-CLD-900', group:'Louvre / Cladding', config:'Single Cladding', lock:'Left', open:'Open in', code:'H-CLD-900', label:'Cladding Single 900', style:'cladding', widthClass:'single', note:'Single full cladding door, 900 wide.' },
+        { id:'H-CLD-1600', group:'Louvre / Cladding', config:'Double Cladding', lock:'Centre', open:'Open in', code:'H-CLD-1600', label:'Cladding Double 1600', style:'cladding', widthClass:'double', note:'Double full cladding door, 1600 wide.' }
       ]
     };
 
-    let currentFamily = 'patio';
+    let currentFamily = 'hinged';
     let selectedDoor = null;
+
+    function setSelectOptions(id, options, selected = '') {
+      const el = document.getElementById(id);
+      el.innerHTML = options.map((opt) => `<option value="${opt}">${opt || '— confirm —'}</option>`).join('');
+      el.value = selected && options.includes(selected) ? selected : options[0];
+    }
+
+    function applyDoorDecisionOptions(door) {
+      const family = door?.family || currentFamily;
+      const handleOptions = ['', 'LEFT', 'RIGHT', 'CENTRE', 'CUSTOM'];
+      const openOptions =
+        (family === 'hinged' || family === 'pivot') ? ['', 'OPEN IN', 'OPEN OUT', 'CUSTOM'] :
+        family === 'vistafold' ? ['', 'OPEN IN', 'OPEN OUT', 'STACK LEFT', 'STACK RIGHT', 'CUSTOM'] :
+        ['', 'SLIDE LEFT', 'SLIDE RIGHT', 'BI-PART', 'CUSTOM'];
+
+      const handleValue = (door?.lock || '').toUpperCase();
+      const openingValue = (door?.open || '').toUpperCase();
+      setSelectOptions('handleField', handleOptions, handleOptions.includes(handleValue) ? handleValue : '');
+      setSelectOptions('openField', openOptions, openOptions.includes(openingValue) ? openingValue : '');
+    }
+
+    function resetSelectionPanel() {
+      document.getElementById('doorTitle').textContent = '---';
+      document.getElementById('configField').value = '';
+      document.getElementById('codeField').value = '';
+      applyDoorDecisionOptions(null);
+      document.getElementById('configNote').textContent = 'Select a door configuration.';
+    }
 
     // dispatch to the right SVG renderer with its real signature
     function doorSVG(door, W, H) {
       if (door.panels) return slidingSVG(door.panels, W, H);
-      if (door.leaves) return foldingSVG(door.leaves, W, H);
-      if (door.bars)   return colonialSVG(!!door.double, door.bars, W, H);
-      return hingedSVG(!!door.double, W, H);
+      if (door.leaves) return foldingSVG(door.leaves, W, H, door.activeLeaf || 0);
+      if (door.family === 'pivot') return pivotDoorSVG(door.style && door.style.startsWith('classic') ? 'classic' : 'large', W, H);
+      return hingedStyleSVG(door.style || 'large', door.widthClass || 'single', W, H);
     }
 
     function renderCatalog(family) {
       const catalog = DOORS[family];
-      const cardsHtml = catalog.map(door => {
-        const svgContent = doorSVG(door, 100, 80);
-        return `
-          <article class="door-card" data-id="${door.id}">
-            <div class="door-graphic">${svgContent}</div>
-            <strong>${door.label}</strong>
-            <div class="label">${door.code}</div>
-          </article>
-        `;
-      }).join('');
+      const groups = [];
+      catalog.forEach((door) => {
+        const key = door.group || 'Standard';
+        let found = groups.find((g) => g.key === key);
+        if (!found) {
+          found = { key, items: [] };
+          groups.push(found);
+        }
+        found.items.push(door);
+      });
 
-      document.getElementById('doorCards').innerHTML = cardsHtml;
+      document.getElementById('doorCards').innerHTML = groups.map((group) => `
+        <section class="catalog-group">
+          <div class="catalog-group-title">${group.key}</div>
+          <div class="cards">
+            ${group.items.map((door) => {
+              const svgContent = doorSVG(door, 100, 80);
+              return `
+                <article class="door-card" data-id="${door.id}">
+                  <div class="door-graphic">${svgContent}</div>
+                  <strong>${door.label}</strong>
+                  <div class="label">${door.code}</div>
+                </article>
+              `;
+            }).join('')}
+          </div>
+        </section>
+      `).join('');
 
       const labels = {
+        pivot: 'PIVOT',
         patio: 'PATIO SLIDING',
-        multislide: 'MULTI-SLIDE',
-        vistafold: 'VISTAFOLD',
+        multislide: 'HEAVY DUTY SLIDER',
+        vistafold: 'SLIDING FOLDING',
         hinged: 'HINGED DOORS'
       };
       document.getElementById('sectionLabel').textContent = labels[family];
@@ -343,10 +534,10 @@
 
       document.getElementById('doorTitle').textContent = door.label;
       document.getElementById('configField').value = door.config || '';
-      document.getElementById('lockField').value = door.lock || '';
-      document.getElementById('openField').value = door.open || '';
       document.getElementById('codeField').value = door.code;
-      document.getElementById('configNote').textContent = door.label + ' • ' + door.code;
+      applyDoorDecisionOptions(selectedDoor);
+      document.getElementById('configNote').textContent =
+        `${door.note || door.label} Confirm handle side and opening before using this door.`;
     }
 
     document.getElementById('familyTabs').addEventListener('click', (e) => {
@@ -358,13 +549,7 @@
       currentFamily = e.target.dataset.family;
       renderCatalog(currentFamily);
       selectedDoor = null;
-
-      document.getElementById('doorTitle').textContent = '---';
-      document.getElementById('configField').value = '';
-      document.getElementById('lockField').value = '';
-      document.getElementById('openField').value = '';
-      document.getElementById('codeField').value = '';
-      document.getElementById('configNote').textContent = 'Select a door configuration.';
+      resetSelectionPanel();
     });
 
     function saveDoorSelection() {
@@ -374,14 +559,21 @@
       }
 
       if (CTX && typeof CTX.i === 'number') {
-        const noteBits = [selectedDoor.config, selectedDoor.lock && 'lock ' + selectedDoor.lock,
-                          selectedDoor.open].filter(Boolean).join(' • ');
+        const handleSide = document.getElementById('handleField').value;
+        const openingDirection = document.getElementById('openField').value;
+        const noteBits = [
+          selectedDoor.config,
+          handleSide && 'handle ' + handleSide,
+          openingDirection
+        ].filter(Boolean).join(' • ');
         localStorage.setItem('aw_picker_result', JSON.stringify({
           i: CTX.i, kind: 'door',
           code: selectedDoor.code,
           name: selectedDoor.label,
           family: selectedDoor.family,
           config: selectedDoor.config || '',
+          handleSide,
+          openingDirection,
           note: noteBits,
           glass: document.getElementById('glassField').value,
           colour: document.getElementById('colourField').value,
@@ -410,7 +602,8 @@
       else if (e.key === 'Escape') { location.href = 'workspace.html'; }
     });
 
-    renderCatalog('patio');
+    applyDoorDecisionOptions(null);
+    renderCatalog('hinged');
   </script>
 </body>
 </html>

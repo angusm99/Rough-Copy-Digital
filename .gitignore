@@ -16,3 +16,4 @@ _quote*.txt
 _quote*.json
 tablet-screen*.png
 tablet-test-files/
+tmp/

@@ -62,13 +62,24 @@
     /* ── content split ── */
     .content { display: grid; grid-template-columns: 1fr 320px; min-height: 0; }
     .catalog { padding: 18px 22px; overflow-y: auto; display: grid; align-content: start; gap: 14px; }
-    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+    .catalog-group { grid-column: 1 / -1; display: grid; gap: 12px; align-items: start; }
+    .catalog-group-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-top: 2px;
+    }
+    .group-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
     /* ── cards ── */
     .card {
-      padding: 12px; border-radius: 14px;
+      padding: 10px; border-radius: 14px;
       border: 1px solid color-mix(in oklab, var(--border) 82%, white 18%);
       background: color-mix(in oklab, var(--surface-2) 88%, black 12%);
-      cursor: pointer; display: grid; gap: 8px; transition: border-color .12s;
+      cursor: pointer; display: grid; gap: 6px; transition: border-color .12s;
+      align-content: start;
     }
     .card:hover { border-color: color-mix(in oklab, var(--border) 60%, var(--accent) 40%); }
     .card.selected {
@@ -81,10 +92,18 @@
       border: 1px solid color-mix(in oklab, var(--border) 80%, var(--accent) 20%);
       background: color-mix(in oklab, var(--surface) 72%, black 28%);
       display: flex; align-items: center; justify-content: center;
-      padding: 8px; min-height: 100px;
+      padding: 6px; min-height: 118px; height: 118px;
     }
-    .card strong { font-size: 13px; line-height: 1.3; }
-    .card .sub { font-size: 11px; color: var(--muted); }
+    .thumb svg,
+    .preview-box svg,
+    .svg-asset {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .card strong { font-size: 13px; line-height: 1.2; }
+    .card .sub { font-size: 11px; color: var(--muted); line-height: 1.35; }
     .card .code { font-family: var(--font-mono); font-size: 10px; color: var(--accent); opacity: .8; letter-spacing: .05em; }
     /* ── side panel ── */
     .side {
@@ -123,10 +142,10 @@
     @media (max-width: 960px) {
       .content { grid-template-columns: 1fr; }
       .side { border-left: 0; border-top: 1px solid color-mix(in oklab, var(--border) 88%, white 12%); }
-      .grid { grid-template-columns: 1fr 1fr; }
+      .grid, .group-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 640px) {
-      .grid, .form-grid { grid-template-columns: 1fr; }
+      .grid, .group-grid, .form-grid { grid-template-columns: 1fr; }
       .head, .foot { flex-wrap: wrap; }
     }
   </style>
@@ -147,7 +166,7 @@
   <nav class="tools">
     <!-- View mode -->
     <div class="tools-group" id="viewTabs">
-      <button class="tab active" onclick="setView('common')">Common sizes</button>
+      <button class="tab active" onclick="setView('common')">Standard configurations</button>
       <button class="tab" onclick="setView('builder')">Custom builder</button>
       <button class="tab" onclick="setView('recent')">Recent</button>
     </div>
@@ -166,8 +185,8 @@
 
   <section class="content">
     <div class="catalog">
-      <div class="label" id="sectionLabel">Recommended matches</div>
-      <div class="grid" id="catalog"></div>
+        <div class="label" id="sectionLabel">Recommended matches</div>
+        <div class="grid" id="catalog"></div>
     </div>
     <aside class="side">
       <div class="panel">
@@ -196,10 +215,10 @@
           </label>
         </div>
       </div>
-      <div class="panel">
-        <div class="label">Configuration</div>
-        <p id="configNote" style="margin:8px 0 0;line-height:1.55;font-size:13px;color:var(--muted)">Select a window above to see details.</p>
-      </div>
+        <div class="panel">
+          <div class="label">Configuration</div>
+          <p id="configNote" style="margin:8px 0 0;line-height:1.55;font-size:13px;color:var(--muted)">Select a window above to see details. These standard casement presets are the quick-pick layer for 30.5mm, 38mm, and Boabab families before moving into the custom builder.</p>
+        </div>
     </aside>
   </section>
 
@@ -214,7 +233,14 @@
 
 <script>
 // ── SVG colours matching rough-copy-digital_6 WB_COLOURS ──────────────────
-const CLR = { FIXED:'#3a6bc2', TOP:'#2e9e68', SIDE:'#c28a2e', TOPLIGHT:'#7a5ea8' };
+const CLR = {
+  FIXED:'#3a6bc2',
+  TOP:'#2e9e68',
+  SIDE:'#2e9e68',
+  TOPLIGHT:'#7a5ea8',
+  MULLION:'#3a6bc2',
+  FRAME:'#f5d13a'
+};
 
 // ── Draw a thumbnail SVG from preset data ─────────────────────────────────
 function presetSVG(p, W, H) {
@@ -226,27 +252,36 @@ function presetSVG(p, W, H) {
     const t = p.types[r*p.cols+c];
     const x1=Math.round(colXs[c]*scX+.5),  y1=Math.round(rowYs[r]*scY+.5);
     const x2=Math.round(colXs[c+1]*scX-.5), y2=Math.round(rowYs[r+1]*scY-.5);
-    const clr = CLR[t];
-    s += `<rect x="${x1}" y="${y1}" width="${x2-x1}" height="${y2-y1}" fill="${clr}28" stroke="${clr}" stroke-width="1.4"/>`;
+    const fillClr = CLR[t] || CLR.FIXED;
+    s += `<rect x="${x1}" y="${y1}" width="${x2-x1}" height="${y2-y1}" fill="${fillClr}26" stroke="none"/>`;
     if (t==='TOP') {
-      const hy = y1 + Math.round((y2-y1)*.38);
-      s += `<line x1="${x1+3}" y1="${hy}" x2="${x2-3}" y2="${hy}" stroke="${clr}" stroke-width=".9" stroke-dasharray="2.5,2"/>`;
-      s += `<line x1="${x1+3}" y1="${y1+2}" x2="${x1+3}" y2="${hy}" stroke="${clr}" stroke-width="1"/>`;
-      s += `<line x1="${x2-3}" y1="${y1+2}" x2="${x2-3}" y2="${hy}" stroke="${clr}" stroke-width="1"/>`;
+      const topY = y1 + 3;
+      const apexY = y1 + Math.round((y2-y1)*.86);
+      const midX = Math.round((x1 + x2) / 2);
+      s += `<path d="M ${x1+3} ${topY} L ${x2-3} ${topY} L ${midX} ${apexY} Z" fill="none" stroke="${CLR.TOP}" stroke-width="1.1" stroke-linejoin="round"/>`;
     }
     if (t==='SIDE') {
-      const vx = x1 + Math.round((x2-x1)*.35);
-      s += `<line x1="${vx}" y1="${y1+3}" x2="${vx}" y2="${y2-3}" stroke="${clr}" stroke-width=".9" stroke-dasharray="2.5,2"/>`;
-      s += `<line x1="${x1+2}" y1="${y1+3}" x2="${vx}" y2="${y1+3}" stroke="${clr}" stroke-width="1"/>`;
-      s += `<line x1="${x1+2}" y1="${y2-3}" x2="${vx}" y2="${y2-3}" stroke="${clr}" stroke-width="1"/>`;
+      const leftX = x1 + 3;
+      const apexX = x1 + Math.round((x2-x1)*.84);
+      const midY = Math.round((y1 + y2) / 2);
+      s += `<path d="M ${leftX} ${y1+3} L ${apexX} ${midY} L ${leftX} ${y2-3} Z" fill="none" stroke="${CLR.SIDE}" stroke-width="1.1" stroke-linejoin="round"/>`;
     }
     if (t==='TOPLIGHT') {
       for (let hx=x1+5; hx<x2; hx+=5)
-        s += `<line x1="${hx}" y1="${y1+2}" x2="${hx-4}" y2="${y2-2}" stroke="${clr}" stroke-width=".5" opacity=".4"/>`;
+        s += `<line x1="${hx}" y1="${y1+2}" x2="${hx-4}" y2="${y2-2}" stroke="${CLR.TOPLIGHT}" stroke-width=".5" opacity=".4"/>`;
     }
   }
-  // outer frame
-  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="#f5b800" stroke-width="1.8"/>`;
+
+  for (let c=1; c<p.cols; c++) {
+    const x = Math.round(colXs[c]*scX);
+    s += `<line x1="${x}" y1="1.5" x2="${x}" y2="${H-1.5}" stroke="${CLR.MULLION}" stroke-width="1.3"/>`;
+  }
+  for (let r=1; r<p.rows; r++) {
+    const y = Math.round(rowYs[r]*scY);
+    s += `<line x1="1.5" y1="${y}" x2="${W-1.5}" y2="${y}" stroke="${CLR.MULLION}" stroke-width="1.3"/>`;
+  }
+
+  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="${CLR.FRAME}" stroke-width="1.8"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
 }
 
@@ -257,7 +292,7 @@ function fixedSVG(W, H) {
   // diagonal hatch to indicate fixed/no-vent
   for (let i=0; i<W+H; i+=10)
     s += `<line x1="${i}" y1="0" x2="${i-H}" y2="${H}" stroke="${clr}" stroke-width=".5" opacity=".25"/>`;
-  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="#f5b800" stroke-width="1.8"/>`;
+  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="${CLR.FRAME}" stroke-width="1.8"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
 }
 
@@ -266,7 +301,7 @@ function sidelightSVG(W, H) {
   let s = `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="${clr}18" stroke="${clr}" stroke-width="1.4"/>`;
   const mid = Math.round(H*.45);
   s += `<line x1="4" y1="${mid}" x2="${W-4}" y2="${mid}" stroke="${clr}" stroke-width="1" stroke-dasharray="4,3"/>`;
-  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="#f5b800" stroke-width="1.8"/>`;
+  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="${CLR.FRAME}" stroke-width="1.8"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
 }
 
@@ -275,32 +310,197 @@ function toplightSVG(W, H) {
   let s = `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="${clr}22" stroke="${clr}" stroke-width="1.4"/>`;
   for (let hx=5; hx<W; hx+=5)
     s += `<line x1="${hx}" y1="2" x2="${hx-4}" y2="${H-2}" stroke="${clr}" stroke-width=".5" opacity=".4"/>`;
-  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="#f5b800" stroke-width="1.8"/>`;
+  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="${CLR.FRAME}" stroke-width="1.8"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
 }
 
-// ── Window catalog — based on actual WB_PRESETS from rough-copy-digital_6 ──
+function makeGridPreset({ name, code, W, H, family, group, colW, rowH, types, sub, note, svgFn }) {
+  return {
+    name, code, W, H, family, group, svgFn,
+    cols: colW ? colW.length : 0,
+    rows: rowH ? rowH.length : 0,
+    colW, rowH, types, sub, note,
+  };
+}
+
+function makeTopHung({ name, code, W, H, colW, rowH, types, group = 'Top Hung - Standard', sub, note }) {
+  return makeGridPreset({
+    name, code, W, H, family: 'tophung', group, colW, rowH, types,
+    sub: sub || `${code} • ${W}×${H}`,
+    note: note || `${group} standard top-hung casement configuration.`,
+  });
+}
+
+const DRAWING_BASE = 'assets/casement-305/Anglo-Casement-305-Drawings/';
+const DRAWING_ASSETS = {
+  PT66: 'Anglo-PT0606.svg',
+  PT69: 'Anglo-PT0609.svg',
+  PT612: 'Anglo-PT0612.svg',
+  PTT612: 'Anglo-PTT0612.svg',
+  PT618: 'Anglo-PT0618.svg',
+  PTT618: 'Anglo-PTT0618.svg',
+  PT621: 'Anglo-PT0621.svg',
+  PTT621: 'Anglo-PTT0621.svg',
+  PT912: 'Anglo-PT0912.svg',
+  PTT912: 'Anglo-PTT0912.svg',
+  'PTT1209+': 'Anglo-PTT1209+.svg',
+  PT186: 'Anglo-PT1806.svg',
+  PTT1809: 'Anglo-PTT1809.svg',
+  PTT1212: 'Anglo-PTT1212.svg',
+  PTT1215: 'Anglo-PTT1215.svg',
+  PTT1218: 'Anglo-PTT1218.svg',
+  PTT1812: 'Anglo-PTT1812.svg',
+  PTT1815: 'Anglo-PTT1815.svg',
+  PTT1818: 'Anglo-PTT1818.svg',
+  PTT2412: 'Anglo-PTT2412.svg',
+  PTT2415: 'Anglo-PTT2415.svg',
+  PTT2418: 'Anglo-PTT2418.svg',
+  P4T2412: 'Anglo-P4T2412.svg',
+  P4T2415: 'Anglo-P4T2415.svg',
+  P4T2418: 'Anglo-P4T2418.svg',
+  SH0609: 'Anglo-SH69.svg',
+  SH0612: 'Anglo-SH612.svg',
+  SH0615: 'Anglo-SH615.svg',
+  SH0618: 'Anglo-SH618.svg',
+  SH1209: 'Anglo-SHH129.svg',
+  SH1212: 'Anglo-SH1212.svg',
+  SH1215: 'Anglo-SH1215.svg',
+  SH1218: 'Anglo-SH1218.svg',
+  SH1509: 'Anglo-SHH129.svg',
+  SH1512: 'Anglo-SH1512.svg',
+  SH1809: 'Anglo-SH189.svg',
+  SH1812: 'Anglo-SH1812.svg',
+  SH1815: 'Anglo-SH1815.svg',
+  SH1818: 'Anglo-SH1818.svg',
+  SH2409: 'Anglo-SHH249.svg',
+  SH2412: 'Anglo-SHH2412.svg',
+  SH2415: 'Anglo-SHH2415.svg',
+  SH2418: 'Anglo-SHH2418.svg'
+};
+
+function normalizedCode(code) {
+  return String(code || '').replace(/[^A-Z0-9+]/gi, '').toUpperCase();
+}
+
+function drawingPathFor(windowItem) {
+  const file = DRAWING_ASSETS[normalizedCode(windowItem.code)];
+  return file ? DRAWING_BASE + file : '';
+}
+
+function drawingMarkupFor(windowItem) {
+  const src = drawingPathFor(windowItem);
+  return src ? `<img class="svg-asset" src="${src}" alt="${windowItem.name}" />` : '';
+}
+
+function renderWindowGraphic(windowItem, width, height) {
+  const drawing = drawingMarkupFor(windowItem);
+  if (drawing) return drawing;
+  if (windowItem.svgFn === 'fixed') return fixedSVG(width, height);
+  if (windowItem.svgFn === 'toplight') return toplightSVG(width, height);
+  if (windowItem.svgFn === 'sidelight') return sidelightSVG(width, height);
+  return presetSVG(windowItem, width, height);
+}
+
+// ── Window catalog — active picker baseline ────────────────────────────
 // family: tophung | tophung-fixed | sidehung | sidehung-fixed | fixed | toplight | sidelight
 const CATALOG = [
-  // ── Top Hung vents only ──────────────────────────────────────────────
-  { name:'Top Hung 600×600', code:'0606T', W:600,  H:600,  family:'tophung',
-    cols:1,rows:1, colW:[600],           rowH:[600],       types:['TOP'],
-    sub:'Single vent • 600×600', note:'Standard compact bathroom or toilet vent.' },
-  { name:'Top Hung 900×600', code:'0906T', W:900,  H:600,  family:'tophung',
-    cols:1,rows:1, colW:[900],           rowH:[600],       types:['TOP'],
-    sub:'Single vent • 900×600', note:'Most common standard vent size.' },
-  { name:'Top Hung 1200×600', code:'1206T', W:1200, H:600,  family:'tophung',
-    cols:1,rows:1, colW:[1200],          rowH:[600],       types:['TOP'],
-    sub:'Single wide vent • 1200×600', note:'Wide single vent, lounge or bedroom.' },
-  { name:'Top Hung 1800×600 (TT)', code:'1806TT', W:1800, H:600,  family:'tophung',
-    cols:2,rows:1, colW:[900,900],       rowH:[600],       types:['TOP','TOP'],
-    sub:'Twin vents • 1800×600', note:'Two equal vents side by side.' },
-  { name:'Top Hung 2400×600 (4T)', code:'2406TT', W:2400, H:600,  family:'tophung',
-    cols:4,rows:1, colW:[600,600,600,600],rowH:[600],      types:['TOP','TOP','TOP','TOP'],
-    sub:'Four vents • 2400×600', note:'Wide band of four top-hung vents.' },
-  { name:'Top Hung 900×1200 (DT)', code:'0912T', W:900,  H:1200, family:'tophung',
-    cols:1,rows:2, colW:[900],           rowH:[600,600],   types:['TOP','TOP'],
-    sub:'Double-stack vents • 900×1200', note:'Two stacked vents, no fixed base.' },
+  // ── Top Hung standards from 30.5mm casement sheet ───────────────────
+  makeTopHung({ name:'Top Hung 600×600', code:'PT66', W:600, H:600, colW:[600], rowH:[600], types:['TOP'], sub:'Single vent • PT66' }),
+  makeTopHung({ name:'Top Hung 600×900', code:'PT69', W:600, H:900, colW:[600], rowH:[450,450], types:['TOP','FIXED'], sub:'Top vent + fixed base • PT69' }),
+  makeTopHung({ name:'Top Hung 600×1200', code:'PT612', W:600, H:1200, colW:[600], rowH:[600,600], types:['TOP','FIXED'], sub:'Top vent + fixed base • PT612' }),
+  makeTopHung({ name:'Top Hung 600×1200 (Twin)', code:'PTT612', W:600, H:1200, colW:[600], rowH:[600,600], types:['TOP','TOP'], sub:'Twin vent stack • PTT612' }),
+  makeTopHung({ name:'Top Hung 600×1500', code:'PT615', W:600, H:1500, colW:[600], rowH:[500,500,500], types:['TOP','TOP','FIXED'], sub:'Double vent stack + fixed base • PT615' }),
+  makeTopHung({ name:'Top Hung 600×1800', code:'PT618', W:600, H:1800, colW:[600], rowH:[600,600,600], types:['TOP','TOP','FIXED'], sub:'Tall double vent stack + fixed base • PT618' }),
+  makeTopHung({ name:'Top Hung 600×1800 (Triple)', code:'PTT618', W:600, H:1800, colW:[600], rowH:[600,600,600], types:['TOP','TOP','TOP'], sub:'Triple vent stack • PTT618' }),
+  makeTopHung({ name:'Top Hung 600×2100', code:'PT621', W:600, H:2100, colW:[600], rowH:[600,600,900], types:['TOP','TOP','FIXED'], sub:'Full-height vent stack + fixed base • PT621' }),
+  makeTopHung({ name:'Top Hung 600×2100 (Triple)', code:'PTT621', W:600, H:2100, colW:[600], rowH:[700,700,700], types:['TOP','TOP','TOP'], sub:'Full-height triple vent stack • PTT621' }),
+
+  makeTopHung({ name:'Top Hung 900×600', code:'PT96', W:900, H:600, colW:[900], rowH:[600], types:['TOP'], sub:'Single vent • PT96' }),
+  makeTopHung({ name:'Top Hung 900×900', code:'PT99', W:900, H:900, colW:[900], rowH:[450,450], types:['TOP','FIXED'], sub:'Top vent + fixed base • PT99' }),
+  makeTopHung({ name:'Top Hung 900×1200', code:'PT912', W:900, H:1200, colW:[900], rowH:[600,600], types:['TOP','FIXED'], sub:'Top vent + fixed base • PT912' }),
+  makeTopHung({ name:'Top Hung 900×1200 (Twin)', code:'PTT912', W:900, H:1200, colW:[900], rowH:[600,600], types:['TOP','TOP'], sub:'Twin vent stack • PTT912' }),
+  makeTopHung({ name:'Top Hung 900×1500', code:'PT915', W:900, H:1500, colW:[900], rowH:[500,500,500], types:['TOP','TOP','FIXED'], sub:'Double vent stack + fixed base • PT915' }),
+  makeTopHung({ name:'Top Hung 900×1800', code:'PT918', W:900, H:1800, colW:[900], rowH:[600,600,600], types:['TOP','TOP','FIXED'], sub:'Tall double vent stack + fixed base • PT918' }),
+  makeTopHung({ name:'Top Hung 900×2100', code:'PT921', W:900, H:2100, colW:[900], rowH:[600,600,900], types:['TOP','TOP','FIXED'], sub:'Full-height vent stack + fixed base • PT921' }),
+
+  makeTopHung({ name:'Top Hung 1200×600', code:'PT126', W:1200, H:600, colW:[600,600], rowH:[600], types:['TOP','FIXED'], sub:'Single vent + side fixed • PT126' }),
+  makeTopHung({ name:'Top Hung 1200×900', code:'PT129', W:1200, H:900, colW:[600,600], rowH:[450,450], types:['TOP','FIXED','FIXED','FIXED'], sub:'Vent over fixed + side fixed • PT129' }),
+  makeTopHung({ name:'Top Hung 1200×900 (Twin Side)', code:'PTT1209+', W:1200, H:900, colW:[600,600], rowH:[600,300], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + fixed base • PTT1209+' }),
+  makeTopHung({ name:'Top Hung 1200×1200', code:'PTT1212', W:1200, H:1200, colW:[600,600], rowH:[600,600], types:['TOP','FIXED','TOP','FIXED'], sub:'Double vent stack + side fixed • PTT1212' }),
+  makeTopHung({ name:'Top Hung 1200×1500', code:'PTT1215', W:1200, H:1500, colW:[600,600], rowH:[500,500,500], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Stacked vents + side fixed • PTT1215' }),
+  makeTopHung({ name:'Top Hung 1200×1800', code:'PTT1218', W:1200, H:1800, colW:[600,600], rowH:[600,600,600], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Tall stacked vents + side fixed • PTT1218' }),
+
+  makeTopHung({ name:'Top Hung 1500×600', code:'PT156', W:1500, H:600, colW:[600,900], rowH:[600], types:['TOP','FIXED'], sub:'Single vent + wide fixed • PT156' }),
+  makeTopHung({ name:'Top Hung 1500×900', code:'PT159', W:1500, H:900, colW:[600,900], rowH:[450,450], types:['TOP','FIXED','FIXED','FIXED'], sub:'Vent over fixed + wide fixed • PT159' }),
+  makeTopHung({ name:'Top Hung 1500×1200', code:'PTT1512', W:1500, H:1200, colW:[600,900], rowH:[600,600], types:['TOP','FIXED','TOP','FIXED'], sub:'Double vent stack + wide fixed • PTT1512' }),
+  makeTopHung({ name:'Top Hung 1500×1500', code:'PTT1515', W:1500, H:1500, colW:[600,900], rowH:[500,500,500], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Stacked vents + wide fixed • PTT1515' }),
+  makeTopHung({ name:'Top Hung 1500×1800', code:'PTT1518', W:1500, H:1800, colW:[600,900], rowH:[600,600,600], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Tall stacked vents + wide fixed • PTT1518' }),
+  makeTopHung({ name:'Top Hung 1500×600 (Twin)', code:'PTT156', W:1500, H:600, colW:[750,750], rowH:[600], types:['TOP','TOP'], sub:'Twin vents • PTT156' }),
+  makeTopHung({ name:'Top Hung 1500×900 (Twin)', code:'PTT159', W:1500, H:900, colW:[750,750], rowH:[600,300], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + fixed base • PTT159' }),
+  makeTopHung({ name:'Top Hung 1500×1200 (Four Vent)', code:'P4T1512', W:1500, H:1200, colW:[750,750], rowH:[600,600], types:['TOP','TOP','TOP','TOP'], sub:'Four vents • P4T1512' }),
+
+  makeTopHung({ name:'Top Hung 1800×600', code:'PT186', W:1800, H:600, colW:[900,900], rowH:[600], types:['TOP','FIXED'], sub:'Single vent + fixed • PT186' }),
+  makeTopHung({ name:'Top Hung 1800×600 (Twin Side)', code:'PTT186', W:1800, H:600, colW:[450,900,450], rowH:[600], types:['TOP','FIXED','TOP'], sub:'Twin side vents + centre fixed • PTT186' }),
+  makeTopHung({ name:'Top Hung 1800×900', code:'PT189', W:1800, H:900, colW:[900,900], rowH:[450,450], types:['TOP','FIXED','FIXED','FIXED'], sub:'Top vent + fixed • PT189' }),
+  makeTopHung({ name:'Top Hung 1800×900 (Twin Side + Base)', code:'PTT1809', W:1800, H:900, colW:[600,600,600], rowH:[600,300], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Twin side vents + centre fixed + base • PTT1809' }),
+  makeTopHung({ name:'Top Hung 1800×900 (Twin Side)', code:'PTT189', W:1800, H:900, colW:[450,900,450], rowH:[450,450], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Twin side vents + centre fixed • PTT189' }),
+  makeTopHung({ name:'Top Hung 1800×1200', code:'PTT1812', W:1800, H:1200, colW:[600,1200], rowH:[600,600], types:['TOP','FIXED','TOP','FIXED'], sub:'Double vent stack + fixed • PTT1812' }),
+  makeTopHung({ name:'Top Hung 1800×1200 (Four Vent)', code:'P4T1812', W:1800, H:1200, colW:[450,900,450], rowH:[600,600], types:['TOP','FIXED','TOP','TOP','FIXED','TOP'], sub:'Four vents with centre fixed • P4T1812' }),
+  makeTopHung({ name:'Top Hung 1800×1500', code:'PTT1815', W:1800, H:1500, colW:[600,1200], rowH:[500,500,500], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Stacked vents + fixed • PTT1815' }),
+  makeTopHung({ name:'Top Hung 1800×1500 (Four Vent)', code:'P4T1815', W:1800, H:1500, colW:[450,900,450], rowH:[500,500,500], types:['TOP','FIXED','TOP','TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Four vents with fixed base • P4T1815' }),
+  makeTopHung({ name:'Top Hung 1800×1800', code:'PTT1818', W:1800, H:1800, colW:[600,1200], rowH:[600,600,600], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Tall stacked vents + fixed • PTT1818' }),
+  makeTopHung({ name:'Top Hung 1800×1800 (Four Vent)', code:'P4T1818', W:1800, H:1800, colW:[450,900,450], rowH:[600,600,600], types:['TOP','FIXED','TOP','TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Tall four vents with fixed base • P4T1818' }),
+
+  makeTopHung({ name:'Top Hung 2100×600', code:'PT216', W:2100, H:600, colW:[900,1200], rowH:[600], types:['TOP','FIXED'], sub:'Single vent + wide fixed • PT216' }),
+  makeTopHung({ name:'Top Hung 2100×600 (Twin Side)', code:'PTT216', W:2100, H:600, colW:[450,1200,450], rowH:[600], types:['TOP','FIXED','TOP'], sub:'Twin side vents + centre fixed • PTT216' }),
+  makeTopHung({ name:'Top Hung 2100×900', code:'PT219', W:2100, H:900, colW:[900,1200], rowH:[450,450], types:['TOP','FIXED','FIXED','FIXED'], sub:'Top vent + wide fixed • PT219' }),
+  makeTopHung({ name:'Top Hung 2100×900 (Twin Side)', code:'PTT219', W:2100, H:900, colW:[450,1200,450], rowH:[450,450], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Twin side vents + centre fixed • PTT219' }),
+  makeTopHung({ name:'Top Hung 2100×1200', code:'PTT2112', W:2100, H:1200, colW:[900,1200], rowH:[600,600], types:['TOP','FIXED','TOP','FIXED'], sub:'Double vent stack + wide fixed • PTT2112' }),
+  makeTopHung({ name:'Top Hung 2100×1200 (Four Vent)', code:'P4T2112', W:2100, H:1200, colW:[450,1200,450], rowH:[600,600], types:['TOP','FIXED','TOP','TOP','FIXED','TOP'], sub:'Four vents with centre fixed • P4T2112' }),
+  makeTopHung({ name:'Top Hung 2100×1500', code:'PTT2115', W:2100, H:1500, colW:[900,1200], rowH:[500,500,500], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Stacked vents + wide fixed • PTT2115' }),
+  makeTopHung({ name:'Top Hung 2100×1500 (Four Vent)', code:'P4T2115', W:2100, H:1500, colW:[450,1200,450], rowH:[500,500,500], types:['TOP','FIXED','TOP','TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Four vents with fixed base • P4T2115' }),
+  makeTopHung({ name:'Top Hung 2100×1800', code:'PTT2118', W:2100, H:1800, colW:[900,1200], rowH:[600,600,600], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Tall stacked vents + wide fixed • PTT2118' }),
+  makeTopHung({ name:'Top Hung 2100×1800 (Four Vent)', code:'P4T2118', W:2100, H:1800, colW:[450,1200,450], rowH:[600,600,600], types:['TOP','FIXED','TOP','TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Tall four vents with fixed base • P4T2118' }),
+
+  makeTopHung({ name:'Top Hung 2400×600', code:'PT246', W:2400, H:600, colW:[1200,1200], rowH:[600], types:['TOP','FIXED'], sub:'Single vent + wide fixed • PT246' }),
+  makeTopHung({ name:'Top Hung 2400×600 (Twin Side)', code:'PTT246', W:2400, H:600, colW:[600,1200,600], rowH:[600], types:['TOP','FIXED','TOP'], sub:'Twin side vents + centre fixed • PTT246' }),
+  makeTopHung({ name:'Top Hung 2400×900', code:'PT249', W:2400, H:900, colW:[1200,1200], rowH:[450,450], types:['TOP','FIXED','FIXED','FIXED'], sub:'Top vent + wide fixed • PT249' }),
+  makeTopHung({ name:'Top Hung 2400×900 (Twin Side)', code:'PTT249', W:2400, H:900, colW:[600,1200,600], rowH:[450,450], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Twin side vents + centre fixed • PTT249' }),
+  makeTopHung({ name:'Top Hung 2400×1200', code:'PTT2412', W:2400, H:1200, colW:[1200,1200], rowH:[600,600], types:['TOP','FIXED','TOP','FIXED'], sub:'Double vent stack + wide fixed • PTT2412' }),
+  makeTopHung({ name:'Top Hung 2400×1200 (Four Vent)', code:'P4T2412', W:2400, H:1200, colW:[600,1200,600], rowH:[600,600], types:['TOP','FIXED','TOP','TOP','FIXED','TOP'], sub:'Four vents with centre fixed • P4T2412' }),
+  makeTopHung({ name:'Top Hung 2400×1500', code:'PTT2415', W:2400, H:1500, colW:[1200,1200], rowH:[500,500,500], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Stacked vents + wide fixed • PTT2415' }),
+  makeTopHung({ name:'Top Hung 2400×1500 (Four Vent)', code:'P4T2415', W:2400, H:1500, colW:[600,1200,600], rowH:[500,500,500], types:['TOP','FIXED','TOP','TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Four vents with fixed base • P4T2415' }),
+  makeTopHung({ name:'Top Hung 2400×1800', code:'PTT2418', W:2400, H:1800, colW:[1200,1200], rowH:[600,600,600], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Tall stacked vents + wide fixed • PTT2418' }),
+  makeTopHung({ name:'Top Hung 2400×1800 (Four Vent)', code:'P4T2418', W:2400, H:1800, colW:[600,1200,600], rowH:[600,600,600], types:['TOP','FIXED','TOP','TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Tall four vents with fixed base • P4T2418' }),
+
+  // ── Top Hung B range ────────────────────────────────────────────────
+  makeTopHung({ name:'Top Hung B 900×1200', code:'PTT912B', W:900, H:1200, group:'Top Hung B Range', colW:[450,450], rowH:[600,600], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + fixed base • PTT912B' }),
+  makeTopHung({ name:'Top Hung B 900×1200 (Four Vent)', code:'P4T912B', W:900, H:1200, group:'Top Hung B Range', colW:[450,450], rowH:[600,600], types:['TOP','TOP','TOP','TOP'], sub:'Four vents • P4T912B' }),
+  makeTopHung({ name:'Top Hung B 1200×1200', code:'PTT1212B', W:1200, H:1200, group:'Top Hung B Range', colW:[600,600], rowH:[600,600], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + fixed base • PTT1212B' }),
+  makeTopHung({ name:'Top Hung B 1200×1200 (Four Vent)', code:'P4T1212B', W:1200, H:1200, group:'Top Hung B Range', colW:[600,600], rowH:[600,600], types:['TOP','TOP','TOP','TOP'], sub:'Four vents • P4T1212B' }),
+  makeTopHung({ name:'Top Hung B 1500×1200', code:'PTT1512B', W:1500, H:1200, group:'Top Hung B Range', colW:[750,750], rowH:[600,600], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + fixed base • PTT1512B' }),
+  makeTopHung({ name:'Top Hung B 1500×1200 (Four Vent)', code:'P4T1512B', W:1500, H:1200, group:'Top Hung B Range', colW:[750,750], rowH:[600,600], types:['TOP','TOP','TOP','TOP'], sub:'Four vents • P4T1512B' }),
+  makeTopHung({ name:'Top Hung B 1800×1200', code:'PTT1812B', W:1800, H:1200, group:'Top Hung B Range', colW:[900,900], rowH:[600,600], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + fixed base • PTT1812B' }),
+  makeTopHung({ name:'Top Hung B 1800×1200 (Four Vent)', code:'P4T1812B', W:1800, H:1200, group:'Top Hung B Range', colW:[900,900], rowH:[600,600], types:['TOP','TOP','TOP','TOP'], sub:'Four vents • P4T1812B' }),
+
+  makeTopHung({ name:'Top Hung B 900×1500', code:'PTT915B', W:900, H:1500, group:'Top Hung B Range', colW:[450,450], rowH:[600,900], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + tall fixed base • PTT915B' }),
+  makeTopHung({ name:'Top Hung B 900×1500 (Four Vent)', code:'P4T915B', W:900, H:1500, group:'Top Hung B Range', colW:[450,450], rowH:[500,500,500], types:['TOP','TOP','TOP','TOP','FIXED','FIXED'], sub:'Four vents + fixed base • P4T915B' }),
+  makeTopHung({ name:'Top Hung B 1200×1500', code:'PTT1215B', W:1200, H:1500, group:'Top Hung B Range', colW:[600,600], rowH:[600,900], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + tall fixed base • PTT1215B' }),
+  makeTopHung({ name:'Top Hung B 1200×1500 (Four Vent)', code:'P4T1215B', W:1200, H:1500, group:'Top Hung B Range', colW:[600,600], rowH:[500,500,500], types:['TOP','TOP','TOP','TOP','FIXED','FIXED'], sub:'Four vents + fixed base • P4T1215B' }),
+  makeTopHung({ name:'Top Hung B 1500×1500', code:'PTT1515B', W:1500, H:1500, group:'Top Hung B Range', colW:[750,750], rowH:[600,900], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + tall fixed base • PTT1515B' }),
+  makeTopHung({ name:'Top Hung B 1500×1500 (Four Vent)', code:'P4T1515B', W:1500, H:1500, group:'Top Hung B Range', colW:[750,750], rowH:[500,500,500], types:['TOP','TOP','TOP','TOP','FIXED','FIXED'], sub:'Four vents + fixed base • P4T1515B' }),
+  makeTopHung({ name:'Top Hung B 1800×1500', code:'PTT1815B', W:1800, H:1500, group:'Top Hung B Range', colW:[900,900], rowH:[600,900], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + tall fixed base • PTT1815B' }),
+  makeTopHung({ name:'Top Hung B 1800×1500 (Four Vent)', code:'P4T1815B', W:1800, H:1500, group:'Top Hung B Range', colW:[900,900], rowH:[500,500,500], types:['TOP','TOP','TOP','TOP','FIXED','FIXED'], sub:'Four vents + fixed base • P4T1815B' }),
+
+  makeTopHung({ name:'Top Hung B 900×1800', code:'PTT918B', W:900, H:1800, group:'Top Hung B Range', colW:[450,450], rowH:[600,1200], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + full-height fixed base • PTT918B' }),
+  makeTopHung({ name:'Top Hung B 900×1800 (Four Vent)', code:'P4T918B', W:900, H:1800, group:'Top Hung B Range', colW:[450,450], rowH:[600,600,600], types:['TOP','TOP','TOP','TOP','FIXED','FIXED'], sub:'Four vents + fixed base • P4T918B' }),
+  makeTopHung({ name:'Top Hung B 1200×1800', code:'PTT1218B', W:1200, H:1800, group:'Top Hung B Range', colW:[600,600], rowH:[600,1200], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + full-height fixed base • PTT1218B' }),
+  makeTopHung({ name:'Top Hung B 1200×1800 (Four Vent)', code:'P4T1218B', W:1200, H:1800, group:'Top Hung B Range', colW:[600,600], rowH:[600,600,600], types:['TOP','TOP','TOP','TOP','FIXED','FIXED'], sub:'Four vents + fixed base • P4T1218B' }),
+  makeTopHung({ name:'Top Hung B 1500×1800', code:'PTT1518B', W:1500, H:1800, group:'Top Hung B Range', colW:[750,750], rowH:[600,1200], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + full-height fixed base • PTT1518B' }),
+  makeTopHung({ name:'Top Hung B 1500×1800 (Four Vent)', code:'P4T1518B', W:1500, H:1800, group:'Top Hung B Range', colW:[750,750], rowH:[600,600,600], types:['TOP','TOP','TOP','TOP','FIXED','FIXED'], sub:'Four vents + fixed base • P4T1518B' }),
+  makeTopHung({ name:'Top Hung B 1800×1800', code:'PTT1818B', W:1800, H:1800, group:'Top Hung B Range', colW:[900,900], rowH:[600,1200], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + full-height fixed base • PTT1818B' }),
+  makeTopHung({ name:'Top Hung B 1800×1800 (Four Vent)', code:'P4T1818B', W:1800, H:1800, group:'Top Hung B Range', colW:[900,900], rowH:[600,600,600], types:['TOP','TOP','TOP','TOP','FIXED','FIXED'], sub:'Four vents + fixed base • P4T1818B' }),
+
   // ── Top Hung + Fixed ────────────────────────────────────────────────
   { name:'Top Hung + Fixed 600×900', code:'0609T', W:600,  H:900,  family:'tophung-fixed',
     cols:1,rows:2, colW:[600],           rowH:[600,300],   types:['TOP','FIXED'],
@@ -321,15 +521,83 @@ const CATALOG = [
     cols:2,rows:3, colW:[600,600],       rowH:[600,600,300],types:['TOP','TOP','TOP','TOP','FIXED','FIXED'],
     sub:'Wide double vent + fixed • 1200×1500', note:'Tall, wide: two columns of double vents.' },
   // ── Side Hung ────────────────────────────────────────────────────────
-  { name:'Side Hung 600×900', code:'SH-0609', W:600, H:900, family:'sidehung',
-    cols:1,rows:1, colW:[600],           rowH:[900],       types:['SIDE'],
-    sub:'Single side-hung vent • 600×900', note:'Hinges on side — like a door. Angular casement.' },
-  { name:'Side Hung 900×1200', code:'SH-0912', W:900, H:1200, family:'sidehung',
-    cols:1,rows:1, colW:[900],           rowH:[1200],      types:['SIDE'],
-    sub:'Side vent • 900×1200', note:'Taller side-hung vent.' },
-  { name:'Side Hung Pair 1200×1200', code:'SH-1212P', W:1200, H:1200, family:'sidehung',
-    cols:2,rows:1, colW:[600,600],       rowH:[1200],      types:['SIDE','SIDE'],
-    sub:'Pair of side-hung vents • 1200×1200', note:'French-style pair — two side-hung units.' },
+  makeGridPreset({ name:'Side Hung 600×900', code:'SH-0609', W:600, H:900, family:'sidehung',
+    group:'Side Hung - Single sash', colW:[600], rowH:[900], types:['SIDE'],
+    sub:'Single sash • 600×900', note:'Single side-hung sash.' }),
+  makeGridPreset({ name:'Side Hung 600×1200', code:'SH-0612', W:600, H:1200, family:'sidehung',
+    group:'Side Hung - Single sash', colW:[600], rowH:[1200], types:['SIDE'],
+    sub:'Single sash • 600×1200', note:'Tall single side-hung sash.' }),
+  makeGridPreset({ name:'Side Hung 600×1500', code:'SH-0615', W:600, H:1500, family:'sidehung',
+    group:'Side Hung - Single sash', colW:[600], rowH:[1200,300], types:['SIDE','FIXED'],
+    sub:'Sash over fixed base • 600×1500', note:'Side-hung sash above fixed base.' }),
+  makeGridPreset({ name:'Side Hung 600×1800', code:'SH-0618', W:600, H:1800, family:'sidehung',
+    group:'Side Hung - Single sash', colW:[600], rowH:[1200,600], types:['SIDE','FIXED'],
+    sub:'Tall sash over fixed base • 600×1800', note:'Tall side-hung sash above fixed base.' }),
+
+  makeGridPreset({ name:'Side Hung 900×900', code:'SH-0909', W:900, H:900, family:'sidehung',
+    group:'Side Hung - Sash + fixed side', colW:[600,300], rowH:[900], types:['SIDE','FIXED'],
+    sub:'Sash + fixed side • 900×900', note:'One side-hung sash with a narrow fixed light.' }),
+  makeGridPreset({ name:'Side Hung 900×1200', code:'SH-0912', W:900, H:1200, family:'sidehung',
+    group:'Side Hung - Sash + fixed side', colW:[600,300], rowH:[1200], types:['SIDE','FIXED'],
+    sub:'Sash + fixed side • 900×1200', note:'Tall side-hung sash with narrow fixed side light.' }),
+  makeGridPreset({ name:'Side Hung 900×1500', code:'SH-0915', W:900, H:1500, family:'sidehung',
+    group:'Side Hung - Sash + fixed side', colW:[600,300], rowH:[1200,300], types:['SIDE','FIXED','FIXED','FIXED'],
+    sub:'Sash + fixed side over base • 900×1500', note:'Side-hung sash with fixed side light and base panel.' }),
+  makeGridPreset({ name:'Side Hung 900×1800', code:'SH-0918', W:900, H:1800, family:'sidehung',
+    group:'Side Hung - Sash + fixed side', colW:[600,300], rowH:[1200,600], types:['SIDE','FIXED','FIXED','FIXED'],
+    sub:'Tall sash + fixed side over base • 900×1800', note:'Tall side-hung sash with fixed side light and deeper base panel.' }),
+
+  makeGridPreset({ name:'Side Hung 1200×900', code:'SH-1209', W:1200, H:900, family:'sidehung',
+    group:'Side Hung - Sash + fixed side', colW:[600,600], rowH:[900], types:['SIDE','FIXED'],
+    sub:'Sash + fixed side • 1200×900', note:'Half vent, half fixed side-hung layout.' }),
+  makeGridPreset({ name:'Side Hung 1200×1200', code:'SH-1212', W:1200, H:1200, family:'sidehung',
+    group:'Side Hung - Sash + fixed side', colW:[600,600], rowH:[1200], types:['SIDE','FIXED'],
+    sub:'Sash + fixed side • 1200×1200', note:'Side-hung sash paired with equal fixed panel.' }),
+  makeGridPreset({ name:'Side Hung 1200×1500', code:'SH-1215', W:1200, H:1500, family:'sidehung',
+    group:'Side Hung - Sash + fixed side', colW:[600,600], rowH:[1200,300], types:['SIDE','FIXED','FIXED','FIXED'],
+    sub:'Sash + fixed side over base • 1200×1500', note:'Tall side-hung sash beside full-height fixed panel.' }),
+  makeGridPreset({ name:'Side Hung 1200×1800', code:'SH-1218', W:1200, H:1800, family:'sidehung',
+    group:'Side Hung - Sash + fixed side', colW:[600,600], rowH:[1200,600], types:['SIDE','FIXED','FIXED','FIXED'],
+    sub:'Tall sash + fixed side over base • 1200×1800', note:'Tall side-hung sash beside full-height fixed panel and base.' }),
+
+  makeGridPreset({ name:'Side Hung 1500×900', code:'SH-1509', W:1500, H:900, family:'sidehung',
+    group:'Side Hung - Sash + wide fixed', colW:[600,900], rowH:[900], types:['SIDE','FIXED'],
+    sub:'Sash + wide fixed • 1500×900', note:'Side-hung sash with wide fixed section.' }),
+  makeGridPreset({ name:'Side Hung 1500×1200', code:'SH-1512', W:1500, H:1200, family:'sidehung',
+    group:'Side Hung - Sash + wide fixed', colW:[600,900], rowH:[1200], types:['SIDE','FIXED'],
+    sub:'Sash + wide fixed • 1500×1200', note:'Tall side-hung sash with wide fixed section.' }),
+  makeGridPreset({ name:'Side Hung 1500×1500', code:'SH-1515', W:1500, H:1500, family:'sidehung',
+    group:'Side Hung - Sash + wide fixed', colW:[600,900], rowH:[1200,300], types:['SIDE','FIXED','FIXED','FIXED'],
+    sub:'Sash + wide fixed over base • 1500×1500', note:'Wide fixed section with side-hung sash and base panel.' }),
+  makeGridPreset({ name:'Side Hung 1500×1800', code:'SH-1518', W:1500, H:1800, family:'sidehung',
+    group:'Side Hung - Sash + wide fixed', colW:[600,900], rowH:[1200,600], types:['SIDE','FIXED','FIXED','FIXED'],
+    sub:'Tall sash + wide fixed over base • 1500×1800', note:'Tall side-hung sash with wide fixed section and deeper base.' }),
+
+  makeGridPreset({ name:'Side Hung 1800×900', code:'SH-1809', W:1800, H:900, family:'sidehung',
+    group:'Side Hung - Twin sashes', colW:[600,600,600], rowH:[900], types:['SIDE','FIXED','SIDE'],
+    sub:'Twin sashes + centre fixed • 1800×900', note:'Twin side-hung sashes with centre fixed panel.' }),
+  makeGridPreset({ name:'Side Hung 1800×1200', code:'SH-1812', W:1800, H:1200, family:'sidehung',
+    group:'Side Hung - Twin sashes', colW:[600,600,600], rowH:[1200], types:['SIDE','FIXED','SIDE'],
+    sub:'Twin sashes + centre fixed • 1800×1200', note:'Twin side-hung sashes with equal centre fixed panel.' }),
+  makeGridPreset({ name:'Side Hung 1800×1500', code:'SH-1815', W:1800, H:1500, family:'sidehung',
+    group:'Side Hung - Twin sashes', colW:[600,600,600], rowH:[1200,300], types:['SIDE','FIXED','SIDE','FIXED','FIXED','FIXED'],
+    sub:'Twin sashes over base • 1800×1500', note:'Twin side-hung sashes with centre fixed and base band.' }),
+  makeGridPreset({ name:'Side Hung 1800×1800', code:'SH-1818', W:1800, H:1800, family:'sidehung',
+    group:'Side Hung - Twin sashes', colW:[600,600,600], rowH:[1200,600], types:['SIDE','FIXED','SIDE','FIXED','FIXED','FIXED'],
+    sub:'Tall twin sashes over base • 1800×1800', note:'Tall twin side-hung sashes with centre fixed and deeper base band.' }),
+
+  makeGridPreset({ name:'Side Hung 2400×900', code:'SH-2409', W:2400, H:900, family:'sidehung',
+    group:'Side Hung - Twin sashes', colW:[600,1200,600], rowH:[900], types:['SIDE','FIXED','SIDE'],
+    sub:'Twin sashes + wide centre fixed • 2400×900', note:'Twin side-hung sashes flanking a wide centre fixed panel.' }),
+  makeGridPreset({ name:'Side Hung 2400×1200', code:'SH-2412', W:2400, H:1200, family:'sidehung',
+    group:'Side Hung - Twin sashes', colW:[600,1200,600], rowH:[1200], types:['SIDE','FIXED','SIDE'],
+    sub:'Twin sashes + wide centre fixed • 2400×1200', note:'Twin side-hung sashes flanking a wide centre fixed panel.' }),
+  makeGridPreset({ name:'Side Hung 2400×1500', code:'SH-2415', W:2400, H:1500, family:'sidehung',
+    group:'Side Hung - Twin sashes', colW:[600,1200,600], rowH:[1200,300], types:['SIDE','FIXED','SIDE','FIXED','FIXED','FIXED'],
+    sub:'Twin sashes over base • 2400×1500', note:'Twin side-hung sashes with wide centre fixed and base band.' }),
+  makeGridPreset({ name:'Side Hung 2400×1800', code:'SH-2418', W:2400, H:1800, family:'sidehung',
+    group:'Side Hung - Twin sashes', colW:[600,1200,600], rowH:[1200,600], types:['SIDE','FIXED','SIDE','FIXED','FIXED','FIXED'],
+    sub:'Tall twin sashes over base • 2400×1800', note:'Tall twin side-hung sashes with wide centre fixed and deeper base band.' }),
   // ── Fixed Panel ──────────────────────────────────────────────────────
   { name:'Fixed Panel 600×600', code:'FX-0606', W:600,  H:600,  family:'fixed', svgFn:'fixed',
     sub:'Fixed panel • 600×600', note:'No opening — glass only. Used as infill.' },
@@ -387,14 +655,20 @@ function renderCatalog() {
 
   document.getElementById('sectionLabel').textContent = label;
 
-  const grid = document.getElementById('catalog');
-  grid.innerHTML = items.map(w => {
+  const groups = [];
+  items.forEach((item) => {
+    const key = item.group || label;
+    let found = groups.find((g) => g.key === key);
+    if (!found) {
+      found = { key, items: [] };
+      groups.push(found);
+    }
+    found.items.push(item);
+  });
+
+  const renderCard = (w) => {
     const thumbW = 88, thumbH = Math.max(56, Math.round(thumbW * w.H / w.W));
-    let svg;
-    if (w.svgFn === 'fixed')     svg = fixedSVG(thumbW, thumbH);
-    else if (w.svgFn === 'toplight') svg = toplightSVG(thumbW, thumbH);
-    else if (w.svgFn === 'sidelight') svg = sidelightSVG(thumbW, thumbH);
-    else svg = presetSVG(w, thumbW, thumbH);
+    const svg = renderWindowGraphic(w, thumbW, thumbH);
     const sel = w.code === selectedCode ? 'selected' : '';
     return `<article class="card ${sel}" onclick="selectCard('${w.code}')">
       <div class="thumb">${svg}</div>
@@ -402,7 +676,15 @@ function renderCatalog() {
       <div class="sub">${w.sub}</div>
       <div class="code">${w.code}</div>
     </article>`;
-  }).join('');
+  };
+
+  const grid = document.getElementById('catalog');
+  grid.innerHTML = groups.map((group) => `
+    <section class="catalog-group">
+      <div class="catalog-group-title">${group.key}</div>
+      <div class="group-grid">${group.items.map(renderCard).join('')}</div>
+    </section>
+  `).join('');
 }
 
 // ── Select a card and update side panel ─────────────────────────────────
@@ -426,11 +708,7 @@ function selectCard(code) {
   const aspect = w.W / w.H;
   let pW = bW - 32, pH = Math.round(pW / aspect);
   if (pH > bH - 24) { pH = bH - 24; pW = Math.round(pH * aspect); }
-  let svg;
-  if (w.svgFn === 'fixed')          svg = fixedSVG(pW, pH);
-  else if (w.svgFn === 'toplight')  svg = toplightSVG(pW, pH);
-  else if (w.svgFn === 'sidelight') svg = sidelightSVG(pW, pH);
-  else svg = presetSVG(w, pW, pH);
+  const svg = renderWindowGraphic(w, pW, pH);
   box.innerHTML = svg;
 
   document.getElementById('codeField').value = w.code;
@@ -455,11 +733,7 @@ function useSelected() {
   if (!w) { alert('Select a window first.'); return; }
   // thumbnail for the workspace diagram cell
   const tW = 88, tH = Math.max(40, Math.min(96, Math.round(tW * w.H / w.W)));
-  let svg;
-  if (w.svgFn === 'fixed')          svg = fixedSVG(tW, tH);
-  else if (w.svgFn === 'toplight')  svg = toplightSVG(tW, tH);
-  else if (w.svgFn === 'sidelight') svg = sidelightSVG(tW, tH);
-  else svg = presetSVG(w, tW, tH);
+  const svg = renderWindowGraphic(w, tW, tH);
 
   if (CTX && typeof CTX.i === 'number') {
     localStorage.setItem('aw_picker_result', JSON.stringify({

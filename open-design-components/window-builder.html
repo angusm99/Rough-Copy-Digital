@@ -22,24 +22,26 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: linear-gradient(180deg, oklch(17% 0.01 245), var(--bg));
+      background: linear-gradient(180deg, rgba(4, 6, 10, 0.72), rgba(4, 6, 10, 0.86)), linear-gradient(180deg, oklch(17% 0.01 245), var(--bg));
       color: var(--fg);
       font-family: var(--font-body);
       display: grid;
       place-items: center;
-      padding: 16px;
+      padding: 18px;
     }
     .modal {
-      width: min(1240px, 100%);
+      width: min(1280px, 100%);
+      min-height: min(860px, calc(100vh - 36px));
       background: color-mix(in oklab, var(--surface) 92%, black 8%);
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
-      border-radius: 22px;
+      border-radius: 24px;
       overflow: hidden;
       display: grid;
       grid-template-rows: auto auto 1fr auto;
+      box-shadow: 0 28px 80px rgba(0,0,0,.4);
     }
     .head {
-      padding: 16px 20px;
+      padding: 18px 22px;
       border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
       display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; flex-wrap: wrap;
     }
@@ -50,7 +52,7 @@
       letter-spacing: .14em;
       text-transform: uppercase;
     }
-    h1 { margin: 5px 0 0; font-size: 27px; font-family: var(--font-display); }
+    h1 { margin: 6px 0 0; font-size: 30px; font-family: var(--font-display); }
     button {
       border: 0; border-radius: 10px; padding: 10px 14px;
       font: inherit; font-weight: 700; cursor: pointer; min-height: 42px;
@@ -65,7 +67,7 @@
       min-height: 44px; min-width: 44px; padding: 8px 13px; font-size: 15px; border-radius: 9px;
     }
     .toolbar {
-      padding: 12px 20px;
+      padding: 12px 22px;
       display: flex; gap: 16px; align-items: end; flex-wrap: wrap;
       background: color-mix(in oklab, var(--surface-2) 82%, black 18%);
       border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
@@ -79,9 +81,9 @@
       color: var(--fg); font: inherit; text-align: center; min-height: 42px;
     }
     .count { min-width: 26px; text-align: center; font-weight: 700; }
-    .body { display: grid; grid-template-columns: 1fr 300px; min-height: 0; }
+    .body { display: grid; grid-template-columns: 1fr 360px; min-height: 0; }
     .canvas-wrap {
-      padding: 20px; display: flex; align-items: center; justify-content: center;
+      padding: 20px 22px; display: flex; align-items: center; justify-content: center;
       min-height: 420px;
     }
     #canvasBox { width: 100%; display: flex; justify-content: center; }
@@ -89,32 +91,75 @@
     .side {
       border-left: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
       background: color-mix(in oklab, var(--surface) 88%, black 12%);
-      padding: 16px; display: grid; gap: 13px; align-content: start;
-      overflow-y: auto; max-height: calc(100vh - 320px);
+      padding: 18px; display: grid; gap: 14px; align-content: start;
+      overflow-y: auto; overflow-x: hidden; max-height: calc(100vh - 320px);
     }
     .panel {
-      padding: 13px; border-radius: 13px;
+      padding: 14px; border-radius: 14px;
       border: 1px solid color-mix(in oklab, var(--border) 86%, white 14%);
       background: color-mix(in oklab, var(--surface-2) 92%, black 8%);
     }
-    .dim-list { display: grid; gap: 7px; margin-top: 8px; }
-    .dim-row { display: flex; gap: 6px; align-items: center; }
-    .dim-row .label { width: 38px; }
+    .preview-box {
+      height: 200px;
+      border-radius: 12px;
+      border: 1px solid color-mix(in oklab, var(--border) 80%, var(--accent) 20%);
+      background: color-mix(in oklab, var(--surface) 72%, black 28%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    .preview-box svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .dim-list { display: grid; gap: 10px; margin-top: 8px; }
+    .dim-row {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+    }
+    .dim-row .label {
+      width: auto;
+      padding-top: 11px;
+    }
     .dim-row input {
       flex: 1; min-width: 0; padding: 8px 8px; border-radius: 8px; min-height: 42px;
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
       background: color-mix(in oklab, var(--surface) 72%, var(--surface-2));
       color: var(--fg); font: inherit; font-size: 15px; text-align: center;
     }
+    .dim-controls {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+    .snap-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+    }
     .snapbtn {
-      min-height: 42px; padding: 6px 10px; font-size: 12px; font-weight: 600; border-radius: 8px;
+      min-height: 34px; padding: 6px 8px; font-size: 11px; font-weight: 600; border-radius: 8px;
       border: 1px solid color-mix(in oklab, var(--border) 84%, white 16%);
       background: color-mix(in oklab, var(--surface-3) 80%, black 20%);
       color: var(--muted);
     }
     .legend { display: grid; gap: 7px; font-size: 13px; }
     .legend span { display: inline-block; width: 13px; height: 13px; border-radius: 3px; margin-right: 8px; vertical-align: -2px; }
-    .spec { font-family: var(--font-mono); font-size: 11px; line-height: 1.6; color: var(--muted); word-break: break-all; }
+    .spec {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
     .foot {
       padding: 13px 20px;
       display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
@@ -176,7 +221,7 @@
       <div class="legend" style="display:flex;gap:14px">
         <small><span style="background:#3a6bc2"></span>Fixed</small>
         <small><span style="background:#2e9e68"></span>Top hung</small>
-        <small><span style="background:#c28a2e"></span>Side hung</small>
+        <small><span style="background:#2e9e68"></span>Side hung</small>
         <small><span style="background:#7a5ea8"></span>Toplight</small>
       </div>
     </div>
@@ -185,6 +230,11 @@
   <section class="body">
     <div class="canvas-wrap"><div id="canvasBox"></div></div>
     <aside class="side">
+      <div class="panel">
+        <div class="label">Selection preview</div>
+        <h2 id="builderName" style="margin:10px 0 0;font-size:18px;font-family:var(--font-display)">Custom window</h2>
+        <div class="preview-box" id="builderPreview"></div>
+      </div>
       <div class="panel">
         <div class="label">Column widths (mm)</div>
         <div class="dim-list" id="colDims"></div>
@@ -211,7 +261,14 @@
 
 <script>
 // ── colours match rough-copy-digital_6 WB_COLOURS ─────────────────────────
-const CLR = { FIXED:'#3a6bc2', TOP:'#2e9e68', SIDE:'#c28a2e', TOPLIGHT:'#7a5ea8' };
+const CLR = {
+  FIXED:'#3a6bc2',
+  TOP:'#2e9e68',
+  SIDE:'#2e9e68',
+  TOPLIGHT:'#7a5ea8',
+  MULLION:'#3a6bc2',
+  FRAME:'#f5d13a'
+};
 const CYCLE = ['FIXED','TOP','SIDE','TOPLIGHT'];
 const STD = [300, 600, 900];
 const MIN_CELL = 150;
@@ -321,37 +378,63 @@ function drawSVG(W, H, interactive) {
   let colXs = [0]; wb.colW.forEach((w) => colXs.push(colXs[colXs.length - 1] + w));
   let rowYs = [0]; wb.rowH.forEach((h) => rowYs.push(rowYs[rowYs.length - 1] + h));
   const scX = W / wb.W, scY = H / wb.H;
+  const profile = Math.max(3, Math.min(12, Math.round(Math.min(W, H) * .055)));
+  const sashInset = Math.max(3, Math.round(profile * .75));
+  const clickRects = [];
   let s = '';
   for (let r = 0; r < wb.rows; r++) for (let c = 0; c < wb.cols; c++) {
     const i = r * wb.cols + c;
     const t = wb.types[i];
     const x1 = Math.round(colXs[c] * scX + .5), y1 = Math.round(rowYs[r] * scY + .5);
     const x2 = Math.round(colXs[c + 1] * scX - .5), y2 = Math.round(rowYs[r + 1] * scY - .5);
-    const clr = CLR[t];
-    s += `<rect data-i="${i}" x="${x1}" y="${y1}" width="${x2 - x1}" height="${y2 - y1}" fill="${clr}28" stroke="${clr}" stroke-width="1.6"/>`;
+    const fillClr = CLR[t] || CLR.FIXED;
+    const w = Math.max(1, x2 - x1);
+    const h = Math.max(1, y2 - y1);
+    const gx = x1 + profile;
+    const gy = y1 + profile;
+    const gw = Math.max(2, w - profile * 2);
+    const gh = Math.max(2, h - profile * 2);
+    s += `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" fill="${fillClr}12" stroke="none"/>`;
+    s += `<rect x="${gx}" y="${gy}" width="${gw}" height="${gh}" fill="#0d1319" stroke="#d0ae62" stroke-width="${Math.max(.8, profile * .16)}"/>`;
+    s += `<rect x="${gx + 1}" y="${gy + 1}" width="${Math.max(1, gw - 2)}" height="${Math.max(1, gh - 2)}" fill="${fillClr}18" stroke="#1b242b" stroke-width="${Math.max(.6, profile * .12)}"/>`;
     if (t === 'TOP') {
-      const hy = y1 + Math.round((y2 - y1) * .38);
-      s += `<line x1="${x1 + 4}" y1="${hy}" x2="${x2 - 4}" y2="${hy}" stroke="${clr}" stroke-width="1" stroke-dasharray="3,2.5" pointer-events="none"/>`;
-      s += `<line x1="${x1 + 4}" y1="${y1 + 3}" x2="${x1 + 4}" y2="${hy}" stroke="${clr}" stroke-width="1.1" pointer-events="none"/>`;
-      s += `<line x1="${x2 - 4}" y1="${y1 + 3}" x2="${x2 - 4}" y2="${hy}" stroke="${clr}" stroke-width="1.1" pointer-events="none"/>`;
+      const topY = gy + sashInset;
+      const apexY = gy + Math.round(gh * .86);
+      const midX = Math.round(gx + gw / 2);
+      s += `<path d="M ${gx + sashInset} ${topY} L ${gx + gw - sashInset} ${topY} L ${midX} ${apexY} Z" fill="none" stroke="${CLR.TOP}" stroke-width="${Math.max(1.2, profile * .28)}" stroke-linejoin="round" pointer-events="none"/>`;
     }
     if (t === 'SIDE') {
-      const vx = x1 + Math.round((x2 - x1) * .35);
-      s += `<line x1="${vx}" y1="${y1 + 4}" x2="${vx}" y2="${y2 - 4}" stroke="${clr}" stroke-width="1" stroke-dasharray="3,2.5" pointer-events="none"/>`;
-      s += `<line x1="${x1 + 3}" y1="${y1 + 4}" x2="${vx}" y2="${y1 + 4}" stroke="${clr}" stroke-width="1.1" pointer-events="none"/>`;
-      s += `<line x1="${x1 + 3}" y1="${y2 - 4}" x2="${vx}" y2="${y2 - 4}" stroke="${clr}" stroke-width="1.1" pointer-events="none"/>`;
+      const leftX = gx + sashInset;
+      const apexX = gx + Math.round(gw * .86);
+      const midY = Math.round(gy + gh / 2);
+      s += `<path d="M ${leftX} ${gy + sashInset} L ${apexX} ${midY} L ${leftX} ${gy + gh - sashInset} Z" fill="none" stroke="${CLR.SIDE}" stroke-width="${Math.max(1.2, profile * .28)}" stroke-linejoin="round" pointer-events="none"/>`;
     }
     if (t === 'TOPLIGHT') {
-      for (let hx = x1 + 6; hx < x2; hx += 6)
-        s += `<line x1="${hx}" y1="${y1 + 2}" x2="${hx - 5}" y2="${y2 - 2}" stroke="${clr}" stroke-width=".6" opacity=".4" pointer-events="none"/>`;
+      for (let hx = gx + 4; hx < gx + gw; hx += 7)
+        s += `<line x1="${hx}" y1="${gy + 2}" x2="${hx - 6}" y2="${gy + gh - 2}" stroke="${CLR.TOPLIGHT}" stroke-width=".7" opacity=".5" pointer-events="none"/>`;
     }
     if (interactive) {
       // cell label: type + mm
-      s += `<text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-family="monospace" fill="${clr}" opacity=".85" pointer-events="none">${t}</text>`;
+      s += `<text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-family="monospace" fill="${fillClr}" opacity=".85" pointer-events="none">${t}</text>`;
       s += `<text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 + 14}" text-anchor="middle" font-size="9.5" font-family="monospace" fill="#8a9ab0" pointer-events="none">${wb.colW[c]}×${wb.rowH[r]}</text>`;
     }
+    clickRects.push(`<rect data-i="${i}" x="${x1}" y="${y1}" width="${w}" height="${h}" fill="transparent" pointer-events="all"/>`);
   }
-  s += `<rect x="1" y="1" width="${W - 2}" height="${H - 2}" fill="none" stroke="#f5b800" stroke-width="2.2" pointer-events="none"/>`;
+
+  for (let c = 1; c < wb.cols; c++) {
+    const x = Math.round(colXs[c] * scX);
+    s += `<line x1="${x}" y1="1.5" x2="${x}" y2="${H - 1.5}" stroke="#d0ae62" stroke-width="${profile * 1.1}" pointer-events="none"/>`;
+    s += `<line x1="${x}" y1="1.5" x2="${x}" y2="${H - 1.5}" stroke="${CLR.MULLION}" stroke-width="${Math.max(1.2, profile * .3)}" pointer-events="none"/>`;
+  }
+  for (let r = 1; r < wb.rows; r++) {
+    const y = Math.round(rowYs[r] * scY);
+    s += `<line x1="1.5" y1="${y}" x2="${W - 1.5}" y2="${y}" stroke="#d0ae62" stroke-width="${profile * 1.1}" pointer-events="none"/>`;
+    s += `<line x1="1.5" y1="${y}" x2="${W - 1.5}" y2="${y}" stroke="${CLR.MULLION}" stroke-width="${Math.max(1.2, profile * .3)}" pointer-events="none"/>`;
+  }
+
+  s += `<rect x="${profile / 2}" y="${profile / 2}" width="${W - profile}" height="${H - profile}" fill="none" stroke="#d0ae62" stroke-width="${profile}" pointer-events="none"/>`;
+  s += `<rect x="1" y="1" width="${W - 2}" height="${H - 2}" fill="none" stroke="${CLR.FRAME}" stroke-width="${Math.max(1.6, profile * .28)}" pointer-events="none"/>`;
+  if (interactive) s += clickRects.join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
 }
 
@@ -370,6 +453,9 @@ function render() {
   let cw = maxW, ch = Math.round(maxW * wb.H / wb.W);
   if (ch > maxH) { ch = maxH; cw = Math.round(maxH * wb.W / wb.H); }
   document.getElementById('canvasBox').innerHTML = drawSVG(cw, ch, true);
+  const previewH = Math.max(90, Math.round(220 * wb.H / wb.W));
+  document.getElementById('builderPreview').innerHTML = drawSVG(220, previewH, false);
+  document.getElementById('builderName').textContent = `Custom ${wb.W}×${wb.H}`;
 
   document.getElementById('colCount').textContent = wb.cols - 1;
   document.getElementById('rowCount').textContent = wb.rows - 1;
@@ -380,9 +466,13 @@ function render() {
   const dimRows = (axis, arr) => arr.map((v, i) => `
     <div class="dim-row">
       <span class="label">${axis === 'col' ? 'C' : 'R'}${i + 1}</span>
-      <input type="number" inputmode="numeric" value="${v}"
-        onchange="setDim('${axis}', ${i}, this.value)" />
-      ${STD.map((s) => `<button class="snapbtn" onclick="setDim('${axis}', ${i}, ${s})">${s}</button>`).join('')}
+      <div class="dim-controls">
+        <input type="number" inputmode="numeric" value="${v}"
+          onchange="setDim('${axis}', ${i}, this.value)" />
+        <div class="snap-row">
+          ${STD.map((s) => `<button class="snapbtn" onclick="setDim('${axis}', ${i}, ${s})">${s}</button>`).join('')}
+        </div>
+      </div>
     </div>`).join('');
   document.getElementById('colDims').innerHTML = dimRows('col', wb.colW);
   document.getElementById('rowDims').innerHTML = dimRows('row', wb.rowH);

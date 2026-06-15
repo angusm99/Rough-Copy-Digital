@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1190 1190" width="100%" height="100%">
+        <style>
+          .frame-bg { fill: #c9a05b; } /* Yellow Anglo Gold Frame */
+          .glass { fill: #0f1012; stroke: #000; stroke-width: 2; }
+          .glass-highlight { fill: url(#glow); opacity: 0.15; }
+          .sash { fill: none; stroke: #c9a05b; stroke-width: 24; }
+          .opening { fill: none; stroke: rgba(255,255,255,0.4); stroke-width: 6; stroke-dasharray: 12, 12; stroke-linecap: round; stroke-linejoin: round; }
+        </style>
+        <defs>
+          <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fff" stop-opacity="0.1"/>
+            <stop offset="50%" stop-color="#fff" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+      <rect class="frame-bg" x="0" y="0" width="1190" height="1190" rx="4" /><rect class="glass" x="45" y="45" width="537.5" height="1100" /><polygon class="glass-highlight" points="45,45 582.5,45 45,1145" /><rect class="sash" x="57" y="57" width="513.5" height="1076" /><polyline class="opening" points="81,81 546.5,595 81,1109" /><rect class="glass" x="607.5" y="45" width="537.5" height="1100" /><polygon class="glass-highlight" points="607.5,45 1145,45 607.5,1145" /><rect class="sash" x="619.5" y="57" width="513.5" height="1076" /><polyline class="opening" points="1109,81 643.5,595 1109,1109" /></svg>
