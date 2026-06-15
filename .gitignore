@@ -10,4 +10,9 @@ desktop.ini
 test-server.out.log
 test-server.err.log
 _test_quote*.pdf
+_test_quote*.txt
+_test_quote*.json
 _quote*.txt
+_quote*.json
+tablet-screen*.png
+tablet-test-files/

@@ -58,8 +58,20 @@ http://<PC-LAN-IP>:5179/open-design-components/workspace.html
 Start servers from the repo root:
 
 ```powershell
-python -m http.server 5178 --bind 127.0.0.1
-python -m http.server 5179 --bind 0.0.0.0
+.\tools\start-preview.ps1
+.\tools\start-preview.ps1 -Port 5179 -Bind 0.0.0.0
+```
+
+Run the project verification helper before committing:
+
+```powershell
+.\tools\verify-project.ps1
+```
+
+To test quote upload/extraction on a tablet, stage the sample quote locally and use the generated tablet download URL:
+
+```powershell
+.\tools\stage-tablet-files.ps1 -Path "\\ANGLOSERVER\Share\Search\Scans\.....202606\ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf" -Port 5179
 ```
 
 ## Do Not Commit
@@ -68,6 +80,9 @@ Real quote PDFs and extracted quote text fixtures contain customer PII. Keep the
 
 - `_test_quote*.pdf`
 - `_quote*.txt`
+- `_quote*.json`
+- `tablet-screen*.png`
+- `tablet-test-files/`
 
 ## Source Price-List References
 

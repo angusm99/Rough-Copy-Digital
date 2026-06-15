@@ -45,7 +45,7 @@ Core flow:
 From repo root:
 
 ```powershell
-python -m http.server 5178 --bind 127.0.0.1
+.\tools\start-preview.ps1
 ```
 
 Open:
@@ -57,7 +57,7 @@ http://127.0.0.1:5178/open-design-components/workspace.html
 For tablet testing on same Wi-Fi:
 
 ```powershell
-python -m http.server 5179 --bind 0.0.0.0
+.\tools\start-preview.ps1 -Port 5179 -Bind 0.0.0.0
 ```
 
 Open:
@@ -68,18 +68,67 @@ http://<PC-LAN-IP>:5179/open-design-components/workspace.html
 
 Use `Get-NetIPAddress -AddressFamily IPv4` to find the current PC LAN IP.
 
+## Verification Before Commit
+
+Run:
+
+```powershell
+.\tools\verify-project.ps1
+```
+
+This verifies the active files exist, offline PDF.js/logo assets are present, and active JavaScript parses cleanly.
+
+## Tablet Workflow
+
+Use this for on-device testing:
+
+```powershell
+.\tools\start-preview.ps1 -Port 5179 -Bind 0.0.0.0
+.\tools\stage-tablet-files.ps1 -Path "\\ANGLOSERVER\Share\Search\Scans\.....202606\ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf" -Port 5179
+```
+
+Then open the printed LAN app URL on the tablet and download the printed quote URL into Android Downloads. The quote PDF stays local-only under `tablet-test-files/`, which is ignored by Git.
+
+Once USB debugging or Wireless debugging is authorised:
+
+```powershell
+.\tools\tablet-adb.ps1 -List
+.\tools\tablet-adb.ps1 -Push "\\ANGLOSERVER\Share\Search\Scans\.....202606\ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf"
+.\tools\tablet-adb.ps1 -OpenUrl -Url "http://<PC-LAN-IP>:5179/open-design-components/workspace.html"
+```
+
+Confirmed device state as of 2026-06-15:
+
+- USB ADB serial: `FS44BPC01070`
+- Wireless ADB: `192.168.0.159:5555`
+- Model/OS: `HTC AT01`, Android `13`
+- Screen: `800x1280`
+- Sample quote location on tablet: `/sdcard/Download/Rough-Copy-Digital/ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf`
+
+To re-enable wireless ADB after plugging in USB:
+
+```powershell
+adb devices -l
+adb tcpip 5555
+adb connect 192.168.0.159:5555
+```
+
 ## Privacy And Repo Hygiene
 
 Real quotes and extracted quote text contain customer PII. Do not commit:
 
 - `_test_quote*.pdf`
 - `_quote*.txt`
+- `_quote*.json`
+- `tablet-screen*.png`
+- `tablet-test-files/`
 - preview server logs
 
 These patterns are in `.gitignore`, but still check `git status` before committing.
 
 ## Current Known Work
 
+- HTC AT01 tablet browser testing is in progress. LAN page testing can use the tablet's current Wi-Fi IP, but ADB is not connected until USB debugging or Wireless debugging pairing is enabled on the tablet.
 - Photo/OCR import for handwritten rough copies is still outstanding.
 - Workshop Excel/export-to-external-system is still outstanding.
 - More Bizman product-line quote exports are needed for a fuller preset library.

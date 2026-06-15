@@ -27,7 +27,7 @@ If you are testing or editing the current version, start in `open-design-compone
 From this folder:
 
 ```powershell
-python -m http.server 5178 --bind 127.0.0.1
+.\tools\start-preview.ps1
 ```
 
 Open:
@@ -39,7 +39,7 @@ http://127.0.0.1:5178/open-design-components/workspace.html
 For tablet testing on the same Wi-Fi, start a LAN-bound server and use this PC's local IP address:
 
 ```powershell
-python -m http.server 5179 --bind 0.0.0.0
+.\tools\start-preview.ps1 -Port 5179 -Bind 0.0.0.0
 ```
 
 Then open:
@@ -50,9 +50,37 @@ http://<PC-LAN-IP>:5179/open-design-components/workspace.html
 
 Use `Get-NetIPAddress -AddressFamily IPv4` to confirm the current LAN IP.
 
+To stage a local sample quote PDF for tablet upload testing without committing it:
+
+```powershell
+.\tools\stage-tablet-files.ps1 -Path "\\ANGLOSERVER\Share\Search\Scans\.....202606\ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf" -Port 5179
+```
+
+Once ADB is authorised, the tablet helper can push files and open the app:
+
+```powershell
+.\tools\tablet-adb.ps1 -List
+.\tools\tablet-adb.ps1 -Push "\\ANGLOSERVER\Share\Search\Scans\.....202606\ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf"
+.\tools\tablet-adb.ps1 -OpenUrl -Url "http://<PC-LAN-IP>:5179/open-design-components/workspace.html"
+```
+
+For the current HTC AT01 test tablet, wireless ADB can be re-enabled after USB connection with:
+
+```powershell
+adb tcpip 5555
+adb connect 192.168.0.159:5555
+```
+
+Before committing changes, run:
+
+```powershell
+.\tools\verify-project.ps1
+```
+
 ## Files
 
 - **`open-design-components/`** - current active build path and UI basis
+- **`tools/`** - local preview and verification helpers
 - **`rough-copy-digital_6.html`** - legacy working base kept for reference
 - **`Rough Copy Digital - Standalone.html`** - React/JSX variant from Claude Design, reference only
 - **`PROGRESS-2026-04-24.md`** - planning doc and business-logic spec

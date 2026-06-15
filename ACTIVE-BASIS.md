@@ -44,7 +44,52 @@ If the local preview server is running, open:
 
 - `http://127.0.0.1:5178/open-design-components/workspace.html`
 
+Recommended preview commands from the repo root:
+
+```powershell
+.\tools\start-preview.ps1
+.\tools\start-preview.ps1 -Port 5179 -Bind 0.0.0.0
+```
+
 If you are unsure where to make a change, make it in `open-design-components/` first.
+
+## Verification
+
+Run this before committing or handing off:
+
+```powershell
+.\tools\verify-project.ps1
+```
+
+This checks the active app files, vendored offline assets, `quote-parser.js`, and inline scripts in the active HTML surfaces.
+
+## Tablet Testing
+
+Current tablet target:
+
+- HTC AT01 on Android 13
+- Current tablet Wi-Fi IP seen from device settings: `192.168.0.159`
+- ADB USB serial: `FS44BPC01070`
+- Wireless ADB target after `adb tcpip 5555`: `192.168.0.159:5555`
+- Screen size reported by ADB: `800x1280`
+- Sample quote pushed to: `/sdcard/Download/Rough-Copy-Digital/ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf`
+
+Use the LAN preview path for browser testing:
+
+```powershell
+.\tools\start-preview.ps1 -Port 5179 -Bind 0.0.0.0
+```
+
+Use `tools/stage-tablet-files.ps1` to make local-only sample quote PDFs downloadable to the tablet. Use `tools/tablet-adb.ps1` to push files and open the app once ADB is authorised.
+
+Current confirmed ADB sequence:
+
+```powershell
+adb devices -l
+adb tcpip 5555
+adb connect 192.168.0.159:5555
+.\tools\tablet-adb.ps1 -Device "192.168.0.159:5555" -OpenUrl -Url "http://192.168.0.106:5179/open-design-components/workspace.html"
+```
 
 ## Storage Keys
 
@@ -54,4 +99,4 @@ If you are unsure where to make a change, make it in `open-design-components/` f
 
 ## Privacy
 
-Real quote PDFs and extracted quote fixtures can contain customer PII. They should remain local-only and are ignored by `.gitignore` under `_test_quote*.pdf` and `_quote*.txt`.
+Real quote PDFs and extracted quote fixtures can contain customer PII. They should remain local-only and are ignored by `.gitignore` under `_test_quote*.pdf`, `_quote*.txt`, `_quote*.json`, and related local test artefacts.
