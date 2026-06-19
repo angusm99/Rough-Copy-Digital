@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1790 890" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1490 2090" width="100%" height="100%">
       <style>
         .frame-bg { fill: #c29b27; }
         .glass-fixed { fill: rgba(40, 100, 180, 0.6); stroke: #000; stroke-width: 2; }
@@ -15,4 +15,4 @@
           <stop offset="50%" stop-color="#fff" stop-opacity="0"/>
         </linearGradient>
       </defs>
-    <rect class="frame-bg" x="0" y="0" width="1790" height="890" rx="4" /><rect class="glass-sash" x="45" y="45" width="515.5" height="800" /><polygon class="glass-highlight" points="45,45 560.5,45 45,845" /><rect class="sash" x="57" y="57" width="491.5" height="776" /><polyline class="opening" points="74,74 531.5,445 74,816" /><rect class="glass-fixed" x="585.5" y="45" width="1159.5" height="800" /><polygon class="glass-highlight" points="585.5,45 1745,45 585.5,845" /></svg>
+    <rect class="frame-bg" x="0" y="0" width="1490" height="2090" rx="4" /><rect class="glass-sash" x="55" y="55" width="672.5" height="1980" /><polygon class="glass-highlight" points="55,55 727.5,55 55,2035" /><rect class="frame-bg" x="55" y="1170" width="672.5" height="40" /><rect class="sash-door" x="70" y="70" width="642.5" height="1950" /><path class="slide-arrow" d="M331.25,1045 L451.25,1045 M426.25,1020 L451.25,1045 L426.25,1070" /><rect class="glass-fixed" x="762.5" y="55" width="672.5" height="1980" /><polygon class="glass-highlight" points="762.5,55 1435,55 762.5,2035" /><rect class="frame-bg" x="762.5" y="1170" width="672.5" height="40" /></svg>

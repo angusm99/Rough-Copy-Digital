@@ -117,6 +117,7 @@
       padding: 10px;
     }
     svg { width: 100%; height: 100%; }
+    .door-graphic img, .svg-asset { width: 100%; height: 100%; object-fit: contain; display: block; }
     .panel {
       padding: 15px;
       border-radius: 16px;
@@ -470,8 +471,45 @@
       document.getElementById('configNote').textContent = 'Select a door configuration.';
     }
 
-    // dispatch to the right SVG renderer with its real signature
+    // ── Architectural drawing assets (gold-frame glass diagrams) ──────────
+    // Maps catalog door id → SVG file from the 305 architectural drawings set.
+    // Same pattern as the casement DRAWING_ASSETS map in window-picker.html:
+    // an asset wins when present, otherwise we fall back to the generated SVG.
+    const DOOR_DRAWING_BASE = 'assets/architectural-doors/';
+    const DOOR_DRAWING_ASSETS = {
+      // Hinged — Large Pane (full-glass gold-frame style)
+      'H-LP-900':  'Anglo-HD0921L.svg',
+      'H-LP-1000': 'Anglo-HD0921L.svg',
+      'H-LP-1200': 'Anglo-HD0921L.svg',
+      'H-LP-1600': 'Anglo-DD1521.svg',   // double-leaf hinged
+      'H-LP-1800': 'Anglo-DD1821.svg',   // double-leaf hinged
+      // Patio Sliding
+      'SL-2-OX':   'Anglo-PD1821OX.svg',
+      'SL-2-XO':   'Anglo-PD1821XO.svg',
+      'SL-4-OXXO': 'Anglo-PD3021OXXO.svg',
+      // Heavy Duty Slider — Valencia
+      'HDS-VAL-2-OX': 'Anglo-PD2121OX.svg',
+      'HDS-VAL-2-XO': 'Anglo-PD2121XO.svg',
+      // Heavy Duty Slider — Palace Door
+      'HDS-PAL-2-OX':   'Anglo-PD2421OX.svg',
+      'HDS-PAL-2-XO':   'Anglo-PD2421XO.svg',
+      'HDS-PAL-4-OXXO': 'Anglo-PD3621OXXO.svg',
+      // Heavy Duty Slider — CLS-250 Lift and Slide
+      'HDS-CLS-2-OX': 'Anglo-PD1521OX.svg',
+      'HDS-CLS-2-XO': 'Anglo-PD1521XO.svg'
+    };
+
+    function doorDrawingMarkupFor(door) {
+      const file = door && DOOR_DRAWING_ASSETS[door.id];
+      if (!file) return '';
+      const alt = (door.label || door.code || 'door').replace(/"/g, '');
+      return `<img class="svg-asset" src="${DOOR_DRAWING_BASE}${file}" alt="${alt}" />`;
+    }
+
+    // dispatch to the architectural drawing if available, else the generated SVG
     function doorSVG(door, W, H) {
+      const drawing = doorDrawingMarkupFor(door);
+      if (drawing) return drawing;
       if (door.panels) return slidingSVG(door.panels, W, H);
       if (door.leaves) return foldingSVG(door.leaves, W, H, door.activeLeaf || 0);
       if (door.family === 'pivot') return pivotDoorSVG(door.style && door.style.startsWith('classic') ? 'classic' : 'large', W, H);

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2390 2090" width="100%" height="100%">
+      <style>
+        .frame-bg { fill: #c29b27; }
+        .glass-fixed { fill: rgba(40, 100, 180, 0.6); stroke: #000; stroke-width: 2; }
+        .glass-sash { fill: rgba(40, 150, 70, 0.6); stroke: #000; stroke-width: 2; }
+        .glass-highlight { fill: url(#glow); opacity: 0.15; }
+        .sash { fill: none; stroke: #c29b27; stroke-width: 24; }
+        .sash-door { fill: none; stroke: #c29b27; stroke-width: 30; }
+        .opening { fill: none; stroke: #FFFFFF; stroke-width: 8; stroke-dasharray: 14,14; stroke-linecap: round; stroke-linejoin: round; }
+        .slide-arrow { fill: none; stroke: #FFFFFF; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+      </style>
+      <defs>
+        <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fff" stop-opacity="0.1"/>
+          <stop offset="50%" stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+    <rect class="frame-bg" x="0" y="0" width="2390" height="2090" rx="4" /><rect class="glass-fixed" x="55" y="55" width="543.75" height="1980" /><polygon class="glass-highlight" points="55,55 598.75,55 55,2035" /><rect class="frame-bg" x="55" y="1170" width="543.75" height="40" /><rect class="glass-sash" x="633.75" y="55" width="543.75" height="1980" /><polygon class="glass-highlight" points="633.75,55 1177.5,55 633.75,2035" /><rect class="frame-bg" x="633.75" y="1170" width="543.75" height="40" /><rect class="sash-door" x="648.75" y="70" width="513.75" height="1950" /><path class="slide-arrow" d="M965.625,1045 L845.625,1045 M870.625,1020 L845.625,1045 L870.625,1070" /><rect class="glass-sash" x="1212.5" y="55" width="543.75" height="1980" /><polygon class="glass-highlight" points="1212.5,55 1756.25,55 1212.5,2035" /><rect class="frame-bg" x="1212.5" y="1170" width="543.75" height="40" /><rect class="sash-door" x="1227.5" y="70" width="513.75" height="1950" /><path class="slide-arrow" d="M1424.375,1045 L1544.375,1045 M1519.375,1020 L1544.375,1045 L1519.375,1070" /><rect class="glass-fixed" x="1791.25" y="55" width="543.75" height="1980" /><polygon class="glass-highlight" points="1791.25,55 2335,55 1791.25,2035" /><rect class="frame-bg" x="1791.25" y="1170" width="543.75" height="40" /></svg>

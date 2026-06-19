@@ -1,15 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1790 1190" width="100%" height="100%">
-        <style>
-          .frame-bg { fill: #c9a05b; } /* Yellow Anglo Gold Frame */
-          .glass { fill: #0f1012; stroke: #000; stroke-width: 2; }
-          .glass-highlight { fill: url(#glow); opacity: 0.15; }
-          .sash { fill: none; stroke: #c9a05b; stroke-width: 24; }
-          .opening { fill: none; stroke: rgba(255,255,255,0.4); stroke-width: 6; stroke-dasharray: 12, 12; stroke-linecap: round; stroke-linejoin: round; }
-        </style>
-        <defs>
-          <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#fff" stop-opacity="0.1"/>
-            <stop offset="50%" stop-color="#fff" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-      <rect class="frame-bg" x="0" y="0" width="1790" height="1190" rx="4" /><rect class="glass" x="45" y="45" width="515.5" height="537.5" /><polygon class="glass-highlight" points="45,45 560.5,45 45,582.5" /><rect class="sash" x="57" y="57" width="491.5" height="513.5" /><polyline class="opening" points="81,81 302.75,546.5 524.5,81" /><rect class="glass" x="45" y="607.5" width="515.5" height="537.5" /><polygon class="glass-highlight" points="45,607.5 560.5,607.5 45,1145" /><rect class="sash" x="57" y="619.5" width="491.5" height="513.5" /><polyline class="opening" points="81,643.5 302.75,1109 524.5,643.5" /><rect class="glass" x="585.5" y="45" width="1159.5" height="1100" /><polygon class="glass-highlight" points="585.5,45 1745,45 585.5,1145" /></svg>
+      <style>
+        .frame-bg { fill: #c29b27; }
+        .glass-fixed { fill: rgba(40, 100, 180, 0.6); stroke: #000; stroke-width: 2; }
+        .glass-sash { fill: rgba(40, 150, 70, 0.6); stroke: #000; stroke-width: 2; }
+        .glass-highlight { fill: url(#glow); opacity: 0.15; }
+        .sash { fill: none; stroke: #c29b27; stroke-width: 24; }
+        .sash-door { fill: none; stroke: #c29b27; stroke-width: 30; }
+        .opening { fill: none; stroke: #FFFFFF; stroke-width: 8; stroke-dasharray: 14,14; stroke-linecap: round; stroke-linejoin: round; }
+        .slide-arrow { fill: none; stroke: #FFFFFF; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+      </style>
+      <defs>
+        <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fff" stop-opacity="0.1"/>
+          <stop offset="50%" stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+    <rect class="frame-bg" x="0" y="0" width="1790" height="1190" rx="4" /><rect class="glass-sash" x="45" y="45" width="515.5" height="537.5" /><polygon class="glass-highlight" points="45,45 560.5,45 45,582.5" /><rect class="sash" x="57" y="57" width="491.5" height="513.5" /><polyline class="opening" points="74,74 302.75,553.5 531.5,74" /><rect class="glass-sash" x="45" y="607.5" width="515.5" height="537.5" /><polygon class="glass-highlight" points="45,607.5 560.5,607.5 45,1145" /><rect class="sash" x="57" y="619.5" width="491.5" height="513.5" /><polyline class="opening" points="74,636.5 302.75,1116 531.5,636.5" /><rect class="glass-fixed" x="585.5" y="45" width="1159.5" height="1100" /><polygon class="glass-highlight" points="585.5,45 1745,45 585.5,1145" /></svg>
