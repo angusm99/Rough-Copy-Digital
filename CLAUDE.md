@@ -51,7 +51,7 @@ From repo root:
 Open:
 
 ```text
-http://127.0.0.1:5178/open-design-components/workspace.html
+http://127.0.0.1:5178/workspace.html
 ```
 
 For tablet testing on same Wi-Fi:
@@ -63,10 +63,15 @@ For tablet testing on same Wi-Fi:
 Open:
 
 ```text
-http://<PC-LAN-IP>:5179/open-design-components/workspace.html
+http://<PC-LAN-IP>:5179/workspace.html
 ```
 
 Use `Get-NetIPAddress -AddressFamily IPv4` to find the current PC LAN IP.
+
+The preview server serves only the app folder (`open-design-components/`) as its
+root, pinned via `--directory`. The landing page is at `/`, the workspace at
+`/workspace.html`. The repo root and local-only files (e.g. `tablet-test-files/`)
+are never exposed on the LAN.
 
 ## Verification Before Commit
 
@@ -84,17 +89,17 @@ Use this for on-device testing:
 
 ```powershell
 .\tools\start-preview.ps1 -Port 5179 -Bind 0.0.0.0
-.\tools\stage-tablet-files.ps1 -Path "\\ANGLOSERVER\Share\Search\Scans\.....202606\ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf" -Port 5179
+.\tools\stage-tablet-files.ps1 -Path "\\ANGLOSERVER\Share\Search\Scans\.....202606\ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf"
 ```
 
-Then open the printed LAN app URL on the tablet and download the printed quote URL into Android Downloads. The quote PDF stays local-only under `tablet-test-files/`, which is ignored by Git.
+Open the printed LAN app URL (`http://<PC-LAN-IP>:5179/workspace.html`) on the tablet. `stage-tablet-files.ps1` copies the quote into local-only `tablet-test-files/` (ignored by Git) and prints the exact `tablet-adb.ps1 -Push` command to push it to the tablet over ADB. Quotes go to the tablet via ADB, never over the LAN.
 
 Once USB debugging or Wireless debugging is authorised:
 
 ```powershell
 .\tools\tablet-adb.ps1 -List
 .\tools\tablet-adb.ps1 -Push "\\ANGLOSERVER\Share\Search\Scans\.....202606\ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf"
-.\tools\tablet-adb.ps1 -OpenUrl -Url "http://<PC-LAN-IP>:5179/open-design-components/workspace.html"
+.\tools\tablet-adb.ps1 -OpenUrl -Url "http://<PC-LAN-IP>:5179/workspace.html"
 ```
 
 Confirmed device state as of 2026-06-15:

@@ -42,6 +42,8 @@
     .header-inner { max-width: 1280px; margin: 0 auto; padding: 0 28px; height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
     .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--fg); }
     .logo svg { width: 36px; height: 36px; flex-shrink: 0; }
+    .logo .brand-logo { height: 34px; width: auto; display: block; flex-shrink: 0; }
+    .logo-divider { width: 1px; height: 26px; background: var(--border-hi); flex-shrink: 0; }
     .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
     .logo-name { font-family: var(--font-display); font-size: 17px; letter-spacing: 0.02em; }
     .logo-sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
@@ -136,21 +138,13 @@
 <div class="page">
   <header>
     <div class="header-inner">
-      <a class="logo" href="#">
-        <svg viewBox="0 0 100 100" fill="none" aria-label="Anglo Windows">
-          <path d="M8 62C8 34 29 12 56 12C83 12 94 34 94 62H8Z" stroke="var(--accent)" stroke-width="4.5" stroke-linejoin="round"/>
-          <path d="M18 60C18 40 32 22 56 22C80 22 86 41 86 60H18Z" stroke="var(--accent)" stroke-width="3.6" stroke-linejoin="round"/>
-          <line x1="56" y1="22" x2="56" y2="60" stroke="var(--accent)" stroke-width="3.6"/>
-          <line x1="30" y1="36" x2="55" y2="60" stroke="var(--accent)" stroke-width="3.2"/>
-          <line x1="78" y1="36" x2="57" y2="60" stroke="var(--accent)" stroke-width="3.2"/>
-        </svg>
-        <div class="logo-text">
-          <span class="logo-name">Anglo Windows</span>
-          <span class="logo-sub">Digital Rough Copy</span>
-        </div>
+      <a class="logo" href="index.html">
+        <img class="brand-logo" src="assets/brand/anglo-logo-gold.png" alt="Anglo Windows" />
+        <span class="logo-divider" aria-hidden="true"></span>
+        <span class="logo-sub">Digital Rough Copy</span>
       </a>
       <div class="header-actions">
-        <button class="btn btn-ghost" type="button" onclick="location.href='workspace.html?import=1'">Import Bizman</button>
+        <button class="btn btn-ghost" type="button" onclick="location.href='workspace.html?import=1'">Import documents</button>
         <button class="btn btn-primary" type="button" onclick="location.href='workspace.html?new=1'">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
           New Quote
@@ -189,7 +183,7 @@
         <div class="card-body">
           <div class="card-meta">01 — Workspace</div>
           <div class="card-title">Quote workspace</div>
-          <div class="card-desc">All line items for a job. Import Bizman, scan and confirm each row, add notes, track status.</div>
+          <div class="card-desc">All line items for a job. Import documents, scan and confirm each row, add notes, track status.</div>
           <div class="card-footer"><span class="card-tag">Main view</span><span class="card-arrow"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
         </div>
       </a>

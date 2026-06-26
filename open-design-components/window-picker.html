@@ -12,7 +12,10 @@
       --fg: oklch(92.5% 0.007 88.6);
       --muted: oklch(70.4% 0.031 87.6);
       --border: oklch(31% 0.015 252.3);
-      --accent: oklch(87.1% 0.178 91.8);
+      --accent: oklch(86% 0.185 96);
+      --outline-gold: color-mix(in oklab, var(--accent) 70%, var(--border));
+      --outline-gold-strong: color-mix(in oklab, var(--accent) 88%, var(--border));
+      --outline-gold-soft: color-mix(in oklab, var(--accent) 48%, var(--border));
       --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
       --font-body: "Segoe UI", "Segoe UI Variable Text", Inter, system-ui, sans-serif;
       --font-mono: "Cascadia Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
@@ -41,7 +44,11 @@
       overflow: hidden;
     }
     .head { padding: 18px 22px; border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%);
-            display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; }
+            display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+    .head-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .home-link { flex-shrink:0; display:inline-flex; align-items:center; border-radius:10px; padding:2px 4px; text-decoration:none; }
+    .home-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .brand-logo { height: 34px; width: auto; display: block; }
     .label { color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: .15em; text-transform: uppercase; }
     h1 { margin: 6px 0 0; font-size: 30px; font-family: var(--font-display); }
     .tools {
@@ -153,13 +160,19 @@
 <body>
 <div class="modal">
   <header class="head">
-    <div>
-      <div class="label" id="lineCtx">No line selected — browsing</div>
-      <h1>Pick the right window configuration.</h1>
+    <div class="head-left">
+      <a class="home-link" href="index.html" title="Home">
+        <img class="brand-logo" src="assets/brand/anglo-logo-gold.png" alt="Anglo Windows" />
+      </a>
+      <div>
+        <div class="label" id="lineCtx">No line selected — browsing</div>
+        <h1>Pick the right window configuration.</h1>
+      </div>
     </div>
     <div class="actions">
-      <button class="secondary" onclick="location.href='workspace.html'">Back to workspace</button>
-      <button class="secondary" onclick="location.href='window-builder.html'">Open builder</button>
+      <button class="secondary" onclick="location.href='index.html'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px"><path d="M3 11l9-8 9 8M5 9.5V21h14V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Home</button>
+      <button class="secondary" onclick="location.href=workspaceUrl()">Workspace</button>
+      <button class="secondary" onclick="location.href='window-builder.html'">Builder</button>
     </div>
   </header>
 
@@ -219,13 +232,14 @@
           <div class="label">Configuration</div>
           <p id="configNote" style="margin:8px 0 0;line-height:1.55;font-size:13px;color:var(--muted)">Select a window above to see details. These standard casement presets are the quick-pick layer for 30.5mm, 38mm, and Boabab families before moving into the custom builder.</p>
         </div>
+      <button class="primary" id="useBtnSide" onclick="useSelected()" style="width:100%;margin-top:4px;min-height:48px;font-size:15px">Use this window ✓</button>
     </aside>
   </section>
 
   <footer class="foot">
     <div class="label">Enter confirms • B opens builder • Esc returns to workspace</div>
     <div class="actions">
-      <button class="secondary" onclick="location.href='workspace.html'">Cancel</button>
+      <button class="secondary" onclick="location.href=workspaceUrl()">Cancel</button>
       <button class="primary" id="useBtn" onclick="useSelected()">Use selected window</button>
     </div>
   </footer>
@@ -742,6 +756,10 @@ if (CTX) {
   document.getElementById('lineCtx').textContent = bits.join(' • ') || 'Pick for current line';
 }
 
+function workspaceUrl() {
+  return CTX && typeof CTX.i === 'number' ? `workspace.html?line=${CTX.i}` : 'workspace.html';
+}
+
 // ── Save selection back to the workspace line ───────────────────────────
 function useSelected() {
   const w = CATALOG.find(x => x.code === selectedCode);
@@ -760,14 +778,14 @@ function useSelected() {
     }));
   }
   localStorage.removeItem('aw_picker_ctx');
-  location.href = 'workspace.html';
+  location.href = workspaceUrl();
 }
 
 // ── Keyboard: Enter confirms • B opens builder • Esc returns ────────────
 document.addEventListener('keydown', (e) => {
   if (e.target.closest('input, select, textarea')) return;
   if (e.key === 'Enter') { e.preventDefault(); useSelected(); }
-  else if (e.key === 'Escape') { location.href = 'workspace.html'; }
+  else if (e.key === 'Escape') { location.href = workspaceUrl(); }
   else if (e.key === 'b' || e.key === 'B') { location.href = 'window-builder.html'; }
 });
 

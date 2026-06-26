@@ -13,10 +13,10 @@
       --fg: oklch(92.5% 0.007 88.6);
       --muted: oklch(70.4% 0.031 87.6);
       --border: oklch(31% 0.015 252.3);
-      --accent: oklch(87.1% 0.178 91.8);
-      --outline-gold: color-mix(in oklab, var(--accent) 42%, var(--border));
-      --outline-gold-strong: color-mix(in oklab, var(--accent) 58%, var(--border));
-      --outline-gold-soft: color-mix(in oklab, var(--accent) 24%, var(--border));
+      --accent: oklch(86% 0.185 96);
+      --outline-gold: color-mix(in oklab, var(--accent) 70%, var(--border));
+      --outline-gold-strong: color-mix(in oklab, var(--accent) 88%, var(--border));
+      --outline-gold-soft: color-mix(in oklab, var(--accent) 48%, var(--border));
       --success: oklch(71% 0.13 152);
       --danger: oklch(67% 0.18 32);
       --info: oklch(68% 0.09 236);
@@ -77,7 +77,30 @@
       display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center;
     }
     .header h1 { margin: 4px 0 0; font-size: 28px; font-family: var(--font-display); }
+    .job-id { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .home-link { flex-shrink: 0; display: inline-flex; align-items: center; border-radius: 10px; padding: 2px 4px; }
+    .home-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .brand-logo { height: 36px; width: auto; display: block; }
+    .job-id-fields { display: grid; gap: 7px; min-width: 0; flex: 1; }
+    .hdr-field { display: grid; gap: 3px; min-width: 0; }
+    .hdr-input {
+      width: 100%;
+      background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
+      color: var(--fg);
+      border: 1px solid var(--outline-gold-soft);
+      border-radius: 9px;
+      padding: 8px 11px;
+      font: inherit; font-size: 14px;
+      min-height: 40px;
+    }
+    .hdr-input-lg { font-family: var(--font-display); font-size: 22px; font-weight: 700; min-height: 46px; padding: 6px 12px; }
+    .hdr-input::placeholder { color: var(--muted); opacity: 0.7; }
+    .back-btn { background: transparent; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
     .toolbar { display: flex; flex-wrap: wrap; gap: 9px; justify-content: end; }
+    .toggle { display: inline-flex; border: 1px solid var(--outline-gold-soft); border-radius: 9px; overflow: hidden; width: fit-content; }
+    .toggle-opt { background: transparent; color: var(--muted); border: 0; border-radius: 0; min-height: 42px; padding: 8px 20px; font-weight: 700; }
+    .toggle-opt.active { background: var(--accent); color: var(--bg); }
+    .toggle-field { display: grid; gap: 4px; min-width: 0; }
     button, .link-btn {
       border: 0; border-radius: 10px; padding: 11px 14px;
       font: inherit; font-weight: 700; cursor: pointer;
@@ -140,9 +163,10 @@
     tbody tr { cursor: pointer; }
     tbody tr:hover { background: color-mix(in oklab, var(--accent) 6%, transparent); }
     tbody tr.editing { background: color-mix(in oklab, var(--accent) 11%, var(--surface-2)); }
+    tbody tr.row-flash { outline: 2px solid var(--accent); outline-offset: -2px; }
     .type-cell { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .type-cell .diag {
-      width: 46px; height: 36px; flex: none;
+      width: 82px; height: 58px; flex: none;
       border: 1px solid color-mix(in oklab, var(--border) 72%, var(--accent) 28%);
       border-radius: 7px;
       background: color-mix(in oklab, var(--surface) 62%, var(--surface-3));
@@ -191,7 +215,7 @@
     .editor-grid .full { grid-column: 1 / -1; }
     .editor-type-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .editor-diag {
-      width: 92px; height: 72px; flex: none;
+      width: 128px; height: 88px; flex: none;
       border: 1px solid color-mix(in oklab, var(--border) 72%, var(--accent) 28%);
       border-radius: 10px;
       background: color-mix(in oklab, var(--surface) 62%, var(--surface-3));
@@ -274,10 +298,12 @@
       }
       #printView tr { break-inside: avoid; }
       #printView thead { display: table-header-group; }
-      #printView .p-diag { width: 64px; height: 52px; display: flex; align-items: center; }
-      #printView .p-diag img, #printView .p-diag svg { max-width: 64px; max-height: 52px; object-fit: contain; }
+      #printView .p-diag { width: 104px; height: 74px; display: flex; align-items: center; justify-content: center; }
+      #printView .p-diag img, #printView .p-diag svg { max-width: 104px; max-height: 74px; object-fit: contain; }
       #printView .p-size { font-weight: 700; white-space: nowrap; }
       #printView .p-mono { font-family: ui-monospace, monospace; font-size: 9px; color: #444; }
+      #printView .p-detail { margin-top: 2px; font-size: 8.8px; line-height: 1.25; color: #333; }
+      #printView .p-detail b { color: #111; }
       #printView .p-tally {
         display: flex; gap: 8px; margin-top: 10px; break-inside: avoid;
         border-top: 2px solid #111; padding-top: 8px;
@@ -326,18 +352,31 @@
         <strong id="navIssueCount">0</strong>
       </div>
       <div class="quick">
-        <span>Bizman import</span>
+        <span>Document import</span>
         <strong id="quickQuoteRef">—</strong>
       </div>
     </aside>
 
     <section class="workspace">
       <header class="header">
-        <div>
-          <div class="label">Current job</div>
-          <h1 id="jobTitle">No quote loaded</h1>
+        <div class="job-id">
+          <a class="home-link" href="index.html" title="Back to start" aria-label="Back to start">
+            <img class="brand-logo" src="assets/brand/anglo-logo-gold.png" alt="Anglo Windows" />
+          </a>
+          <div class="job-id-fields">
+            <label class="hdr-field">
+              <span class="label">Customer</span>
+              <input class="hdr-input hdr-input-lg" data-site="client" placeholder="Customer name" />
+            </label>
+            <label class="hdr-field">
+              <span class="label">Project / site</span>
+              <input class="hdr-input" data-site="project" placeholder="Project name or site address" />
+            </label>
+          </div>
+          <span id="jobTitle" class="hidden"></span>
         </div>
         <div class="toolbar">
+          <button class="secondary back-btn" type="button" onclick="location.href='index.html'" title="Go to start page"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px"><path d="M3 11l9-8 9 8M5 9.5V21h14V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Home</button>
           <input type="file" id="docInput" accept=".pdf,.txt,.doc,.docx,image/*,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden" />
           <button class="secondary" id="importBtn">Import documents</button>
           <button class="secondary" id="addLineBtn">Add Line</button>
@@ -392,11 +431,32 @@
               <option>WHITE</option><option>BRONZE</option><option>CHARCOAL</option><option>BLACK</option><option>SILVER</option><option>SPECIAL</option>
             </select>
           </label>
+          <label id="specialColourField" class="hidden"><span class="label">Special colour</span>
+            <select data-site="specialColour">
+              <option value="">— select —</option>
+              <option>LL230P - MATT STONE GREY</option>
+              <option>LL259P - MATT DARK UMBER GREY</option>
+              <option>LL235P - MATT LIGHT GREY</option>
+              <option>CUSTOM</option>
+            </select>
+          </label>
+          <label id="customColourField" class="hidden"><span class="label">Custom colour</span><input class="input" data-site="customColour" placeholder="Type colour name" /></label>
+          <label id="customColourCodeField" class="hidden"><span class="label">Colour code (if available)</span><input class="input" data-site="customColourCode" placeholder="Code (optional)" /></label>
+          <label class="toggle-field"><span class="label">Standard flats &amp; angles</span>
+            <div class="toggle" id="flatsAnglesToggle" role="group" aria-label="Standard flats and angles">
+              <button type="button" class="toggle-opt" data-toggle="flatsAngles" data-val="YES">Yes</button>
+              <button type="button" class="toggle-opt" data-toggle="flatsAngles" data-val="NO">No</button>
+            </div>
+          </label>
           <label><span class="label">Floor #</span><input class="input" data-site="floor" inputmode="numeric" /></label>
         </div>
         <div class="note-banner hidden" id="siteRuleNote"></div>
         <div class="note-banner hidden" id="colourNote"></div>
         <div class="note-banner hidden" id="quoteNotes"></div>
+        <div class="note-banner hidden" id="importPrompt">
+          <strong>Choose document:</strong> if the file picker did not open automatically, tap here to import a quote, PDF, Word document, photo, or handwritten note.
+          <button class="secondary" id="importPromptBtn" type="button" style="margin-left:10px;min-height:34px;padding:5px 11px;font-size:12px">Choose document</button>
+        </div>
       </section>
 
       <!-- ════ LINE TABLE — one row per opening, like the paper grid ════ -->
@@ -407,7 +467,11 @@
         </div>
         <div class="table-tools">
           <div class="summary" id="summary"><span class="status info">No lines</span></div>
-          <div class="summary"><span class="status warn" id="confirmTracker">0 of 0 sizes confirmed</span></div>
+          <div class="summary" style="gap:6px;align-items:center">
+            <span class="status warn" id="confirmTracker">0 of 0 sizes confirmed</span>
+            <button class="secondary" id="useAllQuoteBtn" style="min-height:34px;padding:5px 11px;font-size:12px">Use all quote sizes</button>
+            <button class="secondary" id="confirmAllBtn" style="min-height:34px;padding:5px 11px;font-size:12px">Confirm all</button>
+          </div>
         </div>
         <div class="table-scroll">
           <table id="lineTable">
@@ -479,11 +543,29 @@
               <option>6.38 Clear Lam</option><option>6.38 Safety</option><option>Bronze</option>
             </select>
           </label>
+          <label class="wide hidden" id="edCustomGlassField"><span class="label">Special glass variant</span>
+            <input class="input" id="edCustomGlass" placeholder="e.g. Low-E safety, grey tint TSG, acoustic lam" />
+          </label>
           <label class="wide"><span class="label">Colour</span>
             <select id="edColour">
               <option value="">— select —</option>
               <option>WHITE</option><option>BRONZE</option><option>CHARCOAL</option><option>BLACK</option><option>SILVER</option><option>SPECIAL</option>
             </select>
+          </label>
+          <label class="wide hidden" id="edSpecialColourField"><span class="label">Special colour</span>
+            <select id="edSpecialColour">
+              <option value="">— select —</option>
+              <option>LL230P - MATT STONE GREY</option>
+              <option>LL259P - MATT DARK UMBER GREY</option>
+              <option>LL235P - MATT LIGHT GREY</option>
+              <option>CUSTOM</option>
+            </select>
+          </label>
+          <label class="wide hidden" id="edCustomColourField"><span class="label">Custom colour</span>
+            <input class="input" id="edCustomColour" placeholder="Type colour name" />
+          </label>
+          <label class="wide hidden" id="edCustomColourCodeField"><span class="label">Colour code (optional)</span>
+            <input class="input" id="edCustomColourCode" placeholder="Code (optional)" />
           </label>
           <label class="wide"><span class="label">Wrap</span>
             <select id="edWrap">
@@ -558,7 +640,7 @@
     <table>
       <thead>
         <tr>
-          <th>Ref</th><th>Room</th><th>Diagram</th><th>Type</th>
+          <th>Ref</th><th>Room</th><th>Diagram</th><th>Type / details</th>
           <th>Final size (mm)</th><th>Qty</th><th>Glass</th><th>Colour</th><th>Wrap</th><th>Notes</th>
         </tr>
       </thead>
@@ -591,21 +673,94 @@
     const IMPORT_SCRIPT_CACHE = {};
 
     const SITE_FIELDS = ["jobRef","date","client","phone","address","email","rep","building","enclosure","material","wall","colour","floor"];
+    const WINDOW_GLASS_OPTIONS = ["", "4mm Clear", "4mm Obscure", "6.38 Clear Lam", "6.38 Safety", "Bronze"];
+    const DOOR_GLASS_OPTIONS = [
+      "5mm TSG", "6mm TSG", "8mm TSG", "10mm TSG", "12mm TSG",
+      "6.38mm Clear Lam", "8.38mm Clear Lam", "10.38mm Clear Lam", "12.38mm Clear Lam",
+      "SPECIAL"
+    ];
 
     let state = { job: null, site: {}, lines: [] };
     let editingIndex = -1;
+    let requestedLineIndex = -1;
 
     function blankLine(overrides = {}) {
       return {
         ref: "", location: "", product: "", code: "", family: "",
         quoteWidth: null, quoteHeight: null, quoteSize: "",
         width: null, height: null, size: "",
-        qty: 1, glass: "", colour: "", wrap: "",
+        qty: 1, glass: "", customGlass: "", colour: "", wrap: "",
         notes: "", diagSVG: "",
         config: "", handleSide: "", openingDirection: "",
+        specialColour: "", customColour: "", customColourCode: "",
         sizeConfirmed: false,
         ...overrides,
       };
+    }
+
+    function colourDisplay(base, special, custom, code) {
+      const baseText = (base || "").trim();
+      if (baseText !== "SPECIAL") return baseText;
+      const specialText = (special || "").trim();
+      if (specialText === "CUSTOM") {
+        return ["SPECIAL", custom, code ? `(${code})` : ""].filter(Boolean).join(" ");
+      }
+      return specialText ? `SPECIAL - ${specialText}` : "SPECIAL";
+    }
+    function siteColourDisplay() {
+      const s = state.site || {};
+      return colourDisplay(s.colour, s.specialColour, s.customColour, s.customColourCode);
+    }
+    function lineColourDisplay(l) {
+      return colourDisplay(l.colour, l.specialColour, l.customColour, l.customColourCode);
+    }
+    function lineSpecHTML(l) {
+      const op = [l.handleSide, l.openingDirection].filter(Boolean).join(" • ");
+      return [lineGlassDisplay(l), lineColourDisplay(l), op].filter(Boolean).join("<br>") || "—";
+    }
+    function lineGlassDisplay(l) {
+      if ((l.glass || "").trim() === "SPECIAL") return cleanText(l.customGlass) || "SPECIAL";
+      return cleanText(l.glass);
+    }
+    function cleanText(v) {
+      return (v == null ? "" : String(v)).replace(/\s+/g, " ").trim();
+    }
+    function escapeHTML(v) {
+      return cleanText(v).replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[ch]));
+    }
+    function lineProductTitle(l) {
+      const product = cleanText(l.product);
+      const raw = cleanText(l.rawDescription);
+      const tags = Array.isArray(l.productTags)
+        ? l.productTags.map(cleanText).filter(Boolean)
+        : [];
+      if (/^casement$/i.test(product)) {
+        if (tags.length) return `Casement - ${tags.join(", ")}`;
+        if (raw) return raw.length > 90 ? raw.slice(0, 87) + "..." : raw;
+      }
+      return product || raw || "";
+    }
+    function linePrintDetailHTML(l) {
+      const details = [];
+      const add = (label, value) => {
+        const v = cleanText(value);
+        if (v) details.push(`<div><b>${escapeHTML(label)}:</b> ${escapeHTML(v)}</div>`);
+      };
+      add("Config", l.config);
+      add("Handle/lead", l.handleSide);
+      add("Opening", l.openingDirection);
+      add("Code", l.code);
+      const raw = cleanText(l.rawDescription);
+      const title = cleanText(lineProductTitle(l));
+      if (raw && raw !== title && raw !== cleanText(l.product)) add("Quote item", raw);
+      return details.length ? `<div class="p-detail">${details.join("")}</div>` : "";
+    }
+    function lineNotesHTML(l) {
+      return (l.notes || "").replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[ch])).replace(/\n/g, "<br>");
     }
 
     // ---------- persistence ----------
@@ -667,7 +822,7 @@
         });
       });
       const n = Math.min(anchors.length, lines.length);
-      const SCALE = 1.6;
+      const SCALE = 2.2;
       const rendered = {};
       for (let k = 0; k < n; k++) {
         const a = anchors[k];
@@ -697,11 +852,11 @@
             break; // next item's band — stop looking
           }
         }
-        const topPdf = a.y + 16;
-        const botPdf = (vfoY !== null ? vfoY : a.y - 100) - 6;
+        const topPdf = a.y + 24;
+        const botPdf = (vfoY !== null ? vfoY : a.y - 116) - 8;
         const cy1 = Math.max(0, (pageH - topPdf) * SCALE);
         const cy2 = Math.min(c.height, (pageH - botPdf) * SCALE);
-        const cx1 = 14 * SCALE, cx2 = 122 * SCALE;
+        const cx1 = 8 * SCALE, cx2 = 164 * SCALE;
         if (cy2 - cy1 < 30) continue;
         const out = document.createElement("canvas");
         out.width = Math.round(cx2 - cx1);
@@ -799,6 +954,9 @@
       SITE_FIELDS.forEach((field) => {
         if (incoming[field]) state.site[field] = incoming[field];
       });
+      // Generic imports are not quote-structured, so reset the project/site line
+      // explicitly instead of letting a previous job's project text linger.
+      state.site.project = incoming.address || incoming.client || data.sourceName || "";
       save();
       renderAll();
       alert("Imported what could be identified from that document. Please review the customer/site fields and complete any missing line details.");
@@ -897,6 +1055,9 @@
       // quote pre-fills site details; rep completes the rest on site
       const fromQuote = siteFromJob(parsed.job, parsed.lines);
       SITE_FIELDS.forEach((f) => { if (fromQuote[f]) state.site[f] = fromQuote[f]; });
+      // A fresh import is a new job — refresh the Project/site line to the new
+      // quote's address (rep can type an actual project name over it).
+      state.site.project = fromQuote.address || "";
       editingIndex = -1;
       save();
       renderAll();
@@ -945,7 +1106,7 @@
     }
 
     function renderSite() {
-      document.querySelectorAll("#siteGrid [data-site]").forEach((el) => {
+      document.querySelectorAll(".workspace [data-site]").forEach((el) => {
         el.value = state.site[el.dataset.site] || "";
       });
       syncSiteFields();
@@ -986,6 +1147,41 @@
       return changed;
     }
     function syncSiteFields() {
+      // ── Colour → Special colour → Custom cascade ──
+      const colourIsSpecial = state.site.colour === "SPECIAL";
+      const specialField = document.getElementById("specialColourField");
+      const customField = document.getElementById("customColourField");
+      const customCodeField = document.getElementById("customColourCodeField");
+      if (specialField) specialField.classList.toggle("hidden", !colourIsSpecial);
+      if (!colourIsSpecial && state.site.specialColour) {
+        state.site.specialColour = "";
+        const ss = specialField && specialField.querySelector("select");
+        if (ss) ss.value = "";
+      }
+      const isCustomColour = colourIsSpecial && state.site.specialColour === "CUSTOM";
+      if (customField) customField.classList.toggle("hidden", !isCustomColour);
+      if (customCodeField) customCodeField.classList.toggle("hidden", !isCustomColour);
+      if (!isCustomColour) {
+        if (state.site.customColour) {
+          state.site.customColour = "";
+          const ci = customField && customField.querySelector("input");
+          if (ci) ci.value = "";
+        }
+        if (state.site.customColourCode) {
+          state.site.customColourCode = "";
+          const cc = customCodeField && customCodeField.querySelector("input");
+          if (cc) cc.value = "";
+        }
+      }
+      // ── Standard flats & angles toggle (defaults to YES) ──
+      if (!state.site.flatsAngles) state.site.flatsAngles = "YES";
+      const faToggle = document.getElementById("flatsAnglesToggle");
+      if (faToggle) {
+        faToggle.querySelectorAll(".toggle-opt").forEach((b) => {
+          b.classList.toggle("active", b.dataset.val === state.site.flatsAngles);
+        });
+      }
+
       const isNew = state.site.building === "NEW";
       const enclosureField = document.getElementById("enclosureField");
       const materialField = document.getElementById("materialField");
@@ -1045,10 +1241,13 @@
     function doorOperationReady(l) {
       return !needsDoorOperation(l) || (!!l.handleSide && !!l.openingDirection);
     }
-    function isSafetyGlass(g) { return /safety|laminat|6\.38/i.test(g || ""); }
+    function isDoorSafetyGlass(g) {
+      return /TSG|laminat|lam\b|\.38|safety|special/i.test(g || "");
+    }
     function enforceDoorGlass(l) {
-      if (isDoorLine(l) && !isSafetyGlass(l.glass)) {
-        l.glass = "6.38 Safety";
+      if (isDoorLine(l) && !isDoorSafetyGlass(l.glass)) {
+        l.glass = "6.38mm Clear Lam";
+        l.customGlass = "";
         return true;
       }
       return false;
@@ -1063,16 +1262,14 @@
              <button class="usequote" data-i="${i}" title="Copy quote size into final size">use</button></div>`
         : "";
       const diag = lineDiagHTML(l);
-      const op = [l.handleSide, l.openingDirection].filter(Boolean).join(" • ");
-      const spec = [l.glass, l.colour, op].filter(Boolean).join("<br>") || "—";
       return `
         <td><strong class="mono">${l.ref || i + 1}</strong></td>
         <td class="room-cell">${l.location || "—"}</td>
         <td>
           <div class="type-cell">
             <div class="diag">${diag}</div>
-            <div class="type-name">${l.product || '<span style="color:var(--accent)">Tap to set</span>'}
-              ${l.code ? `<span class="code label">${l.code}</span>` : ""}</div>
+            <div class="type-name">${lineProductTitle(l) ? escapeHTML(lineProductTitle(l)) : '<span style="color:var(--accent)">Tap to set</span>'}
+              ${l.code ? `<span class="code label">${escapeHTML(l.code)}</span>` : ""}</div>
           </div>
         </td>
         <td>
@@ -1087,7 +1284,7 @@
           </div>
         </td>
         <td>${l.qty || 1}</td>
-        <td class="spec-cell">${spec}</td>
+        <td class="spec-cell">${lineSpecHTML(l)}</td>
         <td class="status-cell"><span class="status ${cls}">${txt}</span></td>`;
     }
 
@@ -1120,12 +1317,11 @@
         inp.classList.toggle("unconfirmed", !l.sizeConfirmed)
       );
       tr.querySelector(".room-cell").textContent = l.location || "—";
-      tr.querySelector(".spec-cell").innerHTML =
-        [l.glass, l.colour].filter(Boolean).join("<br>") || "—";
+      tr.querySelector(".spec-cell").innerHTML = lineSpecHTML(l);
       tr.querySelector(".type-cell .diag").innerHTML = lineDiagHTML(l);
       tr.querySelector(".type-name").innerHTML =
-        (l.product || '<span style="color:var(--accent)">Tap to set</span>') +
-        (l.code ? `<span class="code label">${l.code}</span>` : "");
+        (lineProductTitle(l) ? escapeHTML(lineProductTitle(l)) : '<span style="color:var(--accent)">Tap to set</span>') +
+        (l.code ? `<span class="code label">${escapeHTML(l.code)}</span>` : "");
       // sync table size inputs from state unless that input is focused
       tr.querySelectorAll(".size-inputs input").forEach((inp) => {
         if (document.activeElement !== inp) {
@@ -1167,6 +1363,48 @@
       refreshRowChrome(i);
       renderSummary();
       syncEditor(i);
+    }
+
+    function useAllQuoteSizes() {
+      let changed = 0;
+      state.lines.forEach((l) => {
+        if (!l.quoteWidth || !l.quoteHeight) return;
+        l.width = l.quoteWidth;
+        l.height = l.quoteHeight;
+        l.size = l.quoteSize || `${l.quoteWidth} × ${l.quoteHeight}`;
+        l.sizeConfirmed = false;
+        changed++;
+      });
+      if (!changed) {
+        alert("No quote sizes found to copy into final sizes.");
+        return;
+      }
+      save();
+      renderTable();
+      renderSummary();
+      if (editingIndex >= 0) renderEditor();
+    }
+
+    function confirmAllSizes() {
+      let confirmed = 0;
+      const missing = [];
+      state.lines.forEach((l) => {
+        if (l.width && l.height) {
+          l.sizeConfirmed = true;
+          confirmed++;
+        } else {
+          missing.push(l.ref || l.location || "?");
+        }
+      });
+      save();
+      renderTable();
+      renderSummary();
+      if (editingIndex >= 0) renderEditor();
+      if (!confirmed) {
+        alert("No final sizes are available to confirm yet.");
+      } else if (missing.length) {
+        alert(`Confirmed ${confirmed} line${confirmed === 1 ? "" : "s"}. Still missing final sizes for: ${missing.join(", ")}`);
+      }
     }
 
     function wireTable() {
@@ -1306,10 +1544,19 @@
       card.classList.remove("hidden");
       card.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
+    function scrollToLine(i) {
+      const tr = document.querySelector(`#lineBody tr[data-i="${i}"]`);
+      if (!tr) return;
+      tr.scrollIntoView({ behavior: "smooth", block: "center" });
+      tr.classList.add("row-flash");
+      setTimeout(() => tr.classList.remove("row-flash"), 1400);
+    }
     function closeEditor() {
+      const closedIndex = editingIndex;
       editingIndex = -1;
       document.getElementById("editorCard").classList.add("hidden");
       document.querySelectorAll("#lineBody tr").forEach((tr) => tr.classList.remove("editing"));
+      if (closedIndex >= 0) setTimeout(() => scrollToLine(closedIndex), 50);
     }
     function renderEditor() {
       const card = document.getElementById("editorCard");
@@ -1328,20 +1575,23 @@
       setVal("edQty", l.qty || 1);
       setVal("edW", l.width);
       setVal("edH", l.height);
+      syncGlassOptions(l);
       setSelect("edGlass", l.glass);
+      syncLineGlassFields(l);
       setSelect("edColour", l.colour);
+      syncLineColourFields(l);
       setSelect("edHandleSide", l.handleSide);
       setSelect("edOpeningDirection", l.openingDirection);
       setVal("edNotes", l.notes);
-      // glass locked on doors; wrap select shows the live site rule
+      // Door lines stay editable but only offer safety glass options.
       const glassEl = document.getElementById("edGlass");
-      glassEl.disabled = isDoorLine(l);
-      glassEl.title = glassEl.disabled ? "Doors always use safety glass" : "";
+      glassEl.disabled = false;
+      glassEl.title = isDoorLine(l) ? "Door lines use safety glass options only" : "";
       const wrapEl = document.getElementById("edWrap");
       wrapEl.options[0].textContent = siteWrap() ? `Auto (${siteWrap()})` : "Auto (site rule)";
       if (document.activeElement !== wrapEl) wrapEl.value = l.wrap || "";
       document.getElementById("doorDecisionFields").classList.toggle("hidden", !needsDoorOperation(l));
-      document.getElementById("edTypeName").textContent = l.product || "Not set";
+      document.getElementById("edTypeName").textContent = lineProductTitle(l) || "Not set";
       document.getElementById("edTypeCode").textContent = l.code || "";
       document.getElementById("edDiag").innerHTML = lineDiagHTML(l);
       document.getElementById("edQuoteSize").textContent =
@@ -1366,23 +1616,78 @@
       }
       el.value = v;
     }
+    function syncGlassOptions(l) {
+      const el = document.getElementById("edGlass");
+      const options = isDoorLine(l) ? DOOR_GLASS_OPTIONS : WINDOW_GLASS_OPTIONS;
+      const current = l.glass || "";
+      el.innerHTML = options
+        .map((opt) => `<option value="${escapeHTML(opt)}">${opt ? escapeHTML(opt) : "— select —"}</option>`)
+        .join("");
+      if (current && !options.includes(current)) {
+        const o = document.createElement("option");
+        o.value = o.textContent = current;
+        el.appendChild(o);
+      }
+      el.value = current;
+    }
+    function syncLineGlassFields(l, cleanInvalid = false) {
+      const isSpecial = l.glass === "SPECIAL";
+      if (cleanInvalid && !isSpecial) l.customGlass = "";
+      document.getElementById("edCustomGlassField").classList.toggle("hidden", !isSpecial);
+      setVal("edCustomGlass", l.customGlass);
+    }
+    function syncLineColourFields(l, cleanInvalid = false) {
+      const isSpecial = l.colour === "SPECIAL";
+      const isCustom = isSpecial && l.specialColour === "CUSTOM";
+      if (cleanInvalid && !isSpecial) {
+        l.specialColour = "";
+        l.customColour = "";
+        l.customColourCode = "";
+      } else if (cleanInvalid && !isCustom) {
+        l.customColour = "";
+        l.customColourCode = "";
+      }
+
+      document.getElementById("edSpecialColourField").classList.toggle("hidden", !isSpecial);
+      document.getElementById("edCustomColourField").classList.toggle("hidden", !isCustom);
+      document.getElementById("edCustomColourCodeField").classList.toggle("hidden", !isCustom);
+      setSelect("edSpecialColour", l.specialColour);
+      setVal("edCustomColour", l.customColour);
+      setVal("edCustomColourCode", l.customColourCode);
+    }
     // editor edits → state + table row (the table row's inputs aren't focused, safe to sync)
     function syncEditor(i) { if (i === editingIndex) renderEditor(); }
 
     function wireEditor() {
-      const bind = (id, fn) =>
-        document.getElementById(id).addEventListener("input", (e) => {
+      const bind = (id, fn) => {
+        const el = document.getElementById(id);
+        const evt = el.tagName === "SELECT" ? "change" : "input";
+        el.addEventListener(evt, (e) => {
           if (editingIndex < 0) return;
           fn(state.lines[editingIndex], e.target.value);
           save();
           refreshRowChrome(editingIndex);
           renderSummary();
         });
+      };
       bind("edRoom", (l, v) => { l.location = v; });
       bind("edRef", (l, v) => { l.ref = v; });
       bind("edQty", (l, v) => { l.qty = v ? +v : 1; });
-      bind("edGlass", (l, v) => { l.glass = v; });
-      bind("edColour", (l, v) => { l.colour = v; });
+      bind("edGlass", (l, v) => {
+        l.glass = v;
+        syncLineGlassFields(l, true);
+      });
+      bind("edCustomGlass", (l, v) => { l.customGlass = v; });
+      bind("edColour", (l, v) => {
+        l.colour = v;
+        syncLineColourFields(l, true);
+      });
+      bind("edSpecialColour", (l, v) => {
+        l.specialColour = v;
+        syncLineColourFields(l, true);
+      });
+      bind("edCustomColour", (l, v) => { l.customColour = v; });
+      bind("edCustomColourCode", (l, v) => { l.customColourCode = v; });
       bind("edWrap", (l, v) => { l.wrap = v; });
       bind("edHandleSide", (l, v) => { l.handleSide = v; });
       bind("edOpeningDirection", (l, v) => { l.openingDirection = v; });
@@ -1448,6 +1753,7 @@
       if (res.handleSide) l.handleSide = res.handleSide;
       if (res.openingDirection) l.openingDirection = res.openingDirection;
       if (res.glass) l.glass = res.glass;
+      if (res.customGlass) l.customGlass = res.customGlass;
       if (res.colour) l.colour = res.colour;
       if (res.svg) l.diagSVG = res.svg;
       if (res.note && !(l.notes || "").includes(res.note)) {
@@ -1459,13 +1765,26 @@
     }
 
     // ---------- events ----------
-    document.getElementById("importBtn").addEventListener("click", () =>
-      document.getElementById("docInput").click()
-    );
+    function showImportPrompt() {
+      const prompt = document.getElementById("importPrompt");
+      if (prompt) prompt.classList.remove("hidden");
+    }
+    function hideImportPrompt() {
+      const prompt = document.getElementById("importPrompt");
+      if (prompt) prompt.classList.add("hidden");
+    }
+    function openImportPicker() {
+      document.getElementById("docInput").click();
+    }
+    document.getElementById("importBtn").addEventListener("click", openImportPicker);
+    document.getElementById("importPromptBtn").addEventListener("click", openImportPicker);
     document.getElementById("docInput").addEventListener("change", (e) => {
+      if (e.target.files[0]) hideImportPrompt();
       if (e.target.files[0]) importFile(e.target.files[0]);
       e.target.value = "";
     });
+    document.getElementById("useAllQuoteBtn").addEventListener("click", useAllQuoteSizes);
+    document.getElementById("confirmAllBtn").addEventListener("click", confirmAllSizes);
     document.getElementById("addLineBtn").addEventListener("click", () => {
       state.lines.push(blankLine());
       save();
@@ -1511,10 +1830,11 @@
         f("Building", s.building + (s.building === "NEW" && s.enclosure ? " • " + s.enclosure : "")) +
         f("Wrap rule", siteWrap() || "per line") +
         f("Material", s.material) + f("Wall", s.wall) +
-        f("Colour", s.colour) + f("Floor", s.floor) +
+        f("Colour", siteColourDisplay()) + f("Standard flats & angles", s.flatsAngles || "YES") + f("Floor", s.floor) +
         f("Quote ref", j.quoteRef) + f("Quote date", j.date) + f("Glass note", "Doors: safety glass");
 
       const notes = [];
+      notes.push("Standard flats & angles: " + (s.flatsAngles || "YES"));
       if (j.colourNote) notes.push("Colour note: " + j.colourNote);
       if (j.headerNotes && j.headerNotes.length) notes.push("Quote notes: " + j.headerNotes.join(" • "));
       document.getElementById("pNotes").textContent = notes.join("   |   ");
@@ -1525,13 +1845,13 @@
             <td><strong>${l.ref || i + 1}</strong></td>
             <td>${l.location || ""}</td>
             <td><div class="p-diag">${lineDiagHTML(l)}</div></td>
-            <td>${l.product || ""}${l.code ? `<div class="p-mono">${l.code}</div>` : ""}</td>
+            <td>${escapeHTML(lineProductTitle(l))}${linePrintDetailHTML(l)}</td>
             <td class="p-size">${l.width || "?"} × ${l.height || "?"}${l.sizeConfirmed ? "" : " ⚠"}</td>
             <td>${l.qty || 1}</td>
-            <td>${l.glass || ""}</td>
-            <td>${l.colour || ""}</td>
+            <td>${escapeHTML(lineGlassDisplay(l))}</td>
+            <td>${lineColourDisplay(l) || ""}</td>
             <td>${resolvedWrap(l) || "—"}</td>
-            <td style="font-size:9px">${(l.notes || "").replace(/\n/g, "<br>")}</td>
+            <td style="font-size:9px">${lineNotesHTML(l)}</td>
           </tr>`)
         .join("");
 
@@ -1572,6 +1892,11 @@
       const key = el.dataset.site;
       state.site[key] = el.value;
 
+      // keep any duplicate inputs for the same field (header ↔ site card) in sync
+      document.querySelectorAll('.workspace [data-site="' + key + '"]').forEach((o) => {
+        if (o !== el && o.value !== el.value) o.value = el.value;
+      });
+
       if (key === "building") {
         if (el.value !== "NEW") state.site.enclosure = "";
         syncSiteFields();
@@ -1584,15 +1909,27 @@
         }
       }
 
+      if (key === "colour" || key === "specialColour") syncSiteFields();
+
       save();
       updateSiteStatus();
       renderJobTitle();
       if (editingIndex >= 0) renderEditor(); // wrap auto-label follows site rule
     }
 
-    document.querySelectorAll("#siteGrid [data-site]").forEach((el) => {
+    document.querySelectorAll(".workspace [data-site]").forEach((el) => {
       const evt = el.tagName === "SELECT" ? "change" : "input";
       el.addEventListener(evt, () => handleSiteFieldChange(el));
+    });
+
+    // Yes/No toggles (e.g. Standard flats & angles) — not [data-site] inputs
+    document.querySelectorAll(".toggle-opt[data-toggle]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.site[btn.dataset.toggle] = btn.dataset.val;
+        syncSiteFields();
+        save();
+        updateSiteStatus();
+      });
     });
 
     // ---------- init ----------
@@ -1606,9 +1943,14 @@
         save();
       }
       if (sp.has('import')) {
-        setTimeout(() => document.getElementById('importBtn').click(), 350);
+        showImportPrompt();
+        setTimeout(openImportPicker, 350);
       }
-      if (sp.has('new') || sp.has('import')) {
+      if (sp.has('line')) {
+        const i = parseInt(sp.get('line'), 10);
+        if (Number.isFinite(i)) requestedLineIndex = i;
+      }
+      if (sp.has('new') || sp.has('import') || sp.has('line')) {
         history.replaceState(null, '', location.pathname);
       }
     })();
@@ -1616,6 +1958,7 @@
     wireEditor();
     renderAll();
     if (editingIndex >= 0) openEditor(editingIndex);
+    else if (requestedLineIndex >= 0) setTimeout(() => scrollToLine(requestedLineIndex), 120);
   </script>
 </body>
 </html>

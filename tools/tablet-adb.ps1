@@ -108,7 +108,7 @@ if ($Push -and $Push.Count -gt 0) {
 
 if ($OpenUrl) {
     if ([string]::IsNullOrWhiteSpace($Url)) {
-        throw "Pass -Url with the tablet test URL, for example http://192.168.0.106:5179/open-design-components/workspace.html"
+        throw "Pass -Url with the tablet test URL, for example http://192.168.0.106:5179/workspace.html"
     }
 
     Write-Host "Opening $Url on tablet"

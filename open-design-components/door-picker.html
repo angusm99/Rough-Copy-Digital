@@ -12,7 +12,10 @@
       --fg: oklch(92.5% 0.007 88.6);
       --muted: oklch(70.4% 0.031 87.6);
       --border: oklch(31% 0.015 252.3);
-      --accent: oklch(87.1% 0.178 91.8);
+      --accent: oklch(86% 0.185 96);
+      --outline-gold: color-mix(in oklab, var(--accent) 70%, var(--border));
+      --outline-gold-strong: color-mix(in oklab, var(--accent) 88%, var(--border));
+      --outline-gold-soft: color-mix(in oklab, var(--accent) 48%, var(--border));
       --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
       --font-body: "Segoe UI", "Segoe UI Variable Text", Inter, system-ui, sans-serif;
       --font-mono: "Cascadia Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
@@ -38,7 +41,12 @@
       grid-template-rows: auto 1fr auto;
     }
     .head, .foot { padding: 18px 22px; }
-    .head { border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%); display:grid; gap:10px; }
+    .head { border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, white 12%); display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    .head-left { display:grid; gap:10px; min-width:0; }
+    .home-link { flex-shrink:0; display:inline-flex; align-items:center; border-radius:10px; padding:2px 4px; text-decoration:none; }
+    .home-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .brand-logo { height: 34px; width: auto; display: block; }
+    .head-actions { display:flex; gap:8px; flex-shrink:0; }
     .label {
       color: var(--muted);
       font-family: var(--font-mono);
@@ -46,6 +54,7 @@
       text-transform: uppercase;
       letter-spacing: 0.15em;
     }
+    .hidden { display: none !important; }
     h1 { margin: 0; font-size: 34px; font-family: var(--font-display); }
     .families, .configs {
       display: flex;
@@ -164,14 +173,25 @@
 <body>
   <div class="wrap">
     <header class="head">
-      <div class="label" id="lineCtx">No line selected — browsing</div>
-      <h1>Pick the right door configuration.</h1>
-      <div class="families" id="familyTabs">
-        <button class="option active" data-family="hinged">Hinged</button>
-        <button class="option" data-family="multislide">Heavy Duty Slider</button>
-        <button class="option" data-family="vistafold">Sliding Folding</button>
-        <button class="option" data-family="pivot">Pivot</button>
-        <button class="option" data-family="patio">Patio Sliding</button>
+      <div class="head-left">
+        <a class="home-link" href="index.html" title="Home">
+          <img class="brand-logo" src="assets/brand/anglo-logo-gold.png" alt="Anglo Windows" />
+        </a>
+        <div>
+          <div class="label" id="lineCtx">No line selected — browsing</div>
+          <h1>Pick the right door configuration.</h1>
+          <div class="families" id="familyTabs">
+            <button class="option active" data-family="hinged">Hinged</button>
+            <button class="option" data-family="multislide">Heavy Duty Slider</button>
+            <button class="option" data-family="vistafold">Sliding Folding</button>
+            <button class="option" data-family="pivot">Pivot</button>
+            <button class="option" data-family="patio">Patio Sliding</button>
+          </div>
+        </div>
+      </div>
+      <div class="head-actions">
+        <button class="option" onclick="location.href='index.html'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px"><path d="M3 11l9-8 9 8M5 9.5V21h14V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Home</button>
+        <button class="option" onclick="location.href=workspaceUrl()">Workspace</button>
       </div>
     </header>
     <section class="body">
@@ -192,7 +212,23 @@
               <select id="openField" class="input"></select>
             </label>
             <label><span class="label">Code</span><input id="codeField" class="input" readonly /></label>
-            <label><span class="label">Glass</span><select id="glassField"><option>4mm Clear</option><option>Tinted</option></select></label>
+            <label><span class="label">Glass</span>
+              <select id="glassField">
+                <option>5mm TSG</option>
+                <option>6mm TSG</option>
+                <option>8mm TSG</option>
+                <option>10mm TSG</option>
+                <option>12mm TSG</option>
+                <option>6.38mm Clear Lam</option>
+                <option>8.38mm Clear Lam</option>
+                <option>10.38mm Clear Lam</option>
+                <option>12.38mm Clear Lam</option>
+                <option>SPECIAL</option>
+              </select>
+            </label>
+            <label class="hidden" id="customGlassField"><span class="label">Special glass variant</span>
+              <input id="customGlassInput" class="input" placeholder="e.g. Low-E safety, tinted TSG" />
+            </label>
             <label><span class="label">Colour</span><select id="colourField"><option>White</option><option>Aluminium</option></select></label>
           </div>
         </div>
@@ -200,10 +236,11 @@
           <div class="label">Configuration note</div>
           <p id="configNote">Select a door configuration.</p>
         </div>
+        <button class="primary" onclick="saveDoorSelection()" style="width:100%;margin-top:4px;min-height:48px;font-size:15px">Use selected door ✓</button>
       </aside>
     </section>
     <footer class="foot">
-      <button onclick="location.href='workspace.html'">Back to workspace</button>
+      <button onclick="location.href=workspaceUrl()">Back to workspace</button>
       <button class="primary" onclick="saveDoorSelection()">Use selected door</button>
     </footer>
   </div>
@@ -449,6 +486,24 @@
       el.value = selected && options.includes(selected) ? selected : options[0];
     }
 
+    function syncCustomGlassField() {
+      const isSpecial = document.getElementById('glassField').value === 'SPECIAL';
+      document.getElementById('customGlassField').classList.toggle('hidden', !isSpecial);
+      if (!isSpecial) document.getElementById('customGlassInput').value = '';
+    }
+
+    function selectedGlassValue() {
+      const glass = document.getElementById('glassField').value;
+      if (glass !== 'SPECIAL') return { glass, customGlass: '' };
+      const customGlass = document.getElementById('customGlassInput').value.trim();
+      if (!customGlass) {
+        alert('Type the special glass variant before using this door.');
+        document.getElementById('customGlassInput').focus();
+        return null;
+      }
+      return { glass: 'SPECIAL', customGlass };
+    }
+
     function applyDoorDecisionOptions(door) {
       const family = door?.family || currentFamily;
       const handleOptions = ['', 'LEFT', 'RIGHT', 'CENTRE', 'CUSTOM'];
@@ -467,6 +522,7 @@
       document.getElementById('doorTitle').textContent = '---';
       document.getElementById('configField').value = '';
       document.getElementById('codeField').value = '';
+      syncCustomGlassField();
       applyDoorDecisionOptions(null);
       document.getElementById('configNote').textContent = 'Select a door configuration.';
     }
@@ -590,11 +646,17 @@
       resetSelectionPanel();
     });
 
+    function workspaceUrl() {
+      return CTX && typeof CTX.i === 'number' ? `workspace.html?line=${CTX.i}` : 'workspace.html';
+    }
+
     function saveDoorSelection() {
       if (!selectedDoor) {
         alert('Please select a door first.');
         return;
       }
+      const glassChoice = selectedGlassValue();
+      if (!glassChoice) return;
 
       if (CTX && typeof CTX.i === 'number') {
         const handleSide = document.getElementById('handleField').value;
@@ -613,13 +675,14 @@
           handleSide,
           openingDirection,
           note: noteBits,
-          glass: document.getElementById('glassField').value,
+          glass: glassChoice.glass,
+          customGlass: glassChoice.customGlass,
           colour: document.getElementById('colourField').value,
           svg: doorSVG(selectedDoor, 88, 64)
         }));
       }
       localStorage.removeItem('aw_picker_ctx');
-      location.href = 'workspace.html';
+      location.href = workspaceUrl();
     }
 
     // ── Line context from workspace (picker round-trip) ────────────────
@@ -632,12 +695,13 @@
       if (CTX.quoteW && CTX.quoteH) bits.push('quote ' + CTX.quoteW + ' × ' + CTX.quoteH);
       document.getElementById('lineCtx').textContent = bits.join(' • ') || 'Pick for current line';
     }
+    document.getElementById('glassField').addEventListener('change', syncCustomGlassField);
 
     // ── Keyboard: Enter confirms • Esc returns ──────────────────────────
     document.addEventListener('keydown', (e) => {
       if (e.target.closest('input, select, textarea')) return;
       if (e.key === 'Enter') { e.preventDefault(); saveDoorSelection(); }
-      else if (e.key === 'Escape') { location.href = 'workspace.html'; }
+      else if (e.key === 'Escape') { location.href = workspaceUrl(); }
     });
 
     applyDoorDecisionOptions(null);

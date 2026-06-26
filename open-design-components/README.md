@@ -46,13 +46,13 @@ Dark gold theme matching Anglo Windows brand:
 Local browser:
 
 ```text
-http://127.0.0.1:5178/open-design-components/workspace.html
+http://127.0.0.1:5178/workspace.html
 ```
 
 Tablet on same Wi-Fi:
 
 ```text
-http://<PC-LAN-IP>:5179/open-design-components/workspace.html
+http://<PC-LAN-IP>:5179/workspace.html
 ```
 
 Start servers from the repo root:
@@ -68,10 +68,10 @@ Run the project verification helper before committing:
 .\tools\verify-project.ps1
 ```
 
-To test quote upload/extraction on a tablet, stage the sample quote locally and use the generated tablet download URL:
+To test quote upload/extraction on a tablet, stage the sample quote locally; the script prints the `tablet-adb.ps1 -Push` command to send it to the tablet over ADB (quotes never go over the LAN):
 
 ```powershell
-.\tools\stage-tablet-files.ps1 -Path "\\ANGLOSERVER\Share\Search\Scans\.....202606\ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf" -Port 5179
+.\tools\stage-tablet-files.ps1 -Path "\\ANGLOSERVER\Share\Search\Scans\.....202606\ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf"
 ```
 
 ## Do Not Commit

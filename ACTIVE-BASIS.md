@@ -42,7 +42,7 @@ These older files are useful for reference, comparison, or logic-porting, but th
 
 If the local preview server is running, open:
 
-- `http://127.0.0.1:5178/open-design-components/workspace.html`
+- `http://127.0.0.1:5178/workspace.html`
 
 Recommended preview commands from the repo root:
 
@@ -80,7 +80,7 @@ Use the LAN preview path for browser testing:
 .\tools\start-preview.ps1 -Port 5179 -Bind 0.0.0.0
 ```
 
-Use `tools/stage-tablet-files.ps1` to make local-only sample quote PDFs downloadable to the tablet. Use `tools/tablet-adb.ps1` to push files and open the app once ADB is authorised.
+Use `tools/stage-tablet-files.ps1` to copy local-only sample quote PDFs into `tablet-test-files/`; it prints the `tablet-adb.ps1 -Push` command to send them to the tablet over ADB (quotes never go over the LAN). Use `tools/tablet-adb.ps1` to push files and open the app once ADB is authorised.
 
 Current confirmed ADB sequence:
 
@@ -88,7 +88,7 @@ Current confirmed ADB sequence:
 adb devices -l
 adb tcpip 5555
 adb connect 192.168.0.159:5555
-.\tools\tablet-adb.ps1 -Device "192.168.0.159:5555" -OpenUrl -Url "http://192.168.0.106:5179/open-design-components/workspace.html"
+.\tools\tablet-adb.ps1 -Device "192.168.0.159:5555" -OpenUrl -Url "http://192.168.0.106:5179/workspace.html"
 ```
 
 ## Storage Keys

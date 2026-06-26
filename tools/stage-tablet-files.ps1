@@ -1,9 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [string[]]$Path,
-
-    [int]$Port = 5179
+    [string[]]$Path
 )
 
 $ErrorActionPreference = "Stop"
@@ -25,28 +23,13 @@ foreach ($item in $Path) {
     $stagedFiles += Get-Item -LiteralPath $target
 }
 
-$ips = Get-NetIPAddress -AddressFamily IPv4 |
-    Where-Object {
-        $_.IPAddress -notlike "127.*" -and
-        $_.IPAddress -notlike "169.254.*" -and
-        $_.PrefixOrigin -ne "WellKnown"
-    } |
-    Sort-Object InterfaceAlias, IPAddress
-
 Write-Host "Staged tablet test file(s) in:"
 Write-Host "  $stageDir"
 Write-Host ""
-Write-Host "Make sure the LAN preview server is running:"
-Write-Host "  .\tools\start-preview.ps1 -Port $Port -Bind 0.0.0.0"
-Write-Host ""
-Write-Host "Open these URL(s) on the tablet to download the file(s):"
-
+Write-Host "Push to the tablet over ADB (preferred - keeps quote PII off the LAN):"
 foreach ($file in $stagedFiles) {
-    $encodedName = [uri]::EscapeDataString($file.Name)
-    foreach ($ip in $ips) {
-        Write-Host ("  http://{0}:{1}/tablet-test-files/{2}" -f $ip.IPAddress, $Port, $encodedName)
-    }
+    Write-Host ("  .\tools\tablet-adb.ps1 -Push `"{0}`"" -f $file.FullName)
 }
-
 Write-Host ""
-Write-Host "These files are local-only and ignored by Git."
+Write-Host "These files are local-only and ignored by Git. The preview server only"
+Write-Host "serves the app folder, so quotes are never exposed on the LAN."
