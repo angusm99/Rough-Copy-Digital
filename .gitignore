@@ -17,3 +17,17 @@ _quote*.json
 tablet-screen*.png
 tablet-test-files/
 tmp/
+
+# legacy local prototype/debug exports kept out of the active repo
+/all_crops_preview.html
+/aw-mobile-pwa.html
+/crop_preview.html
+/debug_boxes.png
+/debug_grid.png
+/debug_grid2.png
+/door_crops.html
+/rough_copy_redesign.pdf
+/site-measurement-sheet.html
+/site-measurement-sheet.pdf
+/svg-test.html
+/window_crop_preview.html

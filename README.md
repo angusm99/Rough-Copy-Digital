@@ -1,6 +1,6 @@
 # Rough Copy Digital
 
-Vanilla HTML/CSS/JS field measurement and quote-confirmation tool for Anglo Windows. Reps use it on tablets on site to import Bizman quote PDFs, confirm final measured window and door sizes, pick or build configurations, and export a rough copy PDF for workshop/material planning.
+Vanilla HTML/CSS/JS field measurement and quote-confirmation tool for Anglo Windows. Reps use it on tablets on site to import Bizman quote PDFs or supporting documents, confirm final measured window and door sizes, pick or build configurations, and export a rough copy PDF for workshop/material planning.
 
 No framework. No build step. The active app is served directly from static files.
 

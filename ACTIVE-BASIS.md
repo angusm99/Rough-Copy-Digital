@@ -15,7 +15,7 @@ This folder is the current build path for the Digital Rough Copy system.
 
 ## Current Behavior To Preserve
 
-- Import Bizman quote PDFs into the workspace.
+- Import documents into the workspace: Bizman quote PDFs first, plus supported PDFs/images/docs for best-effort customer/site extraction.
 - Auto-fill job/site/customer/quote details where available.
 - Keep quote sizes as reference only.
 - Require the rep to enter and confirm final site sizes before export.

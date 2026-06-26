@@ -715,8 +715,9 @@
       return colourDisplay(l.colour, l.specialColour, l.customColour, l.customColourCode);
     }
     function lineSpecHTML(l) {
-      const op = [l.handleSide, l.openingDirection].filter(Boolean).join(" • ");
-      return [lineGlassDisplay(l), lineColourDisplay(l), op].filter(Boolean).join("<br>") || "—";
+      const op = [l.handleSide, l.openingDirection].map(cleanText).filter(Boolean).join(" • ");
+      const parts = [lineGlassDisplay(l), lineColourDisplay(l), op].map(cleanText).filter(Boolean);
+      return parts.length ? parts.map(escapeHTML).join("<br>") : "—";
     }
     function lineGlassDisplay(l) {
       if ((l.glass || "").trim() === "SPECIAL") return cleanText(l.customGlass) || "SPECIAL";
@@ -1230,12 +1231,12 @@
 
     // _6 rule: doors always get safety glass
     function isDoorLine(l) {
-      if (["patio", "multislide", "vistafold", "hinged"].includes((l.family || "").toLowerCase())) return true;
+      if (["patio", "multislide", "vistafold", "hinged", "pivot"].includes((l.family || "").toLowerCase())) return true;
       return /DOOR|STABLE|PALACE|VALENCIA|CLS-?250|HEAVY DUTY|VISTAFOLD|SLIDING FOLDING|PIVOT/i.test(l.product || "");
     }
     function needsDoorOperation(l) {
       const fam = (l.family || "").toLowerCase();
-      if (["hinged", "vistafold"].includes(fam)) return true;
+      if (["hinged", "vistafold", "pivot"].includes(fam)) return true;
       return /HINGED|STABLE|VISTAFOLD|FOLDING|PIVOT/i.test(l.product || "");
     }
     function doorOperationReady(l) {
@@ -1258,13 +1259,13 @@
       const inputCls = l.sizeConfirmed ? "" : "unconfirmed";
       const hasFinal = l.width && l.height;
       const qref = l.quoteSize
-        ? `<div class="qref">Quote: ${l.quoteSize}
+        ? `<div class="qref">Quote: ${escapeHTML(l.quoteSize)}
              <button class="usequote" data-i="${i}" title="Copy quote size into final size">use</button></div>`
         : "";
       const diag = lineDiagHTML(l);
       return `
-        <td><strong class="mono">${l.ref || i + 1}</strong></td>
-        <td class="room-cell">${l.location || "—"}</td>
+        <td><strong class="mono">${escapeHTML(l.ref || i + 1)}</strong></td>
+        <td class="room-cell">${escapeHTML(l.location || "—")}</td>
         <td>
           <div class="type-cell">
             <div class="diag">${diag}</div>
@@ -1283,7 +1284,7 @@
             </button>
           </div>
         </td>
-        <td>${l.qty || 1}</td>
+        <td>${escapeHTML(l.qty || 1)}</td>
         <td class="spec-cell">${lineSpecHTML(l)}</td>
         <td class="status-cell"><span class="status ${cls}">${txt}</span></td>`;
     }
@@ -1823,11 +1824,18 @@
         `${s.date || ""}<br>` +
         `${state.lines.length} lines • printed ${new Date().toISOString().slice(0, 10)}`;
 
-      const f = (k, v) => `<div class="f"><b>${k}</b>${v || "—"}</div>`;
+      const f = (k, v) => {
+        const text = cleanText(v) || "—";
+        return `<div class="f"><b>${escapeHTML(k)}</b>${escapeHTML(text)}</div>`;
+      };
+      const buildingDisplay = [s.building, s.building === "NEW" && s.enclosure ? s.enclosure : ""]
+        .map(cleanText)
+        .filter(Boolean)
+        .join(" • ");
       document.getElementById("pSite").innerHTML =
         f("Client", s.client) + f("Phone", s.phone) + f("Email", s.email) +
         f("Site address", s.address) + f("Rep", s.rep) +
-        f("Building", s.building + (s.building === "NEW" && s.enclosure ? " • " + s.enclosure : "")) +
+        f("Building", buildingDisplay) +
         f("Wrap rule", siteWrap() || "per line") +
         f("Material", s.material) + f("Wall", s.wall) +
         f("Colour", siteColourDisplay()) + f("Standard flats & angles", s.flatsAngles || "YES") + f("Floor", s.floor) +
@@ -1842,15 +1850,15 @@
       document.getElementById("pBody").innerHTML = state.lines
         .map((l, i) => `
           <tr>
-            <td><strong>${l.ref || i + 1}</strong></td>
-            <td>${l.location || ""}</td>
+            <td><strong>${escapeHTML(l.ref || i + 1)}</strong></td>
+            <td>${escapeHTML(l.location || "")}</td>
             <td><div class="p-diag">${lineDiagHTML(l)}</div></td>
             <td>${escapeHTML(lineProductTitle(l))}${linePrintDetailHTML(l)}</td>
             <td class="p-size">${l.width || "?"} × ${l.height || "?"}${l.sizeConfirmed ? "" : " ⚠"}</td>
-            <td>${l.qty || 1}</td>
+            <td>${escapeHTML(l.qty || 1)}</td>
             <td>${escapeHTML(lineGlassDisplay(l))}</td>
-            <td>${lineColourDisplay(l) || ""}</td>
-            <td>${resolvedWrap(l) || "—"}</td>
+            <td>${escapeHTML(lineColourDisplay(l) || "")}</td>
+            <td>${escapeHTML(resolvedWrap(l) || "—")}</td>
             <td style="font-size:9px">${lineNotesHTML(l)}</td>
           </tr>`)
         .join("");
@@ -1864,7 +1872,7 @@
       const boxes = [
         ["Hinged door panels", total.hinged],
         ["Windows (units)", total.windows],
-        ["Palace door panels", total.palace],
+        ["Heavy Duty Slider panels", total.palace],
         ["Folding door panels", total.folding],
         ["Sliding panels", total.sliding],
         ["Fixed frames", total.fixed],

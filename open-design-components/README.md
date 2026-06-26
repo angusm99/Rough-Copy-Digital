@@ -10,11 +10,11 @@ All files are vanilla HTML/CSS/JS. No framework. No build step.
 
 | File | Description |
 |------|-------------|
-| `workspace.html` | Active quote workspace: import Bizman, confirm final site sizes, validate, export PDF |
+| `workspace.html` | Active quote workspace: import documents, confirm final site sizes, validate, export PDF |
 | `quote-parser.js` | Active Bizman quote parser for multiple 6.3.x PDF layouts |
 | `window-picker.html` | Active window picker: common configs, picker context, workspace round-trip |
 | `window-builder.html` | Active custom window builder: grid editor, mullions/transoms, workspace round-trip |
-| `door-picker.html` | Active door picker: Patio, Palace, Multi-Slide, Vistafold, Hinged |
+| `door-picker.html` | Active door picker: Hinged, Heavy Duty Slider, Sliding Folding, Pivot, Patio |
 | `digital-rough-copy-index.html` | Home dashboard / navigation reference |
 | `validation-report.html` | Validation report reference |
 | `brand-spec.md` | Anglo Windows brand spec: colours, typography, CSS variables |
@@ -32,7 +32,7 @@ Dark gold theme matching Anglo Windows brand:
 
 ## Current Workspace Flow
 
-- Import Bizman quote PDF.
+- Import documents: Bizman quote PDFs first, plus supported PDFs/images/docs for best-effort customer/site extraction.
 - Auto-fill job/site/customer details and line items.
 - Show quote sizes as reference only.
 - Require final site sizes and line type/configuration before export.
