@@ -8,7 +8,7 @@ This repo is the active Anglo Windows Digital Rough Copy project.
 - Main entry point: `open-design-components/index.html` (landing page → routes to workspace)
 - Parser: `open-design-components/quote-parser.js`
 - Legacy reference only: `rough-copy-digital_6.html`
-- Project note: `C:\Users\angusm\Documents\Obsidian Vault\Rough Copy Digital.md`
+- Project note: `C:\Users\angusm\Documents\Obsidian Vault\ANGLO WINDOWS\Rough Copy Digital.md`
 
 Do not treat `_6.html` as the current build unless Angus explicitly asks for a legacy comparison or port.
 
@@ -30,9 +30,12 @@ Core flow:
 
 - Handles multiple Bizman 6.3.x quote layouts.
 - Imports quote diagrams where available.
+- Extracts Workpool refs such as `JH`, `JHJ`, `KH`, and `AM` prefixed numbers where present.
+- Extracts project/site names from quote `Your Ref` text where possible.
+- Handles SPECIAL powder-coat colours and keeps CPO/RAL/custom colour detail visible.
 - Uses vendored PDF.js in `open-design-components/vendor/` for offline/tablet use.
 - Window picker, door picker, and custom window builder round-trip through localStorage.
-- Tablet pass has been done: larger touch targets, portrait constraints, no hover-only behavior.
+- Tablet pass has been done: larger touch targets, portrait constraints, no hover-only behavior, and editable Ref/Room cells in the line table.
 
 ## Important Storage Keys
 
@@ -52,6 +55,18 @@ Open:
 
 ```text
 http://127.0.0.1:5178/workspace.html
+```
+
+For a guaranteed blank job, use:
+
+```text
+http://127.0.0.1:5178/workspace.html?new=1
+```
+
+For a fresh document import flow, use:
+
+```text
+http://127.0.0.1:5178/workspace.html?new=1&import=1
 ```
 
 For tablet testing on same Wi-Fi:
@@ -133,7 +148,12 @@ These patterns are in `.gitignore`, but still check `git status` before committi
 
 ## Current Known Work
 
-- HTC AT01 tablet browser testing is in progress. LAN page testing can use the tablet's current Wi-Fi IP, but ADB is not connected until USB debugging or Wireless debugging pairing is enabled on the tablet.
+- Latest sync as of 2026-06-30: landing page import links now start a clean job with `?new=1&import=1`; normal `workspace.html` intentionally resumes `aw_rc_job` from localStorage.
+- Gail/Cecile Perlemoen quote import improved: client name, project/site, Workpool ref, SPECIAL/Pebble Grey/CPO colour details, and tighter quote drawing crops.
+- Workspace line table has editable Ref and Room cells for tablet capture; portrait layout was rebalanced so Spec and Status stay visible.
+- Casement SVG artwork refreshed from `Anglo-Casement-305.zip`: 53 active files replaced in `open-design-components/assets/casement-305/Anglo-Casement-305-Drawings/`.
+- `Anglo-Windows-and-Doors2.zip` was inspected; its 16 door SVGs were byte-for-byte identical to the current `assets/architectural-doors/` files, so no door asset churn was needed.
+- HTC AT01 tablet browser testing is in progress. USB ADB serial remains `FS44BPC01070`; ADB reverse to local preview can use `adb reverse tcp:5179 tcp:5179`.
 - Window picker / builder baseline has moved onto the dark gold review theme. Builder selections now return richer profile-style SVGs to the workspace, not plain placeholder geometry.
 - Door picker category order is now `Hinged`, `Heavy Duty Slider`, `Sliding Folding`, `Pivot`, `Patio Sliding`.
 - Heavy Duty Slider groups are now `Valencia`, `Palace Door`, and `CLS-250 Lift and Slide`.

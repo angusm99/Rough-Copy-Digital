@@ -155,6 +155,13 @@
     .status.info { background: color-mix(in oklab, var(--info) 18%, var(--surface-2)); color: color-mix(in oklab, var(--info) 76%, white 24%); }
     .status.danger { background: color-mix(in oklab, var(--danger) 22%, var(--surface-2)); color: color-mix(in oklab, var(--danger) 80%, white 20%); }
     table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 720px; }
+    #lineTable th:nth-child(1), #lineTable td:nth-child(1) { width: 7%; }
+    #lineTable th:nth-child(2), #lineTable td:nth-child(2) { width: 12%; }
+    #lineTable th:nth-child(3), #lineTable td:nth-child(3) { width: 29%; }
+    #lineTable th:nth-child(4), #lineTable td:nth-child(4) { width: 23%; }
+    #lineTable th:nth-child(5), #lineTable td:nth-child(5) { width: 5%; }
+    #lineTable th:nth-child(6), #lineTable td:nth-child(6) { width: 14%; }
+    #lineTable th:nth-child(7), #lineTable td:nth-child(7) { width: 10%; }
     th, td {
       padding: 10px 10px;
       border-bottom: 1px solid color-mix(in oklab, var(--border) 90%, white 10%);
@@ -164,9 +171,25 @@
     tbody tr:hover { background: color-mix(in oklab, var(--accent) 6%, transparent); }
     tbody tr.editing { background: color-mix(in oklab, var(--accent) 11%, var(--surface-2)); }
     tbody tr.row-flash { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .line-text-input {
+      width: 100%;
+      min-height: 36px;
+      padding: 6px 7px;
+      border-radius: 7px;
+      border: 1px solid color-mix(in oklab, var(--border) 78%, var(--accent) 22%);
+      background: color-mix(in oklab, var(--surface) 76%, var(--surface-3));
+      color: var(--fg);
+      font: inherit;
+      font-size: 12.5px;
+    }
+    .line-text-input.ref-input {
+      font-family: var(--font-mono);
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
     .type-cell { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .type-cell .diag {
-      width: 82px; height: 58px; flex: none;
+      width: 112px; height: 78px; flex: none;
       border: 1px solid color-mix(in oklab, var(--border) 72%, var(--accent) 28%);
       border-radius: 7px;
       background: color-mix(in oklab, var(--surface) 62%, var(--surface-3));
@@ -327,6 +350,30 @@
       .header { grid-template-columns: 1fr; }
       .toolbar { justify-content: start; }
     }
+    @media (max-width: 900px) {
+      .workspace { padding: 10px; gap: 10px; }
+      .table-scroll { overflow-x: hidden; }
+      table { min-width: 0; table-layout: fixed; font-size: 11.5px; }
+      th, td { padding: 7px 5px; }
+      th { font-size: 9.5px; letter-spacing: .12em; }
+      #lineTable th:nth-child(1), #lineTable td:nth-child(1) { width: 8%; }
+      #lineTable th:nth-child(2), #lineTable td:nth-child(2) { width: 10%; }
+      #lineTable th:nth-child(3), #lineTable td:nth-child(3) { width: 21%; }
+      #lineTable th:nth-child(4), #lineTable td:nth-child(4) { width: 22%; }
+      #lineTable th:nth-child(5), #lineTable td:nth-child(5) { width: 4%; }
+      #lineTable th:nth-child(6), #lineTable td:nth-child(6) { width: 22%; }
+      #lineTable th:nth-child(7), #lineTable td:nth-child(7) { width: 13%; }
+      .type-cell { gap: 5px; }
+      .type-cell .diag { width: 62px; height: 46px; }
+      .type-name { font-size: 10.8px; overflow-wrap: anywhere; }
+      .line-text-input { min-height: 34px; padding: 5px 5px; font-size: 11px; }
+      .size-inputs { gap: 3px; flex-wrap: wrap; }
+      .size-inputs input { width: 52px; min-height: 34px; padding: 5px 4px; font-size: 11px; }
+      .confirm-btn, .usequote { min-height: 32px; padding: 5px 7px; font-size: 10.5px; }
+      .qref { font-size: 8.5px; letter-spacing: .03em; gap: 3px; flex-wrap: wrap; }
+      .spec-cell { max-width: none; font-size: 9.5px; line-height: 1.25; overflow-wrap: anywhere; }
+      .status { padding: 5px 7px; font-size: 10px; white-space: normal; line-height: 1.1; text-align: center; }
+    }
     @media (max-width: 560px) {
       .site-grid, .editor-grid { grid-template-columns: 1fr; }
       .editor-grid .wide { grid-column: auto; }
@@ -395,6 +442,7 @@
         </div>
         <div class="site-grid" id="siteGrid">
           <label><span class="label">Job ref</span><input class="input" data-site="jobRef" /></label>
+          <label><span class="label">Workpool ref</span><input class="input" data-site="workpoolRef" placeholder="JH / JHJ / KH / AM ref" /></label>
           <label><span class="label">Date</span><input class="input" type="date" data-site="date" /></label>
           <label><span class="label">Client</span><input class="input" data-site="client" /></label>
           <label><span class="label">Phone</span><input class="input" type="tel" data-site="phone" /></label>
@@ -672,7 +720,11 @@
     const RESULT_KEY = "aw_picker_result";
     const IMPORT_SCRIPT_CACHE = {};
 
-    const SITE_FIELDS = ["jobRef","date","client","phone","address","email","rep","building","enclosure","material","wall","colour","floor"];
+    const SITE_FIELDS = [
+      "jobRef","workpoolRef","date","client","phone","address","email","rep",
+      "building","enclosure","material","wall","colour","specialColour",
+      "customColour","customColourCode","floor"
+    ];
     const WINDOW_GLASS_OPTIONS = ["", "4mm Clear", "4mm Obscure", "6.38 Clear Lam", "6.38 Safety", "Bronze"];
     const DOOR_GLASS_OPTIONS = [
       "5mm TSG", "6mm TSG", "8mm TSG", "10mm TSG", "12mm TSG",
@@ -722,6 +774,33 @@
     function lineGlassDisplay(l) {
       if ((l.glass || "").trim() === "SPECIAL") return cleanText(l.customGlass) || "SPECIAL";
       return cleanText(l.glass);
+    }
+    function titleCaseColour(v) {
+      return cleanText(v).toLowerCase().replace(/\b[a-z]/g, (ch) => ch.toUpperCase());
+    }
+    function specialColourInfo(...sources) {
+      const text = sources.map(cleanText).filter(Boolean).join(" | ");
+      if (!text) return {};
+      const code = firstMatch(text, [/\b((?:CPO|RAL)\s*\d{3,6})\b/i]);
+      const upper = text.toUpperCase();
+      let name = "";
+      const toM = upper.match(/\bTO\s+([A-Z][A-Z\s]+?)\s*[-|]\s*(?:CPO|RAL)\s*\d/i);
+      const afterCodeM = upper.match(/\b(?:CPO|RAL)\s*\d{3,6}\s+([A-Z][A-Z\s]+?)(?:[-|]\s*NON\s*TEX|[-|]\s*TEXTURED|$)/i);
+      if (toM) name = toM[1];
+      else if (afterCodeM) name = afterCodeM[1];
+      name = name
+        .replace(/\bALU\b/g, "")
+        .replace(/\bNON\s*TEX(?:TURED)?\b/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      const texture = /NON\s*TEX/i.test(text) ? "Non Textured" : "";
+      if (!code && !name) return {};
+      return {
+        colour: "SPECIAL",
+        specialColour: "CUSTOM",
+        customColour: [titleCaseColour(name), texture].filter(Boolean).join(" - "),
+        customColourCode: code ? code.toUpperCase().replace(/\s+/, " ") : "",
+      };
     }
     function cleanText(v) {
       return (v == null ? "" : String(v)).replace(/\s+/g, " ").trim();
@@ -812,6 +891,69 @@
       return pageRows;
     }
 
+    function findTightDrawingBounds(canvas, sx, sy, sw, sh) {
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      const x0 = Math.max(0, Math.round(sx));
+      const y0 = Math.max(0, Math.round(sy));
+      const w = Math.min(canvas.width - x0, Math.max(1, Math.round(sw)));
+      const h = Math.min(canvas.height - y0, Math.max(1, Math.round(sh)));
+      const data = ctx.getImageData(x0, y0, w, h).data;
+      const ink = new Uint8Array(w * h);
+      const seen = new Uint8Array(w * h);
+
+      for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+        const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+        if (a < 16) continue;
+        const darkness = 765 - r - g - b;
+        const chroma = Math.max(r, g, b) - Math.min(r, g, b);
+        if (darkness > 42 || chroma > 34) ink[p] = 1;
+      }
+
+      let best = null;
+      const stack = [];
+      for (let p = 0; p < ink.length; p++) {
+        if (!ink[p] || seen[p]) continue;
+        let minX = w, minY = h, maxX = 0, maxY = 0, count = 0;
+        seen[p] = 1;
+        stack.push(p);
+        while (stack.length) {
+          const q = stack.pop();
+          const x = q % w;
+          const y = (q / w) | 0;
+          count++;
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+          for (let yy = Math.max(0, y - 1); yy <= Math.min(h - 1, y + 1); yy++) {
+            for (let xx = Math.max(0, x - 1); xx <= Math.min(w - 1, x + 1); xx++) {
+              const n = yy * w + xx;
+              if (ink[n] && !seen[n]) {
+                seen[n] = 1;
+                stack.push(n);
+              }
+            }
+          }
+        }
+        const bw = maxX - minX + 1;
+        const bh = maxY - minY + 1;
+        if (count < 24 || bw < 10 || bh < 14) continue;
+        // Drawings are the large connected component in the left crop;
+        // text is mostly small disconnected letter components.
+        const score = count + bw * bh * 0.04 - minX * 1.5;
+        if (!best || score > best.score) best = { minX, minY, maxX, maxY, score };
+      }
+
+      if (!best) return null;
+      const pad = 10;
+      return {
+        x: Math.max(0, x0 + best.minX - pad),
+        y: Math.max(0, y0 + best.minY - pad),
+        w: Math.min(canvas.width, x0 + best.maxX + pad) - Math.max(0, x0 + best.minX - pad),
+        h: Math.min(canvas.height, y0 + best.maxY + pad) - Math.max(0, y0 + best.minY - pad),
+      };
+    }
+
     // Crop each item's elevation drawing out of the quote PDF.
     // Bizman draws it on the left of the item band (x ≈ 20–152pt), between
     // the item-code row and the "Windload … View from Outside" row.
@@ -857,12 +999,17 @@
         const botPdf = (vfoY !== null ? vfoY : a.y - 116) - 8;
         const cy1 = Math.max(0, (pageH - topPdf) * SCALE);
         const cy2 = Math.min(c.height, (pageH - botPdf) * SCALE);
-        const cx1 = 8 * SCALE, cx2 = 164 * SCALE;
+        const searchX1 = 6 * SCALE, searchX2 = 150 * SCALE;
         if (cy2 - cy1 < 30) continue;
+        const tight = findTightDrawingBounds(c, searchX1, cy1, searchX2 - searchX1, cy2 - cy1);
+        const cx1 = tight ? tight.x : searchX1;
+        const cropY = tight ? tight.y : cy1;
+        const cropW = tight ? tight.w : (searchX2 - searchX1);
+        const cropH = tight ? tight.h : (cy2 - cy1);
         const out = document.createElement("canvas");
-        out.width = Math.round(cx2 - cx1);
-        out.height = Math.round(cy2 - cy1);
-        out.getContext("2d").drawImage(c, cx1, cy1, out.width, out.height, 0, 0, out.width, out.height);
+        out.width = Math.round(cropW);
+        out.height = Math.round(cropH);
+        out.getContext("2d").drawImage(c, cx1, cropY, cropW, cropH, 0, 0, out.width, out.height);
         lines[k].quoteDiagPNG = out.toDataURL("image/jpeg", 0.78);
       }
     }
@@ -922,6 +1069,14 @@
       const std = ["WHITE", "BRONZE", "CHARCOAL", "BLACK", "SILVER", "SPECIAL"];
       return std.find((c) => new RegExp(`\\b${c}\\b`, "i").test(text)) || "";
     }
+    function inferProjectName(text) {
+      const refLine = firstMatch(text, [/(?:your ref|project|site)\s*[:\-]\s*([^\n]+)/i]);
+      return cleanText(refLine
+        .replace(/\b(?:JHJ|JH|KH|AM)[A-Z]?\d{6}[A-Z]?\b/ig, "")
+        .replace(/\([A-Z]?\d{3,6}\)/ig, "")
+        .replace(/\bREV\d+\b/ig, "")
+        .replace(/\s*[-–—]\s*/g, " "));
+    }
 
     function parseGenericDocumentText(text, sourceName) {
       const compact = (text || "").replace(/\r/g, "").trim();
@@ -932,6 +1087,8 @@
         sourceName,
         site: {
           jobRef: firstMatch(compact, [/(?:quote ref|job ref|reference|quote no|quote number)\s*[:#\-]?\s*([A-Z0-9\-\/]+)/i]),
+          workpoolRef: firstMatch(compact, [/\b((?:JHJ|JH|KH|AM)[A-Z]?\d{6}[A-Z]?)\b/i]),
+          project: inferProjectName(compact),
           date: firstMatch(compact, [/\b(\d{4}-\d{2}-\d{2})\b/, /\b(\d{2}[\/-]\d{2}[\/-]\d{4})\b/]),
           client: firstMatch(compact, [/(?:client|customer|attention|name)\s*[:\-]\s*([^\n]+)/i]),
           phone: firstMatch(compact, [/(?:phone|tel|telephone|cell|mobile)\s*[:\-]?\s*([+\d][\d\s()\-]{7,})/i]),
@@ -949,6 +1106,7 @@
         ...(state.job || {}),
         quoteTitle: incoming.client || data.sourceName || (state.job && state.job.quoteTitle) || "",
         quoteRef: incoming.jobRef || (state.job && state.job.quoteRef) || "",
+        workpoolRef: incoming.workpoolRef || (state.job && state.job.workpoolRef) || "",
         client: incoming.client || (state.job && state.job.client) || "",
         headerNotes: [`Imported from ${data.sourceName || "document"}`],
       };
@@ -957,7 +1115,7 @@
       });
       // Generic imports are not quote-structured, so reset the project/site line
       // explicitly instead of letting a previous job's project text linger.
-      state.site.project = incoming.address || incoming.client || data.sourceName || "";
+      state.site.project = incoming.project || incoming.address || incoming.client || data.sourceName || "";
       save();
       renderAll();
       alert("Imported what could be identified from that document. Please review the customer/site fields and complete any missing line details.");
@@ -1034,8 +1192,11 @@
           colour = "SPECIAL";
         }
       }
+      const specialInfo = specialColourInfo(j.jobType, (lines || []).map((l) => l.colour).find(Boolean));
       return {
         jobRef: j.quoteRef || "",
+        workpoolRef: j.workpoolRef || "",
+        project: j.projectName || "",
         date: j.date || "",
         client: j.client || "",
         phone: j.clientPhone || "",
@@ -1046,6 +1207,7 @@
         material,
         wall: "",
         colour,
+        ...specialInfo,
         floor: "",
       };
     }
@@ -1057,8 +1219,8 @@
       const fromQuote = siteFromJob(parsed.job, parsed.lines);
       SITE_FIELDS.forEach((f) => { if (fromQuote[f]) state.site[f] = fromQuote[f]; });
       // A fresh import is a new job — refresh the Project/site line to the new
-      // quote's address (rep can type an actual project name over it).
-      state.site.project = fromQuote.address || "";
+      // quote project/site (rep can type an actual site address over it).
+      state.site.project = fromQuote.project || fromQuote.address || "";
       editingIndex = -1;
       save();
       renderAll();
@@ -1117,6 +1279,10 @@
       return SITE_FIELDS.filter((f) => {
         if (f === "enclosure") return state.site.building === "NEW";
         if (f === "material") return state.site.building !== "NEW";
+        if (f === "specialColour") return state.site.colour === "SPECIAL";
+        if (f === "customColour" || f === "customColourCode") {
+          return state.site.colour === "SPECIAL" && state.site.specialColour === "CUSTOM";
+        }
         return true;
       });
     }
@@ -1264,8 +1430,12 @@
         : "";
       const diag = lineDiagHTML(l);
       return `
-        <td><strong class="mono">${escapeHTML(l.ref || i + 1)}</strong></td>
-        <td class="room-cell">${escapeHTML(l.location || "—")}</td>
+        <td>
+          <input class="line-text-input ref-input" value="${escapeHTML(l.ref || "")}" placeholder="${escapeHTML(i + 1)}" data-i="${i}" data-f="ref" aria-label="Line reference" />
+        </td>
+        <td class="room-cell">
+          <input class="line-text-input room-input" value="${escapeHTML(l.location || "")}" placeholder="Room" data-i="${i}" data-f="location" aria-label="Room or location" />
+        </td>
         <td>
           <div class="type-cell">
             <div class="diag">${diag}</div>
@@ -1317,7 +1487,11 @@
       tr.querySelectorAll(".size-inputs input").forEach((inp) =>
         inp.classList.toggle("unconfirmed", !l.sizeConfirmed)
       );
-      tr.querySelector(".room-cell").textContent = l.location || "—";
+      tr.querySelectorAll(".line-text-input").forEach((inp) => {
+        if (document.activeElement !== inp) {
+          inp.value = state.lines[i][inp.dataset.f] || "";
+        }
+      });
       tr.querySelector(".spec-cell").innerHTML = lineSpecHTML(l);
       tr.querySelector(".type-cell .diag").innerHTML = lineDiagHTML(l);
       tr.querySelector(".type-name").innerHTML =
@@ -1337,6 +1511,17 @@
       l.size = l.width && l.height ? `${l.width} × ${l.height}` : "";
       // a changed measurement must be re-confirmed
       if (l.sizeConfirmed) l.sizeConfirmed = false;
+      save();
+      refreshRowChrome(i);
+      renderSummary();
+      syncEditor(i);
+    }
+
+    function setLineText(i, f, val) {
+      const l = state.lines[i];
+      if (!l) return;
+      const clean = f === "ref" ? String(val || "").toUpperCase().trim() : String(val || "").trim();
+      l[f] = clean;
       save();
       refreshRowChrome(i);
       renderSummary();
@@ -1410,6 +1595,24 @@
 
     function wireTable() {
       const body = document.getElementById("lineBody");
+      body.querySelectorAll(".line-text-input").forEach((inp) => {
+        inp.addEventListener("input", () => {
+          const i = +inp.dataset.i;
+          const f = inp.dataset.f;
+          const value = f === "ref" ? inp.value.toUpperCase() : inp.value;
+          if (f === "ref" && inp.value !== value) inp.value = value;
+          setLineText(i, f, value);
+        });
+        inp.addEventListener("keydown", (e) => {
+          if (e.key !== "Enter") return;
+          e.preventDefault();
+          if (inp.dataset.f === "ref") {
+            inp.closest("tr").querySelector(".room-input")?.focus();
+          } else {
+            inp.closest("tr").querySelector(".w")?.focus();
+          }
+        });
+      });
       body.querySelectorAll('input[type="number"]').forEach((inp) => {
         inp.addEventListener("input", () => setLineSize(+inp.dataset.i, inp.dataset.f, inp.value));
         inp.addEventListener("keydown", (e) => {
@@ -1839,10 +2042,12 @@
         f("Wrap rule", siteWrap() || "per line") +
         f("Material", s.material) + f("Wall", s.wall) +
         f("Colour", siteColourDisplay()) + f("Standard flats & angles", s.flatsAngles || "YES") + f("Floor", s.floor) +
-        f("Quote ref", j.quoteRef) + f("Quote date", j.date) + f("Glass note", "Doors: safety glass");
+        f("Quote ref", j.quoteRef) + f("Workpool ref", s.workpoolRef || j.workpoolRef) +
+        f("Quote date", j.date) + f("Glass note", "Doors: safety glass");
 
       const notes = [];
       notes.push("Standard flats & angles: " + (s.flatsAngles || "YES"));
+      if (s.workpoolRef || j.workpoolRef) notes.push("Workpool ref: " + (s.workpoolRef || j.workpoolRef));
       if (j.colourNote) notes.push("Colour note: " + j.colourNote);
       if (j.headerNotes && j.headerNotes.length) notes.push("Quote notes: " + j.headerNotes.join(" • "));
       document.getElementById("pNotes").textContent = notes.join("   |   ");

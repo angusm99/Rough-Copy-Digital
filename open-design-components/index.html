@@ -69,6 +69,13 @@
     .stat-label { font-size: 11.5px; color: var(--muted); font-family: var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; }
     .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
     .section-head h2 { font-size: 13px; font-family: var(--font-mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+    .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: -18px 0 34px; }
+    .value-card { border: 1px solid var(--border); border-radius: var(--r-lg); background: linear-gradient(145deg, color-mix(in oklab, var(--surface) 86%, black 14%), var(--surface)); padding: 18px; min-height: 138px; display: flex; flex-direction: column; gap: 10px; color: var(--fg); text-decoration: none; transition: border-color .14s, transform .14s; }
+    .value-card:hover { border-color: var(--border-hi); transform: translateY(-1px); }
+    .value-card strong { font-family: var(--font-display); font-size: 20px; line-height: 1.1; }
+    .value-card p { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .value-card .mini { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+    .value-card.primary { border-color: color-mix(in oklab, var(--accent) 42%, var(--border)); background: linear-gradient(145deg, color-mix(in oklab, var(--accent) 10%, var(--surface)), var(--surface)); }
     .screen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin-bottom: 48px; }
     .screen-card { border: 1px solid var(--border); border-radius: var(--r-xl); background: var(--surface); overflow: hidden; display: flex; flex-direction: column; text-decoration: none; color: var(--fg); transition: border-color 0.14s, background 0.14s; cursor: pointer; }
     .screen-card:hover { border-color: var(--border-hi); background: var(--surface-2); }
@@ -125,6 +132,7 @@
       .stats-strip { flex-direction: column; gap: 0; }
       .stat-item { border-bottom: 1px solid var(--border); }
       .stat-item:last-child { border-bottom: none; }
+      .value-grid { grid-template-columns: 1fr; margin-top: 0; }
       .screen-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 520px) {
@@ -144,7 +152,7 @@
         <span class="logo-sub">Digital Rough Copy</span>
       </a>
       <div class="header-actions">
-        <button class="btn btn-ghost" type="button" onclick="location.href='workspace.html?import=1'">Import documents</button>
+        <button class="btn btn-ghost" type="button" onclick="location.href='workspace.html?new=1&import=1'">Import documents</button>
         <button class="btn btn-primary" type="button" onclick="location.href='workspace.html?new=1'">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
           New Quote
@@ -163,6 +171,23 @@
         <button class="btn btn-ghost" id="openLastBtn" type="button" onclick="location.href='workspace.html'" disabled>Open last job</button>
         <button class="btn btn-primary" type="button" onclick="location.href='workspace.html?new=1'">Start new quote</button>
       </div>
+    </div>
+    <div class="value-grid" aria-label="Rough copy workflow">
+      <a class="value-card primary" href="workspace.html?new=1&import=1">
+        <span class="mini">Step 01</span>
+        <strong>Import the paperwork</strong>
+        <p>Read Bizman quotes first, then use best-effort document import for PDFs, notes, images and Word docs.</p>
+      </a>
+      <a class="value-card" href="workspace.html">
+        <span class="mini">Step 02</span>
+        <strong>Measure and confirm</strong>
+        <p>Quote sizes stay as references. Reps confirm final site sizes, handings, glass, colour and wrap line by line.</p>
+      </a>
+      <a class="value-card" href="workspace.html">
+        <span class="mini">Step 03</span>
+        <strong>Export for factory</strong>
+        <p>Produce a rough copy with diagrams, Workpool refs, safety glass, special colour notes and material tally.</p>
+      </a>
     </div>
     <div class="stats-strip">
       <div class="stat-item"><div class="stat-dot" style="background:var(--success)"></div><div class="stat-body"><div class="stat-val" id="statLines">—</div><div class="stat-label">Lines in job</div></div></div>
@@ -264,7 +289,7 @@
       <h2>Current job</h2>
     </div>
     <div class="table-wrap" id="jobTableWrap">
-      <div class="empty-state" id="noJobMsg">No job loaded — import a Bizman quote or start a new quote.</div>
+      <div class="empty-state" id="noJobMsg">No job loaded — import documents or start a new rough copy.</div>
       <table class="jobs-table" id="jobTable" style="display:none">
         <thead><tr><th>Ref</th><th>Job</th><th>Client</th><th>Lines</th><th>Status</th><th></th></tr></thead>
         <tbody id="jobTableBody"></tbody>
@@ -286,9 +311,9 @@
 
   if (saved && (saved.lines?.length || saved.job || Object.keys(saved.site || {}).length)) {
     const lines = saved.lines || [];
-    const unconfirmed = lines.filter(l => !l.confirmed).length;
-    const typed = lines.filter(l => l.family || l.type).length;
-    const ready = lines.filter(l => l.confirmed && (l.family || l.type)).length;
+    const unconfirmed = lines.filter(l => !l.sizeConfirmed).length;
+    const typed = lines.filter(l => l.family || l.product).length;
+    const ready = lines.filter(l => l.sizeConfirmed && (l.family || l.product)).length;
 
     document.getElementById('statLines').textContent = lines.length;
     document.getElementById('statUnconfirmed').textContent = unconfirmed;
@@ -300,10 +325,10 @@
     // Show current job row
     const site = saved.site || {};
     const jobRef = saved.job?.quoteRef || site.jobRef || '—';
-    const jobName = site.address || '—';
+    const jobName = site.project || site.address || '—';
     const client = site.client || saved.job?.client || '—';
-    const allConfirmed = lines.length > 0 && lines.every(l => l.confirmed);
-    const allTyped = lines.length > 0 && lines.every(l => l.family || l.type);
+    const allConfirmed = lines.length > 0 && lines.every(l => l.sizeConfirmed);
+    const allTyped = lines.length > 0 && lines.every(l => l.family || l.product);
     let statusClass = 's-draft', statusLabel = 'Draft';
     if (lines.length > 0 && allConfirmed && allTyped) { statusClass = 's-ready'; statusLabel = 'Ready'; }
     else if (lines.length > 0 && unconfirmed > 0) { statusClass = 's-check'; statusLabel = unconfirmed + ' need size'; }

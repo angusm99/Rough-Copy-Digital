@@ -181,11 +181,39 @@
       }
     }
 
-    // client: "Attention Gail" — a fuller name ("Gail & Cecile") often sits
-    // elsewhere in the header (above or below, depending on text layout)
-    let client = get(/Attention\s+([A-Z][^\n]*)/);
+    const yourRef =
+      get(/(?:^|\n)\s*Your Ref:\s*([^\n]+)/i) ||
+      after("Your Ref:");
+
+    const workpoolRef =
+      get(/\b((?:JHJ|JH|KH|AM)[A-Z]?\d{6}[A-Z]?)\b/i);
+
+    function projectFromRef(ref) {
+      return (ref || "")
+        .replace(/\b(?:JHJ|JH|KH|AM)[A-Z]?\d{6}[A-Z]?\b/ig, "")
+        .replace(/\([A-Z]?\d{3,6}\)/ig, "")
+        .replace(/\bREV\d+\b/ig, "")
+        .replace(/\s*[-–—]\s*$/g, "")
+        .replace(/\s*[-–—]\s*/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    let projectName = projectFromRef(yourRef);
+    if (!projectName) {
+      const titleLine = header.find((l) =>
+        /\b(?:JHJ|JH|KH|AM)[A-Z]?\d{6}[A-Z]?\b/i.test(l) &&
+        !/Your Ref:/i.test(l)
+      );
+      projectName = projectFromRef(titleLine || "");
+    }
+
+    // client: prefer the fuller "To:" name, then fall back to attention.
+    let client = get(/(?:^|\n)\s*To:\s*([^\n]+)/i) ||
+      after("To:") ||
+      get(/Attention\s+([A-Z][^\n]*)/);
     client = client.replace(/\s+(your ref\b|to:).*$/i, "").trim();
-    if (client) {
+    if (client && !/&/.test(client)) {
       for (const l of header) {
         const t = l.trim();
         if (!t || t.length <= client.length || t.length > 60) continue;
@@ -206,7 +234,7 @@
       after("To:") ||
       get(/\b([A-Z]{2,}[A-Z0-9]*\d{3,}\b[^\n]*?\([A-Z]?\d+\)[^\n]*)/) ||
       get(/\b([A-Z]{2}\d{3,}\b[^\n]*?D\d+[^\n]*)/) ||
-      after("Your Ref:");
+      yourRef;
     quoteTitle = quoteTitle
       .replace(/^(your ref:|attention|to:)\s*/i, "")
       .trim();
@@ -216,6 +244,8 @@
       headerNotes,
       address,
       quoteRef,
+      workpoolRef,
+      projectName,
       date: get(/Date:\s*\n?\s*(\d{4}-\d{2}-\d{2})/i) || get(/\b(\d{4}-\d{2}-\d{2})\b/),
       quoteTitle,
       client,
