@@ -190,9 +190,7 @@
       <button class="tab" data-filter="tophung" onclick="setFilter('tophung')">Top Hung</button>
       <button class="tab" data-filter="tophung-fixed" onclick="setFilter('tophung-fixed')">Top Hung + Fixed</button>
       <button class="tab" data-filter="sidehung" onclick="setFilter('sidehung')">Side Hung</button>
-      <button class="tab" data-filter="fixed" onclick="setFilter('fixed')">Fixed Panel</button>
-      <button class="tab" data-filter="toplight" onclick="setFilter('toplight')">Toplight</button>
-      <button class="tab" data-filter="sidelight" onclick="setFilter('sidelight')">Sidelight</button>
+      <button class="tab" data-filter="fixed" onclick="setFilter('fixed')">Fixed</button>
     </div>
   </nav>
 
@@ -226,6 +224,15 @@
               <option>Bronze</option>
             </select>
           </label>
+          <label id="fixPositionWrap" style="display:none"><span class="label">Fix position</span>
+            <select id="fixPositionField">
+              <option value="">STANDALONE FIX</option>
+              <option value="TOPLIGHT">TOPLIGHT — mullion below</option>
+              <option value="SUBLIGHT">SUBLIGHT — mullion above</option>
+              <option value="SIDELIGHT-LEFT">SIDELIGHT — mullion left</option>
+              <option value="SIDELIGHT-RIGHT">SIDELIGHT — mullion right</option>
+            </select>
+          </label>
         </div>
       </div>
         <div class="panel">
@@ -257,7 +264,7 @@ const CLR = {
 };
 
 // ── Draw a thumbnail SVG from preset data ─────────────────────────────────
-function presetSVG(p, W, H) {
+function presetSVG(p, W, H, couplingEdge) {
   let colXs=[0]; p.colW.forEach(w=>colXs.push(colXs[colXs.length-1]+w));
   let rowYs=[0]; p.rowH.forEach(h=>rowYs.push(rowYs[rowYs.length-1]+h));
   const scX = W/p.W, scY = H/p.H;
@@ -296,35 +303,17 @@ function presetSVG(p, W, H) {
   }
 
   s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="${CLR.FRAME}" stroke-width="1.8"/>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
-}
 
-// ── Special SVGs for non-grid types ──────────────────────────────────────
-function fixedSVG(W, H) {
-  const clr = CLR.FIXED;
-  let s = `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="${clr}22" stroke="${clr}" stroke-width="1.4"/>`;
-  // diagonal hatch to indicate fixed/no-vent
-  for (let i=0; i<W+H; i+=10)
-    s += `<line x1="${i}" y1="0" x2="${i-H}" y2="${H}" stroke="${clr}" stroke-width=".5" opacity=".25"/>`;
-  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="${CLR.FRAME}" stroke-width="1.8"/>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
-}
-
-function sidelightSVG(W, H) {
-  const clr = CLR.FIXED;
-  let s = `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="${clr}18" stroke="${clr}" stroke-width="1.4"/>`;
-  const mid = Math.round(H*.45);
-  s += `<line x1="4" y1="${mid}" x2="${W-4}" y2="${mid}" stroke="${clr}" stroke-width="1" stroke-dasharray="4,3"/>`;
-  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="${CLR.FRAME}" stroke-width="1.8"/>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
-}
-
-function toplightSVG(W, H) {
-  const clr = CLR.TOPLIGHT;
-  let s = `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="${clr}22" stroke="${clr}" stroke-width="1.4"/>`;
-  for (let hx=5; hx<W; hx+=5)
-    s += `<line x1="${hx}" y1="2" x2="${hx-4}" y2="${H-2}" stroke="${clr}" stroke-width=".5" opacity=".4"/>`;
-  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="${CLR.FRAME}" stroke-width="1.8"/>`;
+  // Stronger coupling-mullion indicator: red edge line showing where this
+  // fix couples to its neighbour (toplight = below, sublight = above,
+  // sidelight = left/right).
+  if (couplingEdge) {
+    const RED = '#e5484d', cw = 4, inset = cw / 2;
+    if (couplingEdge === 'top')    s += `<line x1="0" y1="${inset}" x2="${W}" y2="${inset}" stroke="${RED}" stroke-width="${cw}"/>`;
+    if (couplingEdge === 'bottom') s += `<line x1="0" y1="${H-inset}" x2="${W}" y2="${H-inset}" stroke="${RED}" stroke-width="${cw}"/>`;
+    if (couplingEdge === 'left')   s += `<line x1="${inset}" y1="0" x2="${inset}" y2="${H}" stroke="${RED}" stroke-width="${cw}"/>`;
+    if (couplingEdge === 'right')  s += `<line x1="${W-inset}" y1="0" x2="${W-inset}" y2="${H}" stroke="${RED}" stroke-width="${cw}"/>`;
+  }
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
 }
 
@@ -391,7 +380,94 @@ const DRAWING_ASSETS = {
   SH2409: 'Anglo-SHH249.svg',
   SH2412: 'Anglo-SHH2412.svg',
   SH2415: 'Anglo-SHH2415.svg',
-  SH2418: 'Anglo-SHH2418.svg'
+  SH2418: 'Anglo-SHH2418.svg',
+  // Side Hung — unmapped sizes (use nearest representative)
+  SH0909: 'Anglo-SHH129.svg',   // 900×900 sash+fixed → nearest 2-col sash+fixed
+  SH0912: 'Anglo-SHH129.svg',   // 900×1200
+  SH0915: 'Anglo-SH1215.svg',   // 900×1500 sash+fixed+base → nearest tall sash
+  SH0918: 'Anglo-SH1218.svg',   // 900×1800
+  SH1509: 'Anglo-SH1512.svg',   // 1500×900 sash+wide-fixed
+  SH1515: 'Anglo-SH1518.svg',   // 1500×1500
+  // SHH189 (1800×900 twin) — bonus asset in folder, matches twin-sash concept
+  SH1809B: 'Anglo-SHH189.svg',  // reserved alias; SH1809 already → SH189
+
+  // PT — single-col top-hung without exact SVG (nearest same-column drawing)
+  PT615: 'Anglo-PT0612.svg',    // 600×1500 stack → nearest 600-wide PT
+  PT618: 'Anglo-PT0612.svg',    // 600×1800
+  PT621: 'Anglo-PT0612.svg',    // 600×2100
+  PT96:  'Anglo-PT0606.svg',    // 900×600 single vent
+  PT99:  'Anglo-PT0609.svg',    // 900×900
+  PT915: 'Anglo-PT0912.svg',    // 900×1500
+  PT918: 'Anglo-PT0912.svg',    // 900×1800
+  PT921: 'Anglo-PT0912.svg',    // 900×2100
+  PT126: 'Anglo-PT1212.svg',    // 1200×600 vent+fixed → use 1200-wide PT (orphan SVG put to use)
+  PT129: 'Anglo-PT1212.svg',    // 1200×900
+  PT156: 'Anglo-PT0606.svg',    // 1500×600 vent+wide-fixed → nearest single vent
+  PT159: 'Anglo-PT0612.svg',    // 1500×900
+  PT189: 'Anglo-PT1806.svg',    // 1800×900
+  PT216: 'Anglo-PT0606.svg',    // 2100×600
+  PT219: 'Anglo-PT0912.svg',    // 2100×900
+  PT246: 'Anglo-PT0606.svg',    // 2400×600
+  PT249: 'Anglo-PT0912.svg',    // 2400×900
+
+  // PTT — twin/wide top-hung without exact SVG
+  PTT156:  'Anglo-PTT0612.svg',  // 1500×600 twin → nearest twin
+  PTT159:  'Anglo-PTT0618.svg',  // 1500×900 twin
+  PTT186:  'Anglo-PTT1812.svg',  // 1800×600 twin side vents → nearest 1800-wide PTT
+  PTT189:  'Anglo-PTT1809.svg',  // 1800×900 twin side vents
+  PTT1512: 'Anglo-PTT1212.svg',  // 1500×1200 double stack+wide-fixed → nearest 1200-tall PTT
+  PTT1515: 'Anglo-PTT1215.svg',  // 1500×1500
+  PTT1518: 'Anglo-PTT1218.svg',  // 1500×1800
+  PTT216:  'Anglo-PTT2412.svg',  // 2100×600 twin → nearest 2400-wide PTT
+  PTT219:  'Anglo-PTT2412.svg',  // 2100×900
+  PTT2112: 'Anglo-PTT2412.svg',  // 2100×1200
+  PTT2115: 'Anglo-PTT2415.svg',  // 2100×1500
+  PTT2118: 'Anglo-PTT2418.svg',  // 2100×1800
+  PTT246:  'Anglo-PTT2412.svg',  // 2400×600
+  PTT249:  'Anglo-PTT2412.svg',  // 2400×900
+
+  // P4T — four-vent without exact SVG (use nearest 2400 four-vent)
+  P4T1512: 'Anglo-P4T2412.svg',  // 1500×1200 four-vent
+  P4T1812: 'Anglo-P4T2412.svg',  // 1800×1200
+  P4T1815: 'Anglo-P4T2415.svg',  // 1800×1500
+  P4T1818: 'Anglo-P4T2418.svg',  // 1800×1800
+  P4T2112: 'Anglo-P4T2412.svg',  // 2100×1200
+  P4T2115: 'Anglo-P4T2415.svg',  // 2100×1500
+  P4T2118: 'Anglo-P4T2418.svg',  // 2100×1800
+
+  // Top Hung B Range (symmetric twin-column; use nearest standard twin)
+  PTT912B:  'Anglo-PTT0912.svg',
+  P4T912B:  'Anglo-P4T2412.svg',
+  PTT915B:  'Anglo-PTT0912.svg',
+  P4T915B:  'Anglo-P4T2412.svg',
+  PTT918B:  'Anglo-PTT0912.svg',
+  P4T918B:  'Anglo-P4T2412.svg',
+  PTT1212B: 'Anglo-PTT1212.svg',
+  P4T1212B: 'Anglo-P4T2412.svg',
+  PTT1215B: 'Anglo-PTT1215.svg',
+  P4T1215B: 'Anglo-P4T2415.svg',
+  PTT1218B: 'Anglo-PTT1218.svg',
+  P4T1218B: 'Anglo-P4T2418.svg',
+  PTT1512B: 'Anglo-PTT1212.svg',
+  P4T1512B: 'Anglo-P4T2412.svg',
+  PTT1515B: 'Anglo-PTT1215.svg',
+  P4T1515B: 'Anglo-P4T2415.svg',
+  PTT1518B: 'Anglo-PTT1218.svg',
+  P4T1518B: 'Anglo-P4T2418.svg',
+  PTT1812B: 'Anglo-PTT1812.svg',
+  P4T1812B: 'Anglo-P4T2412.svg',
+  PTT1815B: 'Anglo-PTT1815.svg',
+  P4T1815B: 'Anglo-P4T2415.svg',
+  PTT1818B: 'Anglo-PTT1818.svg',
+  P4T1818B: 'Anglo-P4T2418.svg',
+
+  // Top Hung + Fixed family (tophung-fixed)
+  '0609T':  'Anglo-PT0609.svg',
+  '0909T':  'Anglo-PT0912.svg',
+  '1209T':  'Anglo-PT0912.svg',
+  '1809TT': 'Anglo-PTT1809.svg',
+  '0915DT': 'Anglo-PTT0912.svg',
+  '1215DT': 'Anglo-PTT1212.svg'
 };
 
 function normalizedCode(code) {
@@ -408,17 +484,14 @@ function drawingMarkupFor(windowItem) {
   return src ? `<img class="svg-asset" src="${src}" alt="${windowItem.name}" />` : '';
 }
 
-function renderWindowGraphic(windowItem, width, height) {
+function renderWindowGraphic(windowItem, width, height, couplingEdge) {
   const drawing = drawingMarkupFor(windowItem);
   if (drawing) return drawing;
-  if (windowItem.svgFn === 'fixed') return fixedSVG(width, height);
-  if (windowItem.svgFn === 'toplight') return toplightSVG(width, height);
-  if (windowItem.svgFn === 'sidelight') return sidelightSVG(width, height);
-  return presetSVG(windowItem, width, height);
+  return presetSVG(windowItem, width, height, couplingEdge);
 }
 
 // ── Window catalog — active picker baseline ────────────────────────────
-// family: tophung | tophung-fixed | sidehung | sidehung-fixed | fixed | toplight | sidelight
+// family: tophung | tophung-fixed | sidehung | sidehung-fixed | fixed
 const CATALOG = [
   // ── Top Hung standards from 30.5mm casement sheet ───────────────────
   makeTopHung({ name:'Top Hung 600×600', code:'PT66', W:600, H:600, colW:[600], rowH:[600], types:['TOP'], sub:'Single vent • PT66' }),
@@ -627,28 +700,44 @@ const CATALOG = [
   makeGridPreset({ name:'Side Hung 2400×1800', code:'SH-2418', W:2400, H:1800, family:'sidehung',
     group:'Side Hung - Twin sashes', colW:[600,1200,600], rowH:[1200,600], types:['SIDE','FIXED','SIDE','FIXED','FIXED','FIXED'],
     sub:'Tall twin sashes over base • 2400×1800', note:'Tall twin side-hung sashes with wide centre fixed and deeper base band.' }),
-  // ── Fixed Panel ──────────────────────────────────────────────────────
-  { name:'Fixed Panel 600×600', code:'FX-0606', W:600,  H:600,  family:'fixed', svgFn:'fixed',
-    sub:'Fixed panel • 600×600', note:'No opening — glass only. Used as infill.' },
-  { name:'Fixed Panel 900×900', code:'FX-0909', W:900,  H:900,  family:'fixed', svgFn:'fixed',
-    sub:'Fixed panel • 900×900', note:'Standard fixed window, view only.' },
-  { name:'Fixed Panel 1200×1200', code:'FX-1212', W:1200, H:1200, family:'fixed', svgFn:'fixed',
-    sub:'Fixed panel • 1200×1200', note:'Large fixed panel. Must use safety glass below 900mm sill.' },
-  // ── Toplight ─────────────────────────────────────────────────────────
-  { name:'Toplight 1200×300', code:'TL-1203', W:1200, H:300, family:'toplight', svgFn:'toplight',
-    sub:'Toplight transom • 1200×300', note:'Narrow band above door or wide opening.' },
-  { name:'Toplight 1800×300', code:'TL-1803', W:1800, H:300, family:'toplight', svgFn:'toplight',
-    sub:'Toplight transom • 1800×300', note:'Wide toplight over double door.' },
-  { name:'Toplight 900×450', code:'TL-0904', W:900,  H:450, family:'toplight', svgFn:'toplight',
-    sub:'Toplight • 900×450', note:'Standard toplight above window or door.' },
-  // ── Sidelight ────────────────────────────────────────────────────────
-  { name:'Sidelight 300×2100', code:'SL-3021', W:300,  H:2100, family:'sidelight', svgFn:'sidelight',
-    sub:'Narrow sidelight • 300×2100', note:'Door-adjacent narrow fixed light, full height.' },
-  { name:'Sidelight 450×2100', code:'SL-4521', W:450,  H:2100, family:'sidelight', svgFn:'sidelight',
-    sub:'Sidelight • 450×2100', note:'Wider sidelight beside door. Must be safety glass.' },
-  { name:'Sidelight 600×2100', code:'SL-6021', W:600,  H:2100, family:'sidelight', svgFn:'sidelight',
-    sub:'Sidelight • 600×2100', note:'Wide door sidelight. Full height.' },
+  // ── Fixed — full fix presets ─────────────────────────────────────────
+  // Panes-only fixes. The Fix position selector (Toplight / Sublight /
+  // Sidelight) marks the stronger coupling mullion as a red edge line:
+  // toplight = red below, sublight = red above, sidelight = red left/right.
+  makeGridPreset({ name:'Fix 1×1', code:'FIX-1X1', W:900, H:900, family:'fixed',
+    group:'Full fix presets', colW:[900], rowH:[900], types:['FIXED'],
+    sub:'Single pane fix • 1×1', note:'Full fix, single pane. Use Fix position to mark the coupling mullion.' }),
+  makeGridPreset({ name:'Fix 2×1', code:'FIX-2X1', W:1800, H:900, family:'fixed',
+    group:'Full fix presets', colW:[900,900], rowH:[900], types:['FIXED','FIXED'],
+    sub:'Two panes wide • 2×1', note:'Full fix, two panes side by side. Use Fix position to mark the coupling mullion.' }),
+  makeGridPreset({ name:'Fix 2×2', code:'FIX-2X2', W:1800, H:1500, family:'fixed',
+    group:'Full fix presets', colW:[900,900], rowH:[750,750], types:['FIXED','FIXED','FIXED','FIXED'],
+    sub:'Four pane grid • 2×2', note:'Full fix, four panes. Use Fix position to mark the coupling mullion.' }),
+  makeGridPreset({ name:'Fix 1×3', code:'FIX-1X3', W:900, H:2100, family:'fixed',
+    group:'Full fix presets', colW:[900], rowH:[700,700,700], types:['FIXED','FIXED','FIXED'],
+    sub:'Three panes stacked • 1×3', note:'Full fix, three panes stacked. Use Fix position to mark the coupling mullion.' }),
+  makeGridPreset({ name:'Fix 1×2', code:'FIX-1X2', W:900, H:1500, family:'fixed',
+    group:'Full fix presets', colW:[900], rowH:[750,750], types:['FIXED','FIXED'],
+    sub:'Two panes stacked • 1×2', note:'Full fix, two panes stacked. Use Fix position to mark the coupling mullion.' }),
 ];
+
+// Fix position → which edge carries the stronger coupling mullion (red line).
+const FIX_EDGE = {
+  'TOPLIGHT': 'bottom',
+  'SUBLIGHT': 'top',
+  'SIDELIGHT-LEFT': 'left',
+  'SIDELIGHT-RIGHT': 'right'
+};
+const FIX_CONFIG_TEXT = {
+  'TOPLIGHT': 'Toplight — coupling mullion below',
+  'SUBLIGHT': 'Sublight — coupling mullion above',
+  'SIDELIGHT-LEFT': 'Sidelight — coupling mullion left',
+  'SIDELIGHT-RIGHT': 'Sidelight — coupling mullion right'
+};
+function fixPositionValue(w) {
+  if (!w || w.family !== 'fixed') return '';
+  return document.getElementById('fixPositionField').value;
+}
 
 // ── State ────────────────────────────────────────────────────────────────
 let activeFilter = 'all';
@@ -679,7 +768,7 @@ function renderCatalog() {
   const label = {
     all:'All window types', tophung:'Top Hung — vents only',
     'tophung-fixed':'Top Hung + Fixed base', sidehung:'Side Hung',
-    fixed:'Fixed panels', toplight:'Toplights / transoms', sidelight:'Sidelights'
+    fixed:'Fixed — full fix'
   }[activeFilter] || 'All';
 
   document.getElementById('sectionLabel').textContent = label;
@@ -730,6 +819,11 @@ function selectCard(code) {
   // name
   document.getElementById('selName').textContent = w.name;
 
+  // Fix position selector only applies to the fixed family
+  const isFix = w.family === 'fixed';
+  document.getElementById('fixPositionWrap').style.display = isFix ? '' : 'none';
+  if (!isFix) document.getElementById('fixPositionField').value = '';
+
   // large preview SVG
   const box = document.getElementById('previewBox');
   const bW = box.clientWidth  || 260;
@@ -737,7 +831,7 @@ function selectCard(code) {
   const aspect = w.W / w.H;
   let pW = bW - 32, pH = Math.round(pW / aspect);
   if (pH > bH - 24) { pH = bH - 24; pW = Math.round(pH * aspect); }
-  const svg = renderWindowGraphic(w, pW, pH);
+  const svg = renderWindowGraphic(w, pW, pH, FIX_EDGE[fixPositionValue(w)] || null);
   box.innerHTML = svg;
 
   document.getElementById('codeField').value = w.code;
@@ -764,14 +858,17 @@ function workspaceUrl() {
 function useSelected() {
   const w = CATALOG.find(x => x.code === selectedCode);
   if (!w) { alert('Select a window first.'); return; }
-  // thumbnail for the workspace diagram cell
+  const fixPos = fixPositionValue(w);
+  // thumbnail for the workspace diagram cell (red coupling line included)
   const tW = 88, tH = Math.max(40, Math.min(96, Math.round(tW * w.H / w.W)));
-  const svg = renderWindowGraphic(w, tW, tH);
+  const svg = renderWindowGraphic(w, tW, tH, FIX_EDGE[fixPos] || null);
 
   if (CTX && typeof CTX.i === 'number') {
     localStorage.setItem('aw_picker_result', JSON.stringify({
       i: CTX.i, kind: 'window',
       code: w.code, name: w.name, family: w.family,
+      config: FIX_CONFIG_TEXT[fixPos] || '',
+      fixPosition: fixPos,
       glass: document.getElementById('glassField').value,
       colour: document.getElementById('colourField').value,
       svg
@@ -787,6 +884,11 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') { e.preventDefault(); useSelected(); }
   else if (e.key === 'Escape') { location.href = workspaceUrl(); }
   else if (e.key === 'b' || e.key === 'B') { location.href = 'window-builder.html'; }
+});
+
+// Re-draw the preview when the fix position (coupling mullion) changes
+document.getElementById('fixPositionField').addEventListener('change', () => {
+  if (selectedCode) selectCard(selectedCode);
 });
 
 // ── Init ─────────────────────────────────────────────────────────────────
