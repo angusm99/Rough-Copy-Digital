@@ -1664,7 +1664,7 @@
       } else if (fam === "hinged" || /STABLE|HINGED|PIVOT/.test(blob)) {
         t.hinged = (/DOUBLE|DBL/.test(blob) ? 2 : 1) * qty;
       } else if (["fixed", "sidelight", "toplight"].includes(fam) ||
-                 /FIXED PANEL|SIDELIGHT|TOPLIGHT|\bFX-|\bTL-\d/.test(blob)) {
+                 /FIXED PANEL|FULL FIX|SIDELIGHT|TOPLIGHT|SUBLIGHT|\bFIX-/.test(blob)) {
         t.fixed = qty;
       } else if (/WINDOW|CASEMENT|TOP HUNG|SIDE HUNG|BOABAB|BAOBAB|\b\d{4}D?T{1,2}\b|SHOPFRONT|\bWB-|CUSTOM/.test(blob) ||
                  ["tophung", "tophung-fixed", "sidehung", "custom"].includes(fam)) {
