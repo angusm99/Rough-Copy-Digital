@@ -363,16 +363,18 @@ const DRAWING_ASSETS = {
   SH0612: 'Anglo-SH612.svg',
   SH0615: 'Anglo-SH615.svg',
   SH0618: 'Anglo-SH618.svg',
-  SH1209: 'Anglo-SHH129.svg',
+  SH1209: 'Anglo-SH1212.svg',
   SH1212: 'Anglo-SH1212.svg',
   SH1215: 'Anglo-SH1215.svg',
   SH1218: 'Anglo-SH1218.svg',
   SH1512: 'Anglo-SH1512.svg',
   SH1518: 'Anglo-SH1518.svg',
-  SH1809: 'Anglo-SH189.svg',
-  SH1812: 'Anglo-SH1812.svg',
-  SH1815: 'Anglo-SH1815.svg',
-  SH1818: 'Anglo-SH1818.svg',
+  // SH-18xx catalog configs are twin sashes — use the SHH (twin) drawings,
+  // not the single-sash SH files of the same size.
+  SH1809: 'Anglo-SHH189.svg',
+  SH1812: 'Anglo-SHH1812.svg',
+  SH1815: 'Anglo-SHH1815.svg',
+  SH1818: 'Anglo-SHH1818.svg',
   SH2109: 'Anglo-SHH219.svg',
   SH2112: 'Anglo-SHH2112.svg',
   SH2115: 'Anglo-SHH2115.svg',
@@ -381,15 +383,14 @@ const DRAWING_ASSETS = {
   SH2412: 'Anglo-SHH2412.svg',
   SH2415: 'Anglo-SHH2415.svg',
   SH2418: 'Anglo-SHH2418.svg',
-  // Side Hung — unmapped sizes (use nearest representative)
-  SH0909: 'Anglo-SHH129.svg',   // 900×900 sash+fixed → nearest 2-col sash+fixed
-  SH0912: 'Anglo-SHH129.svg',   // 900×1200
-  SH0915: 'Anglo-SH1215.svg',   // 900×1500 sash+fixed+base → nearest tall sash
+  // Side Hung — unmapped sizes (nearest single-sash SH drawing; the SHH
+  // files are twin-sash and would misrepresent these single-sash configs)
+  SH0909: 'Anglo-SH1212.svg',   // 900×900 sash+fixed side
+  SH0912: 'Anglo-SH1215.svg',   // 900×1200
+  SH0915: 'Anglo-SH1215.svg',   // 900×1500 sash+fixed+base
   SH0918: 'Anglo-SH1218.svg',   // 900×1800
   SH1509: 'Anglo-SH1512.svg',   // 1500×900 sash+wide-fixed
   SH1515: 'Anglo-SH1518.svg',   // 1500×1500
-  // SHH189 (1800×900 twin) — bonus asset in folder, matches twin-sash concept
-  SH1809B: 'Anglo-SHH189.svg',  // reserved alias; SH1809 already → SH189
 
   // PT — single-col top-hung without exact SVG (nearest same-column drawing)
   PT615: 'Anglo-PT0612.svg',    // 600×1500 stack → nearest 600-wide PT

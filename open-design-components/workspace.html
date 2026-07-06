@@ -1953,7 +1953,9 @@
       l.product = res.name || res.code || l.product;
       l.code = res.code || "";
       if (res.family) l.family = res.family;
-      if (res.config) l.config = res.config;
+      // Window results always own the config slot (fix position or blank) so a
+      // stale door config / old fix position can't linger on a re-picked line.
+      if (res.kind === "window" || typeof res.config === "string") l.config = res.config || "";
       if (res.handleSide) l.handleSide = res.handleSide;
       if (res.openingDirection) l.openingDirection = res.openingDirection;
       if (res.glass) l.glass = res.glass;
