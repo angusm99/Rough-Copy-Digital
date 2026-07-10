@@ -2174,6 +2174,10 @@
     renderAll();
     if (editingIndex >= 0) openEditor(editingIndex);
     else if (requestedLineIndex >= 0) setTimeout(() => scrollToLine(requestedLineIndex), 120);
+
+    // Back/forward-cache restores skip script load, leaving picker results and
+    // line context unconsumed until a manual refresh — force a real reload.
+    window.addEventListener("pageshow", (e) => { if (e.persisted) location.reload(); });
   </script>
 </body>
 </html>

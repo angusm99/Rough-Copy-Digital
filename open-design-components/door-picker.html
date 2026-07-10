@@ -739,6 +739,9 @@
       else if (e.key === 'Escape') { location.href = workspaceUrl(); }
     });
 
+    // bfcache restore skips script load → stale line context; force a reload
+    window.addEventListener('pageshow', (e) => { if (e.persisted) location.reload(); });
+
     applyDoorDecisionOptions(null);
     renderCatalog('hinged');
   </script>

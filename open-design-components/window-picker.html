@@ -910,6 +910,9 @@ document.getElementById('fixPositionField').addEventListener('change', () => {
   if (selectedCode) selectCard(selectedCode);
 });
 
+// bfcache restore skips script load → stale line context; force a reload
+window.addEventListener('pageshow', (e) => { if (e.persisted) location.reload(); });
+
 // ── Init ─────────────────────────────────────────────────────────────────
 renderCatalog();
 // auto-select first card

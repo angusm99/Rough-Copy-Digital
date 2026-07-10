@@ -556,6 +556,9 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'Escape') { location.href = workspaceUrl(); }
 });
 
+// bfcache restore skips script load → stale line context / seed; reload
+window.addEventListener('pageshow', (e) => { if (e.persisted) location.reload(); });
+
 render();
 </script>
 </body>
