@@ -205,6 +205,8 @@
         <span>×</span>
         <input class="input" id="ohInput" type="number" inputmode="numeric" />
       </div>
+      <div class="tool-row" id="wPresets" style="flex-wrap:wrap;gap:4px"></div>
+      <div class="tool-row" id="hPresets" style="flex-wrap:wrap;gap:4px"></div>
     </div>
     <div class="tool-group">
       <span class="label">Mullions (vertical splits)</span>
@@ -311,6 +313,22 @@ if (CTX) {
     wb.rowH = split(wb.H, wb.rows);
   }
 }
+
+// ── preset seed from the window picker ("Open in builder") ───────────────
+// wins over the quote-size default: the user asked to modify that preset
+try {
+  const seed = JSON.parse(localStorage.getItem('aw_builder_seed') || 'null');
+  localStorage.removeItem('aw_builder_seed');
+  if (seed && seed.colW && seed.rowH && seed.types) {
+    wb = {
+      W: seed.W, H: seed.H,
+      cols: seed.colW.length, rows: seed.rowH.length,
+      colW: seed.colW.slice(), rowH: seed.rowH.slice(),
+      types: seed.types.slice(),
+    };
+    if (seed.name) document.getElementById('builderName').textContent = seed.name + ' — custom';
+  }
+} catch (e) {}
 
 function workspaceUrl() {
   return CTX && typeof CTX.i === 'number' ? `workspace.html?line=${CTX.i}` : 'workspace.html';
@@ -504,6 +522,15 @@ document.getElementById('canvasBox').addEventListener('click', (e) => {
 });
 document.getElementById('owInput').addEventListener('change', (e) => resizeOverall(+e.target.value, wb.H));
 document.getElementById('ohInput').addEventListener('change', (e) => resizeOverall(wb.W, +e.target.value));
+
+// overall-size preset chips (standard fenestration increments)
+const SIZE_PRESETS = [300, 600, 900, 1200, 1500, 1800, 2100, 2400];
+document.getElementById('wPresets').innerHTML =
+  '<small style="align-self:center;color:var(--muted)">W</small>' +
+  SIZE_PRESETS.map((s) => `<button class="secondary mini" onclick="resizeOverall(${s}, wb.H)">${s}</button>`).join('');
+document.getElementById('hPresets').innerHTML =
+  '<small style="align-self:center;color:var(--muted)">H</small>' +
+  SIZE_PRESETS.map((s) => `<button class="secondary mini" onclick="resizeOverall(wb.W, ${s})">${s}</button>`).join('');
 
 // ── confirm: send the design back to the workspace line ──────────────────
 function useDesign() {

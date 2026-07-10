@@ -240,6 +240,7 @@
           <p id="configNote" style="margin:8px 0 0;line-height:1.55;font-size:13px;color:var(--muted)">Select a window above to see details. These standard casement presets are the quick-pick layer for 30.5mm, 38mm, and Boabab families before moving into the custom builder.</p>
         </div>
       <button class="primary" id="useBtnSide" onclick="useSelected()" style="width:100%;margin-top:4px;min-height:48px;font-size:15px">Use this window ✓</button>
+      <button class="secondary" onclick="openInBuilder()" style="width:100%;min-height:44px;font-size:14px">Open in builder ✎</button>
     </aside>
   </section>
 
@@ -774,16 +775,21 @@ function renderCatalog() {
 
   document.getElementById('sectionLabel').textContent = label;
 
+  // group by height (vertical size) across all families; full-fix presets
+  // are size-agnostic templates so they keep their own group at the end
   const groups = [];
   items.forEach((item) => {
-    const key = item.group || label;
+    const isFix = item.family === 'fixed';
+    const key = isFix ? 'Full fix — any size' : `${item.H} high`;
     let found = groups.find((g) => g.key === key);
     if (!found) {
-      found = { key, items: [] };
+      found = { key, sortKey: isFix ? Infinity : item.H, items: [] };
       groups.push(found);
     }
     found.items.push(item);
   });
+  groups.sort((a, b) => a.sortKey - b.sortKey);
+  groups.forEach((g) => g.items.sort((a, b) => a.W - b.W));
 
   const renderCard = (w) => {
     const thumbW = 88, thumbH = Math.max(56, Math.round(thumbW * w.H / w.W));
@@ -877,6 +883,18 @@ function useSelected() {
   }
   localStorage.removeItem('aw_picker_ctx');
   location.href = workspaceUrl();
+}
+
+// ── Open the selected preset in the custom builder for modification ─────
+function openInBuilder() {
+  const w = CATALOG.find(x => x.code === selectedCode);
+  if (w && w.colW && w.rowH && w.types) {
+    localStorage.setItem('aw_builder_seed', JSON.stringify({
+      W: w.W, H: w.H, colW: w.colW, rowH: w.rowH, types: w.types, name: w.name
+    }));
+  }
+  // aw_picker_ctx stays put so the builder still returns to the same line
+  location.href = 'window-builder.html';
 }
 
 // ── Keyboard: Enter confirms • B opens builder • Esc returns ────────────
