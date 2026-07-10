@@ -113,6 +113,20 @@
       return "";
     };
 
+    // value for a bare label line — text extraction sometimes emits the value
+    // on the row ABOVE the label ("NK Development" / "To:"), so try the next
+    // line, and if that is itself a label, take the previous one instead
+    const labelish = (t) => !t || /^[A-Za-z][A-Za-z .\/-]{0,18}:/.test(t) || /@/.test(t);
+    const around = (label) => {
+      const i = lines.findIndex((l) => l.trim() === label);
+      if (i === -1) return "";
+      const nxt = (lines[i + 1] || "").trim();
+      if (!labelish(nxt)) return nxt;
+      const prev = (lines[i - 1] || "").trim();
+      if (!labelish(prev)) return prev;
+      return "";
+    };
+
     // all emails in the document; prefer the client's (not the supplier domain)
     const emails = (text.match(/[\w.\-]+@[\w.\-]+\.\w{2,}/g) || []);
     const email =
@@ -189,14 +203,19 @@
       get(/\b((?:JHJ|JH|KH|AM)[A-Z]?\d{6}[A-Z]?)\b/i);
 
     function projectFromRef(ref) {
-      return (ref || "")
+      const t = (ref || "")
         .replace(/\b(?:JHJ|JH|KH|AM)[A-Z]?\d{6}[A-Z]?\b/ig, "")
         .replace(/\([A-Z]?\d{3,6}\)/ig, "")
-        .replace(/\bREV\d+\b/ig, "")
+        .replace(/\bREV\d*\b/ig, "")
+        .replace(/\bamended\b/ig, "")
+        .replace(/\b\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}\b/g, "")
         .replace(/\s*[-–—]\s*$/g, "")
         .replace(/\s*[-–—]\s*/g, " ")
         .replace(/\s+/g, " ")
         .trim();
+      // refs that are only codes+dates leave single-letter debris ("A J") —
+      // a real project name has at least one 3+ letter word
+      return /[A-Za-z]{3,}/.test(t) ? t : "";
     }
 
     let projectName = projectFromRef(yourRef);
@@ -209,8 +228,8 @@
     }
 
     // client: prefer the fuller "To:" name, then fall back to attention.
-    let client = get(/(?:^|\n)\s*To:\s*([^\n]+)/i) ||
-      after("To:") ||
+    let client = get(/(?:^|\n)[^\S\n]*To:[^\S\n]*(\S[^\n]*)/i) ||
+      around("To:") ||
       get(/Attention\s+([A-Z][^\n]*)/);
     client = client.replace(/\s+(your ref\b|to:).*$/i, "").trim();
     if (client && !/&/.test(client)) {
@@ -226,6 +245,53 @@
           client = t;
           break;
         }
+      }
+    }
+
+    // site block: the run of unlabeled free-text header lines is the
+    // project/site info, e.g. "Atlantic Aerodrome / Vistor Centre /
+    // Cape Farm 27/4 Modderfontein / Kalbaskraal". Lines before the first
+    // digit-bearing line read as the project name, the rest as the address.
+    const isSiteLine = (t) =>
+      t && t.length < 60 &&
+      !/^[A-Za-z][A-Za-z .\/-]{0,18}:/.test(t) &&   // labeled: To:, Tel:, Ex:, E-Mail:…
+      !/@/.test(t) &&
+      !/^(attention|dear)\b/i.test(t) &&
+      !/anglo windows|\(pty\)|licensed to/i.test(t) &&
+      !/^[-•]/.test(t) &&
+      !/^[\d\s+()\/-]+$/.test(t) &&                  // phone / number-only lines
+      !/\b(?:JHJ|JH|KH|AM)[A-Z]?\d{6}\b/i.test(t) && // ref/title lines
+      !(client && t.toUpperCase().includes(client.toUpperCase()));
+    let siteBlock = [], siteRun = [];
+    for (const l of header) {
+      const t = l.trim();
+      if (isSiteLine(t)) {
+        siteRun.push(t);
+        if (siteRun.length > siteBlock.length) siteBlock = siteRun.slice();
+      } else siteRun = [];
+    }
+    const digitIdx = siteBlock.findIndex((t) => /\d/.test(t));
+    if (!projectName) {
+      projectName = (digitIdx === -1 ? siteBlock : siteBlock.slice(0, digitIdx)).join(" ");
+    }
+    if (!address && digitIdx !== -1) {
+      address = siteBlock.slice(digitIdx).join(", ");
+    }
+
+    // client phone fallback: a bare "Tel: 0…" header line whose number does
+    // not also appear on Anglo's own contact lines (Prepared by / Fax / email)
+    if (!clientPhone) {
+      const anglos = new Set();
+      header.forEach((l) => {
+        if (/prepared|fax|anglowindows/i.test(l)) {
+          (l.match(/0\d[\d\s-]{7,}/g) || []).forEach((n) => anglos.add(n.replace(/\D/g, "")));
+        }
+      });
+      for (const l of header) {
+        const m = l.trim().match(/^Tel:\s*(0[\d\s-]{8,})$/i);
+        if (!m) continue;
+        const digits = m[1].replace(/\D/g, "");
+        if (!anglos.has(digits)) { clientPhone = digits; break; }
       }
     }
 
