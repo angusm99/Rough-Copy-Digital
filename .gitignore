@@ -14,6 +14,9 @@ tablet-server.err.log
 
 # Netlify CLI local state (netlify.toml itself is intentional deploy config)
 .netlify/
+
+# point-in-time session handoff notes — content is folded into CLAUDE.md
+/CODEX-HANDOFF-*.md
 _test_quote*.pdf
 _test_quote*.txt
 _test_quote*.json
