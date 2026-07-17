@@ -209,6 +209,10 @@
       <div class="tool-row" id="hPresets" style="flex-wrap:wrap;gap:4px"></div>
     </div>
     <div class="tool-group">
+      <span class="label">Start from a frame preset</span>
+      <div class="tool-row" id="framePresets" style="flex-wrap:wrap;gap:6px"></div>
+    </div>
+    <div class="tool-group">
       <span class="label">Mullions (vertical splits)</span>
       <div class="tool-row">
         <button class="secondary mini" onclick="changeCols(-1)">−</button>
@@ -522,6 +526,30 @@ document.getElementById('canvasBox').addEventListener('click', (e) => {
 });
 document.getElementById('owInput').addEventListener('change', (e) => resizeOverall(+e.target.value, wb.H));
 document.getElementById('ohInput').addEventListener('change', (e) => resizeOverall(wb.W, +e.target.value));
+
+// frame layout presets — quick starting grids, resized to the current W/H
+const FRAME_PRESETS = {
+  'Full fix':         { colW:[900],     rowH:[900],     types:['FIXED'] },
+  'Vent over fix':    { colW:[900],     rowH:[600,300], types:['TOP','FIXED'] },
+  'Twin vent stack':  { colW:[900],     rowH:[450,450], types:['TOP','TOP'] },
+  'Sash + side fix':  { colW:[600,300], rowH:[900],     types:['SIDE','FIXED'] },
+  'Twin vents + fix': { colW:[450,450], rowH:[600,300], types:['TOP','TOP','FIXED','FIXED'] },
+};
+function applyFramePreset(key) {
+  const p = FRAME_PRESETS[key];
+  if (!p) return;
+  const cw = p.colW.reduce((a,b)=>a+b,0), rh = p.rowH.reduce((a,b)=>a+b,0);
+  wb.cols = p.colW.length; wb.rows = p.rowH.length;
+  wb.colW = p.colW.map((w) => Math.round(w / cw * wb.W));
+  wb.rowH = p.rowH.map((h) => Math.round(h / rh * wb.H));
+  fixTotals(wb.colW, wb.W);
+  fixTotals(wb.rowH, wb.H);
+  wb.types = p.types.slice();
+  render();
+}
+document.getElementById('framePresets').innerHTML =
+  Object.keys(FRAME_PRESETS).map((k) =>
+    `<button class="secondary mini" onclick="applyFramePreset('${k}')">${k}</button>`).join('');
 
 // overall-size preset chips (standard fenestration increments)
 const SIZE_PRESETS = [300, 600, 900, 1200, 1500, 1800, 2100, 2400];

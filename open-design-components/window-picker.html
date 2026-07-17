@@ -171,8 +171,8 @@
     </div>
     <div class="actions">
       <button class="secondary" onclick="location.href='index.html'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px"><path d="M3 11l9-8 9 8M5 9.5V21h14V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Home</button>
-      <button class="secondary" onclick="location.href=workspaceUrl()">Workspace</button>
-      <button class="secondary" onclick="location.href='window-builder.html'">Builder</button>
+      <button class="secondary" onclick="location.href=workspaceUrl()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="2"/></svg> Workspace</button>
+      <button class="secondary" onclick="location.href='window-builder.html'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Builder</button>
     </div>
   </header>
 
@@ -253,68 +253,56 @@
 </div>
 
 <script>
-// ── SVG colours matching rough-copy-digital_6 WB_COLOURS ──────────────────
-const CLR = {
-  FIXED:'#3a6bc2',
-  TOP:'#2e9e68',
-  SIDE:'#2e9e68',
-  TOPLIGHT:'#7a5ea8',
-  MULLION:'#3a6bc2',
-  FRAME:'#f5d13a'
-};
-
-// ── Draw a thumbnail SVG from preset data ─────────────────────────────────
+// ── Generated drawings in the Anglo architectural style ──────────────────
+// Same visual language as the hand-drawn Anglo-*.svg assets: gold frame,
+// dark glass, green sash / blue fixed tint, white dashed opening chevrons.
+// Drawn in mm coordinates so every config renders its true proportions.
 function presetSVG(p, W, H, couplingEdge) {
+  const mmW = p.W, mmH = p.H;
+  const FR = 45;        // outer frame border (mm)
+  const GAP = 14;       // gold gap between panes (mullion/transom)
+  const SASH = 22;      // sash inner gold border
+  const GOLD = '#ffcc00', GLASS = '#0f1012';
+  const TINT_S = 'rgba(163,224,163,0.28)', TINT_F = 'rgba(163,210,224,0.28)';
+  const OPEN = 'rgba(255,255,255,0.6)';
   let colXs=[0]; p.colW.forEach(w=>colXs.push(colXs[colXs.length-1]+w));
   let rowYs=[0]; p.rowH.forEach(h=>rowYs.push(rowYs[rowYs.length-1]+h));
-  const scX = W/p.W, scY = H/p.H;
-  let s = '';
+
+  let s = `<rect x="0" y="0" width="${mmW}" height="${mmH}" rx="6" fill="${GOLD}"/>`;
   for (let r=0; r<p.rows; r++) for (let c=0; c<p.cols; c++) {
     const t = p.types[r*p.cols+c];
-    const x1=Math.round(colXs[c]*scX+.5),  y1=Math.round(rowYs[r]*scY+.5);
-    const x2=Math.round(colXs[c+1]*scX-.5), y2=Math.round(rowYs[r+1]*scY-.5);
-    const fillClr = CLR[t] || CLR.FIXED;
-    s += `<rect x="${x1}" y="${y1}" width="${x2-x1}" height="${y2-y1}" fill="${fillClr}26" stroke="none"/>`;
-    if (t==='TOP') {
-      const topY = y1 + 3;
-      const apexY = y1 + Math.round((y2-y1)*.86);
-      const midX = Math.round((x1 + x2) / 2);
-      s += `<path d="M ${x1+3} ${topY} L ${x2-3} ${topY} L ${midX} ${apexY} Z" fill="none" stroke="${CLR.TOP}" stroke-width="1.1" stroke-linejoin="round"/>`;
-    }
-    if (t==='SIDE') {
-      const leftX = x1 + 3;
-      const apexX = x1 + Math.round((x2-x1)*.84);
-      const midY = Math.round((y1 + y2) / 2);
-      s += `<path d="M ${leftX} ${y1+3} L ${apexX} ${midY} L ${leftX} ${y2-3} Z" fill="none" stroke="${CLR.SIDE}" stroke-width="1.1" stroke-linejoin="round"/>`;
-    }
-    if (t==='TOPLIGHT') {
-      for (let hx=x1+5; hx<x2; hx+=5)
-        s += `<line x1="${hx}" y1="${y1+2}" x2="${hx-4}" y2="${y2-2}" stroke="${CLR.TOPLIGHT}" stroke-width=".5" opacity=".4"/>`;
+    const x1 = colXs[c]   + (c===0        ? FR : GAP/2);
+    const x2 = colXs[c+1] - (c===p.cols-1 ? FR : GAP/2);
+    const y1 = rowYs[r]   + (r===0        ? FR : GAP/2);
+    const y2 = rowYs[r+1] - (r===p.rows-1 ? FR : GAP/2);
+    const w = x2-x1, h = y2-y1;
+    if (w <= 0 || h <= 0) continue;
+    const vent = (t==='TOP' || t==='SIDE');
+    s += `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" fill="${GLASS}" stroke="#000" stroke-width="2"/>`;
+    s += `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" fill="${vent ? TINT_S : TINT_F}"/>`;
+    if (vent) {
+      const si = SASH/2 + 6;
+      s += `<rect x="${x1+si}" y="${y1+si}" width="${w-2*si}" height="${h-2*si}" fill="none" stroke="${GOLD}" stroke-width="${SASH}"/>`;
+      const m = SASH + 22; // opening-line inset
+      const dash = `fill="none" stroke="${OPEN}" stroke-width="6" stroke-dasharray="12,12" stroke-linecap="round" stroke-linejoin="round"`;
+      if (t === 'TOP') {
+        s += `<polyline points="${x1+m},${y1+m} ${(x1+x2)/2},${y2-m} ${x2-m},${y1+m}" ${dash}/>`;
+      } else {
+        s += `<polyline points="${x1+m},${y1+m} ${x2-m},${(y1+y2)/2} ${x1+m},${y2-m}" ${dash}/>`;
+      }
     }
   }
 
-  for (let c=1; c<p.cols; c++) {
-    const x = Math.round(colXs[c]*scX);
-    s += `<line x1="${x}" y1="1.5" x2="${x}" y2="${H-1.5}" stroke="${CLR.MULLION}" stroke-width="1.3"/>`;
-  }
-  for (let r=1; r<p.rows; r++) {
-    const y = Math.round(rowYs[r]*scY);
-    s += `<line x1="1.5" y1="${y}" x2="${W-1.5}" y2="${y}" stroke="${CLR.MULLION}" stroke-width="1.3"/>`;
-  }
-
-  s += `<rect x=".5" y=".5" width="${W-1}" height="${H-1}" fill="none" stroke="${CLR.FRAME}" stroke-width="1.8"/>`;
-
-  // Stronger coupling-mullion indicator: red edge line showing where this
-  // fix couples to its neighbour (toplight = below, sublight = above,
-  // sidelight = left/right).
+  // Stronger coupling-mullion indicator (fix presets): red edge line —
+  // toplight = below, sublight = above, sidelight = left/right.
   if (couplingEdge) {
-    const RED = '#e5484d', cw = 4, inset = cw / 2;
-    if (couplingEdge === 'top')    s += `<line x1="0" y1="${inset}" x2="${W}" y2="${inset}" stroke="${RED}" stroke-width="${cw}"/>`;
-    if (couplingEdge === 'bottom') s += `<line x1="0" y1="${H-inset}" x2="${W}" y2="${H-inset}" stroke="${RED}" stroke-width="${cw}"/>`;
-    if (couplingEdge === 'left')   s += `<line x1="${inset}" y1="0" x2="${inset}" y2="${H}" stroke="${RED}" stroke-width="${cw}"/>`;
-    if (couplingEdge === 'right')  s += `<line x1="${W-inset}" y1="0" x2="${W-inset}" y2="${H}" stroke="${RED}" stroke-width="${cw}"/>`;
+    const RED = '#e5484d', cw = 40, i = cw/2;
+    if (couplingEdge === 'top')    s += `<line x1="0" y1="${i}" x2="${mmW}" y2="${i}" stroke="${RED}" stroke-width="${cw}"/>`;
+    if (couplingEdge === 'bottom') s += `<line x1="0" y1="${mmH-i}" x2="${mmW}" y2="${mmH-i}" stroke="${RED}" stroke-width="${cw}"/>`;
+    if (couplingEdge === 'left')   s += `<line x1="${i}" y1="0" x2="${i}" y2="${mmH}" stroke="${RED}" stroke-width="${cw}"/>`;
+    if (couplingEdge === 'right')  s += `<line x1="${mmW-i}" y1="0" x2="${mmW-i}" y2="${mmH}" stroke="${RED}" stroke-width="${cw}"/>`;
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${mmW} ${mmH}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
 }
 
 function makeGridPreset({ name, code, W, H, family, group, colW, rowH, types, sub, note, svgFn }) {
