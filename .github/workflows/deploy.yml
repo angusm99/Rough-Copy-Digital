@@ -1,0 +1,19 @@
+name: Deploy to Netlify
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy open-design-components to Netlify
+        run: >
+          npx --yes netlify-cli deploy --prod --no-build
+          --dir open-design-components
+          --site 73800d07-6087-4563-b376-8afd9fed9d80
+          --message "GitHub push ${{ github.sha }}"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
