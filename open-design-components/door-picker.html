@@ -99,11 +99,12 @@
       gap: 12px;
     }
     .catalog-group-title {
-      color: var(--muted);
-      font-family: var(--font-mono);
-      font-size: 12px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
+      color: var(--accent);
+      font-family: var(--font-display);
+      font-size: 21px;
+      letter-spacing: 0.02em;
+      border-bottom: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+      padding-bottom: 6px;
     }
     .door-card {
       padding: 15px;
@@ -125,7 +126,9 @@
       justify-content: center;
       padding: 10px;
     }
-    svg { width: 100%; height: 100%; }
+    .door-graphic svg { width: 100%; height: 100%; }
+    .head-actions .option { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+    .head-actions .option svg { width: 15px; height: 15px; flex: none; }
     .door-graphic img, .svg-asset { width: 100%; height: 100%; object-fit: contain; display: block; }
     .panel {
       padding: 15px;
@@ -191,7 +194,7 @@
       </div>
       <div class="head-actions">
         <button class="option" onclick="location.href='index.html'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px"><path d="M3 11l9-8 9 8M5 9.5V21h14V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Home</button>
-        <button class="option" onclick="location.href=workspaceUrl()">Workspace</button>
+        <button class="option" onclick="location.href=workspaceUrl()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="2"/></svg> Workspace</button>
       </div>
     </header>
     <section class="body">
@@ -407,13 +410,7 @@
         { id:'SWG-LP-SAOI', group:'Large Pane Swing', config:'SA OI', lock:'Left', open:'Open in', code:'SWG-LP-SAOI', label:'Large Pane Swing SA OI 1200', style:'large', note:'Single active, open-in large pane swing door.' },
         { id:'SWG-LP-SAOO', group:'Large Pane Swing', config:'SA OO', lock:'Left', open:'Open out', code:'SWG-LP-SAOO', label:'Large Pane Swing SA OO 1200', style:'large', note:'Single active, open-out large pane swing door.' },
         { id:'SWG-LP-DA12', group:'Large Pane Swing', config:'DA', lock:'Centre', open:'Open in', code:'SWG-LP-DA12', label:'Large Pane Double Active 1200', style:'large-double', note:'Large pane double active swing door, 1200.' },
-        { id:'SWG-LP-DA15', group:'Large Pane Swing', config:'DA', lock:'Centre', open:'Open in', code:'SWG-LP-DA15', label:'Large Pane Double Active 1500', style:'large-double', note:'Large pane double active swing door, 1500.' },
-        { id:'PIV-CL-12', group:'Classic Pivot', config:'Pivot', lock:'Custom', open:'Open in', code:'PIV-CL-12', label:'Classic Pivot 1200', style:'classic', note:'Classic pivot door, 1200 wide.' },
-        { id:'PIV-CL-15', group:'Classic Pivot', config:'Pivot', lock:'Custom', open:'Open in', code:'PIV-CL-15', label:'Classic Pivot 1500', style:'classic', note:'Classic pivot door, 1500 wide.' },
-        { id:'SWG-CL-SAOI', group:'Classic Swing', config:'SA OI', lock:'Left', open:'Open in', code:'SWG-CL-SAOI', label:'Classic Swing SA OI 1200', style:'classic', note:'Classic single active, open-in swing door.' },
-        { id:'SWG-CL-SAOO', group:'Classic Swing', config:'SA OO', lock:'Left', open:'Open out', code:'SWG-CL-SAOO', label:'Classic Swing SA OO 1200', style:'classic', note:'Classic single active, open-out swing door.' },
-        { id:'SWG-CL-DA12', group:'Classic Swing', config:'DA', lock:'Centre', open:'Open in', code:'SWG-CL-DA12', label:'Classic Double Active 1200', style:'classic-double', note:'Classic double active swing door, 1200.' },
-        { id:'SWG-CL-DA15', group:'Classic Swing', config:'DA', lock:'Centre', open:'Open in', code:'SWG-CL-DA15', label:'Classic Double Active 1500', style:'classic-double', note:'Classic double active swing door, 1500.' }
+        { id:'SWG-LP-DA15', group:'Large Pane Swing', config:'DA', lock:'Centre', open:'Open in', code:'SWG-LP-DA15', label:'Large Pane Double Active 1500', style:'large-double', note:'Large pane double active swing door, 1500.' }
       ],
       patio: [
         { id: 'SL-2-OX', config: 'OX', lock: 'Left', open: 'Slide right', code: 'SL-2-OX', label: 'Patio Slider OX (2 panel)', panels: ['O', 'X'], svg: slidingSVG },
@@ -424,13 +421,13 @@
         { id: 'SL-6', config: '6-panel', lock: 'Custom', open: 'Custom', code: 'SL-6', label: 'Patio 6-Panel', panels: ['O', 'X', 'X', 'X', 'X', 'O'], svg: slidingSVG }
       ],
       multislide: [
+        { id: 'HDS-PAL-2-OX', group:'Palace Door', config: 'OX', lock: 'Right', open: 'Slide left', code: 'PAL-2-OX', label: 'Palace Door OX', brand: 'PALACE', panels: ['O', 'X'], svg: slidingSVG },
+        { id: 'HDS-PAL-2-XO', group:'Palace Door', config: 'XO', lock: 'Left', open: 'Slide right', code: 'PAL-2-XO', label: 'Palace Door XO', brand: 'PALACE', panels: ['X', 'O'], svg: slidingSVG },
+        { id: 'HDS-PAL-4-OXXO', group:'Palace Door', config: 'OXXO', lock: 'Centre', open: 'Bi-part', code: 'PAL-4-OXXO', label: 'Palace Door 4-Panel', brand: 'PALACE', panels: ['O', 'X', 'X', 'O'], svg: slidingSVG },
         { id: 'HDS-VAL-2-OX', group:'Valencia', config: 'OX', lock: 'Right', open: 'Slide left', code: 'VAL-2-OX', label: 'Valencia OX', brand: 'VALENCIA', panels: ['O', 'X'], svg: slidingSVG },
         { id: 'HDS-VAL-2-XO', group:'Valencia', config: 'XO', lock: 'Left', open: 'Slide right', code: 'VAL-2-XO', label: 'Valencia XO', brand: 'VALENCIA', panels: ['X', 'O'], svg: slidingSVG },
         { id: 'HDS-VAL-3-OXX', group:'Valencia', config: 'OXX', lock: 'Right', open: 'Slide left', code: 'VAL-3-OXX', label: 'Valencia OXX', brand: 'VALENCIA', panels: ['O', 'X', 'X'], svg: slidingSVG },
         { id: 'HDS-VAL-3-XXO', group:'Valencia', config: 'XXO', lock: 'Left', open: 'Slide right', code: 'VAL-3-XXO', label: 'Valencia XXO', brand: 'VALENCIA', panels: ['X', 'X', 'O'], svg: slidingSVG },
-        { id: 'HDS-PAL-2-OX', group:'Palace Door', config: 'OX', lock: 'Right', open: 'Slide left', code: 'PAL-2-OX', label: 'Palace Door OX', brand: 'PALACE', panels: ['O', 'X'], svg: slidingSVG },
-        { id: 'HDS-PAL-2-XO', group:'Palace Door', config: 'XO', lock: 'Left', open: 'Slide right', code: 'PAL-2-XO', label: 'Palace Door XO', brand: 'PALACE', panels: ['X', 'O'], svg: slidingSVG },
-        { id: 'HDS-PAL-4-OXXO', group:'Palace Door', config: 'OXXO', lock: 'Centre', open: 'Bi-part', code: 'PAL-4-OXXO', label: 'Palace Door 4-Panel', brand: 'PALACE', panels: ['O', 'X', 'X', 'O'], svg: slidingSVG },
         { id: 'HDS-CLS-2-OX', group:'CLS-250 Lift and Slide', config: 'OX', lock: 'Right', open: 'Slide left', code: 'CLS250-2-OX', label: 'CLS-250 OX', brand: 'CLS-250', panels: ['O', 'X'], svg: slidingSVG },
         { id: 'HDS-CLS-2-XO', group:'CLS-250 Lift and Slide', config: 'XO', lock: 'Left', open: 'Slide right', code: 'CLS250-2-XO', label: 'CLS-250 XO', brand: 'CLS-250', panels: ['X', 'O'], svg: slidingSVG },
         { id: 'HDS-CLS-3-OXX', group:'CLS-250 Lift and Slide', config: 'OXX', lock: 'Right', open: 'Slide left', code: 'CLS250-3-OXX', label: 'CLS-250 OXX', brand: 'CLS-250', panels: ['O', 'X', 'X'], svg: slidingSVG }
@@ -552,42 +549,10 @@
       'HDS-PAL-4-OXXO': 'Anglo-PD3621OXXO.svg',
       // Heavy Duty Slider — CLS-250 Lift and Slide
       'HDS-CLS-2-OX': 'Anglo-PD1521OX.svg',
-      'HDS-CLS-2-XO': 'Anglo-PD1521XO.svg',
-      // Heavy Duty Slider — Valencia 3-panel (use nearest 2-panel OX/XO as representative)
-      'HDS-VAL-3-OXX': 'Anglo-PD2121OX.svg',
-      'HDS-VAL-3-XXO': 'Anglo-PD2121XO.svg',
-      // CLS-250 3-panel
-      'HDS-CLS-3-OXX': 'Anglo-PD1521OX.svg',
-      // Patio Sliding — 3-panel and 6-panel (use nearest 2-panel as representative)
-      'SL-3-OXX': 'Anglo-PD1821OX.svg',
-      'SL-3-XXO': 'Anglo-PD1821XO.svg',
-      'SL-6':     'Anglo-PD4021OXXO.svg',
-      // Hinged — Classic (same silhouette as Large Pane; different glazing/profile)
-      'H-CL-900':  'Anglo-HD0921L.svg',
-      'H-CL-1000': 'Anglo-HD0921L.svg',
-      'H-CL-1200': 'Anglo-HD0921L.svg',
-      'H-CL-1600': 'Anglo-DD1521.svg',
-      'H-CL-1800': 'Anglo-DD1821.svg',
-      // Cape Victorian (single/double — same silhouette)
-      'H-CV-900':  'Anglo-HD0921L.svg',
-      'H-CV-1000': 'Anglo-HD0921L.svg',
-      'H-CV-1200': 'Anglo-HD0921L.svg',
-      'H-CV-1600': 'Anglo-DD1521.svg',
-      'H-CV-1800': 'Anglo-DD1821.svg',
-      // Pivot / Swing — Large Pane (same opening, pivoting hardware)
-      'PIV-LP-12':   'Anglo-HD0921L.svg',
-      'PIV-LP-15':   'Anglo-HD0921L.svg',
-      'SWG-LP-SAOI': 'Anglo-HD0921L.svg',
-      'SWG-LP-SAOO': 'Anglo-HD0921L.svg',
-      'SWG-LP-DA12': 'Anglo-DD1521.svg',
-      'SWG-LP-DA15': 'Anglo-DD1821.svg',
-      // Pivot / Swing — Classic
-      'PIV-CL-12':   'Anglo-HD0921L.svg',
-      'PIV-CL-15':   'Anglo-HD0921L.svg',
-      'SWG-CL-SAOI': 'Anglo-HD0921L.svg',
-      'SWG-CL-SAOO': 'Anglo-HD0921L.svg',
-      'SWG-CL-DA12': 'Anglo-DD1521.svg',
-      'SWG-CL-DA15': 'Anglo-DD1821.svg'
+      'HDS-CLS-2-XO': 'Anglo-PD1521XO.svg'
+      // Exact-config drawings only. Approximations (classic/cape hinged,
+      // pivot/swing, 3- and 6-panel sliders) misrepresented the config —
+      // those fall back to the generated diagram until real SVGs arrive.
     };
 
     function doorDrawingMarkupFor(door) {

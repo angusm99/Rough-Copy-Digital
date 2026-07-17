@@ -188,7 +188,6 @@
     <div class="tools-group" id="filterTabs">
       <button class="tab active" data-filter="all" onclick="setFilter('all')">All</button>
       <button class="tab" data-filter="tophung" onclick="setFilter('tophung')">Top Hung</button>
-      <button class="tab" data-filter="tophung-fixed" onclick="setFilter('tophung-fixed')">Top Hung + Fixed</button>
       <button class="tab" data-filter="sidehung" onclick="setFilter('sidehung')">Side Hung</button>
       <button class="tab" data-filter="fixed" onclick="setFilter('fixed')">Fixed</button>
     </div>
@@ -364,7 +363,6 @@ const DRAWING_ASSETS = {
   SH0612: 'Anglo-SH612.svg',
   SH0615: 'Anglo-SH615.svg',
   SH0618: 'Anglo-SH618.svg',
-  SH1209: 'Anglo-SH1212.svg',
   SH1212: 'Anglo-SH1212.svg',
   SH1215: 'Anglo-SH1215.svg',
   SH1218: 'Anglo-SH1218.svg',
@@ -383,93 +381,11 @@ const DRAWING_ASSETS = {
   SH2409: 'Anglo-SHH249.svg',
   SH2412: 'Anglo-SHH2412.svg',
   SH2415: 'Anglo-SHH2415.svg',
-  SH2418: 'Anglo-SHH2418.svg',
-  // Side Hung — unmapped sizes (nearest single-sash SH drawing; the SHH
-  // files are twin-sash and would misrepresent these single-sash configs)
-  SH0909: 'Anglo-SH1212.svg',   // 900×900 sash+fixed side
-  SH0912: 'Anglo-SH1215.svg',   // 900×1200
-  SH0915: 'Anglo-SH1215.svg',   // 900×1500 sash+fixed+base
-  SH0918: 'Anglo-SH1218.svg',   // 900×1800
-  SH1509: 'Anglo-SH1512.svg',   // 1500×900 sash+wide-fixed
-  SH1515: 'Anglo-SH1518.svg',   // 1500×1500
-
-  // PT — single-col top-hung without exact SVG (nearest same-column drawing)
-  PT615: 'Anglo-PT0612.svg',    // 600×1500 stack → nearest 600-wide PT
-  PT618: 'Anglo-PT0612.svg',    // 600×1800
-  PT621: 'Anglo-PT0612.svg',    // 600×2100
-  PT96:  'Anglo-PT0606.svg',    // 900×600 single vent
-  PT99:  'Anglo-PT0609.svg',    // 900×900
-  PT915: 'Anglo-PT0912.svg',    // 900×1500
-  PT918: 'Anglo-PT0912.svg',    // 900×1800
-  PT921: 'Anglo-PT0912.svg',    // 900×2100
-  PT126: 'Anglo-PT1212.svg',    // 1200×600 vent+fixed → use 1200-wide PT (orphan SVG put to use)
-  PT129: 'Anglo-PT1212.svg',    // 1200×900
-  PT156: 'Anglo-PT0606.svg',    // 1500×600 vent+wide-fixed → nearest single vent
-  PT159: 'Anglo-PT0612.svg',    // 1500×900
-  PT189: 'Anglo-PT1806.svg',    // 1800×900
-  PT216: 'Anglo-PT0606.svg',    // 2100×600
-  PT219: 'Anglo-PT0912.svg',    // 2100×900
-  PT246: 'Anglo-PT0606.svg',    // 2400×600
-  PT249: 'Anglo-PT0912.svg',    // 2400×900
-
-  // PTT — twin/wide top-hung without exact SVG
-  PTT156:  'Anglo-PTT0612.svg',  // 1500×600 twin → nearest twin
-  PTT159:  'Anglo-PTT0618.svg',  // 1500×900 twin
-  PTT186:  'Anglo-PTT1812.svg',  // 1800×600 twin side vents → nearest 1800-wide PTT
-  PTT189:  'Anglo-PTT1809.svg',  // 1800×900 twin side vents
-  PTT1512: 'Anglo-PTT1212.svg',  // 1500×1200 double stack+wide-fixed → nearest 1200-tall PTT
-  PTT1515: 'Anglo-PTT1215.svg',  // 1500×1500
-  PTT1518: 'Anglo-PTT1218.svg',  // 1500×1800
-  PTT216:  'Anglo-PTT2412.svg',  // 2100×600 twin → nearest 2400-wide PTT
-  PTT219:  'Anglo-PTT2412.svg',  // 2100×900
-  PTT2112: 'Anglo-PTT2412.svg',  // 2100×1200
-  PTT2115: 'Anglo-PTT2415.svg',  // 2100×1500
-  PTT2118: 'Anglo-PTT2418.svg',  // 2100×1800
-  PTT246:  'Anglo-PTT2412.svg',  // 2400×600
-  PTT249:  'Anglo-PTT2412.svg',  // 2400×900
-
-  // P4T — four-vent without exact SVG (use nearest 2400 four-vent)
-  P4T1512: 'Anglo-P4T2412.svg',  // 1500×1200 four-vent
-  P4T1812: 'Anglo-P4T2412.svg',  // 1800×1200
-  P4T1815: 'Anglo-P4T2415.svg',  // 1800×1500
-  P4T1818: 'Anglo-P4T2418.svg',  // 1800×1800
-  P4T2112: 'Anglo-P4T2412.svg',  // 2100×1200
-  P4T2115: 'Anglo-P4T2415.svg',  // 2100×1500
-  P4T2118: 'Anglo-P4T2418.svg',  // 2100×1800
-
-  // Top Hung B Range (symmetric twin-column; use nearest standard twin)
-  PTT912B:  'Anglo-PTT0912.svg',
-  P4T912B:  'Anglo-P4T2412.svg',
-  PTT915B:  'Anglo-PTT0912.svg',
-  P4T915B:  'Anglo-P4T2412.svg',
-  PTT918B:  'Anglo-PTT0912.svg',
-  P4T918B:  'Anglo-P4T2412.svg',
-  PTT1212B: 'Anglo-PTT1212.svg',
-  P4T1212B: 'Anglo-P4T2412.svg',
-  PTT1215B: 'Anglo-PTT1215.svg',
-  P4T1215B: 'Anglo-P4T2415.svg',
-  PTT1218B: 'Anglo-PTT1218.svg',
-  P4T1218B: 'Anglo-P4T2418.svg',
-  PTT1512B: 'Anglo-PTT1212.svg',
-  P4T1512B: 'Anglo-P4T2412.svg',
-  PTT1515B: 'Anglo-PTT1215.svg',
-  P4T1515B: 'Anglo-P4T2415.svg',
-  PTT1518B: 'Anglo-PTT1218.svg',
-  P4T1518B: 'Anglo-P4T2418.svg',
-  PTT1812B: 'Anglo-PTT1812.svg',
-  P4T1812B: 'Anglo-P4T2412.svg',
-  PTT1815B: 'Anglo-PTT1815.svg',
-  P4T1815B: 'Anglo-P4T2415.svg',
-  PTT1818B: 'Anglo-PTT1818.svg',
-  P4T1818B: 'Anglo-P4T2418.svg',
-
-  // Top Hung + Fixed family (tophung-fixed)
-  '0609T':  'Anglo-PT0609.svg',
-  '0909T':  'Anglo-PT0912.svg',
-  '1209T':  'Anglo-PT0912.svg',
-  '1809TT': 'Anglo-PTT1809.svg',
-  '0915DT': 'Anglo-PTT0912.svg',
-  '1215DT': 'Anglo-PTT1212.svg'
+  SH2418: 'Anglo-SHH2418.svg'
+  // Exact-config drawings only. Nearest-size approximations were removed —
+  // a card whose drawing doesn't match its title (wrong size, vent count,
+  // or column layout) is worse than the generated diagram, which always
+  // draws the true grid. Unmapped codes fall back to the generated SVG.
 };
 
 function normalizedCode(code) {
@@ -493,7 +409,7 @@ function renderWindowGraphic(windowItem, width, height, couplingEdge) {
 }
 
 // ── Window catalog — active picker baseline ────────────────────────────
-// family: tophung | tophung-fixed | sidehung | sidehung-fixed | fixed
+// family: tophung | sidehung | fixed
 const CATALOG = [
   // ── Top Hung standards from 30.5mm casement sheet ───────────────────
   makeTopHung({ name:'Top Hung 600×600', code:'PT66', W:600, H:600, colW:[600], rowH:[600], types:['TOP'], sub:'Single vent • PT66' }),
@@ -592,25 +508,6 @@ const CATALOG = [
   makeTopHung({ name:'Top Hung B 1800×1800', code:'PTT1818B', W:1800, H:1800, group:'Top Hung B Range', colW:[900,900], rowH:[600,1200], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + full-height fixed base • PTT1818B' }),
   makeTopHung({ name:'Top Hung B 1800×1800 (Four Vent)', code:'P4T1818B', W:1800, H:1800, group:'Top Hung B Range', colW:[900,900], rowH:[600,600,600], types:['TOP','TOP','TOP','TOP','FIXED','FIXED'], sub:'Four vents + fixed base • P4T1818B' }),
 
-  // ── Top Hung + Fixed ────────────────────────────────────────────────
-  { name:'Top Hung + Fixed 600×900', code:'0609T', W:600,  H:900,  family:'tophung-fixed',
-    cols:1,rows:2, colW:[600],           rowH:[600,300],   types:['TOP','FIXED'],
-    sub:'Vent + fixed base • 600×900', note:'Vent sash above, fixed light below.' },
-  { name:'Top Hung + Fixed 900×900', code:'0909T', W:900,  H:900,  family:'tophung-fixed',
-    cols:1,rows:2, colW:[900],           rowH:[600,300],   types:['TOP','FIXED'],
-    sub:'Vent + fixed base • 900×900', note:'Most common window on residential jobs.' },
-  { name:'Top Hung + Fixed 1200×900', code:'1209T', W:1200, H:900,  family:'tophung-fixed',
-    cols:1,rows:2, colW:[1200],          rowH:[600,300],   types:['TOP','FIXED'],
-    sub:'Wide vent + fixed base • 1200×900', note:'Lounge or bedroom standard.' },
-  { name:'Top Hung + Fixed 1800×900 (TT)', code:'1809TT', W:1800, H:900,  family:'tophung-fixed',
-    cols:2,rows:2, colW:[900,900],       rowH:[600,300],   types:['TOP','TOP','FIXED','FIXED'],
-    sub:'Twin vent + fixed • 1800×900', note:'Two vents with fixed base band.' },
-  { name:'Top Hung + Fixed 900×1500 (DT)', code:'0915DT', W:900,  H:1500, family:'tophung-fixed',
-    cols:1,rows:3, colW:[900],           rowH:[600,600,300],types:['TOP','TOP','FIXED'],
-    sub:'Double vent + fixed base • 900×1500', note:'Tall window: two vents, fixed sill panel.' },
-  { name:'Top Hung + Fixed 1200×1500 (DT)', code:'1215DT', W:1200, H:1500, family:'tophung-fixed',
-    cols:2,rows:3, colW:[600,600],       rowH:[600,600,300],types:['TOP','TOP','TOP','TOP','FIXED','FIXED'],
-    sub:'Wide double vent + fixed • 1200×1500', note:'Tall, wide: two columns of double vents.' },
   // ── Side Hung ────────────────────────────────────────────────────────
   makeGridPreset({ name:'Side Hung 600×900', code:'SH-0609', W:600, H:900, family:'sidehung',
     group:'Side Hung - Single sash', colW:[600], rowH:[900], types:['SIDE'],
@@ -769,8 +666,7 @@ function renderCatalog() {
 
   const label = {
     all:'All window types', tophung:'Top Hung — vents only',
-    'tophung-fixed':'Top Hung + Fixed base', sidehung:'Side Hung',
-    fixed:'Fixed — full fix'
+    sidehung:'Side Hung', fixed:'Fixed — full fix'
   }[activeFilter] || 'All';
 
   document.getElementById('sectionLabel').textContent = label;
