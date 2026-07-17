@@ -249,158 +249,120 @@
   </div>
 
   <script>
-    // SVG Rendering functions
-    const DOOR_CLR = {
-      frame: '#f5d13a',
-      line: '#d8e0ea',
-      muted: '#7c8aa3',
-      fill: 'rgba(58,107,194,0.12)'
+    // ── Generated drawings in the Anglo architectural door style ─────────
+    // Same language as the hand-drawn Anglo-HD/DD/PD assets: #c29b27 frame,
+    // strong blue fixed / green sash glass, kick-height midrail band, gold
+    // door-sash border, white dashed opening chevrons and slide arrows.
+    // Drawn in mm so every config renders its true proportions.
+    const D = {
+      GOLD: '#c29b27',
+      FIX: 'rgba(40,100,180,0.6)',
+      SASH: 'rgba(40,150,70,0.6)',
+      H: 2090, FR: 55, GAP: 35, MID: 1170,
     };
 
-    function baseDoorSVG(W, H, inner) {
-      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-        <rect x="1" y="1" width="${W-2}" height="${H-2}" rx="1" fill="none" stroke="${DOOR_CLR.frame}" stroke-width="1.4"/>
-        <rect x="4" y="4" width="${W-8}" height="${H-8}" fill="${DOOR_CLR.fill}" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>
-        ${inner}
-      </svg>`;
+    function doorShellSVG(mmW, inner) {
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${mmW} ${D.H}" preserveAspectRatio="xMidYMid meet">` +
+        `<rect x="0" y="0" width="${mmW}" height="${D.H}" rx="4" fill="${D.GOLD}"/>${inner}</svg>`;
     }
 
-    function swingLeaf(x, y, w, h, opts = {}) {
-      const hingeLeft = opts.hingeLeft !== false;
-      const inset = 4;
-      const left = x + inset;
-      const right = x + w - inset;
-      const top = y + inset;
-      const bottom = y + h - inset;
-      const midY = top + Math.round((bottom - top) * 0.55);
-      const dash = hingeLeft
-        ? `<line x1="${left}" y1="${top}" x2="${right-6}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.85" stroke-dasharray="4 3"/>`
-        : `<line x1="${right}" y1="${top}" x2="${left+6}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.85" stroke-dasharray="4 3"/>`;
-      let parts = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>${dash}`;
-      if (opts.midrail) {
-        parts += `<line x1="${x}" y1="${midY}" x2="${x+w}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>`;
+    // One glass panel. opts: fixed, midrail(false to skip), chevron l/r,
+    // arrow l/r, bars, louvre, cladding, stable — leaf details in gold.
+    function doorPanel(x, w, opts = {}) {
+      const y = D.FR, h = D.H - 2 * D.FR;
+      let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${opts.fixed ? D.FIX : D.SASH}" stroke="#000" stroke-width="2"/>`;
+      if (opts.midrail !== false) s += `<rect x="${x}" y="${D.MID}" width="${w}" height="40" fill="${D.GOLD}"/>`;
+      if (!opts.fixed) s += `<rect x="${x+15}" y="${y+15}" width="${w-30}" height="${h-30}" fill="none" stroke="${D.GOLD}" stroke-width="30"/>`;
+      const midY = y + h / 2;
+      const dash = `fill="none" stroke="#fff" stroke-width="8" stroke-dasharray="14,14" stroke-linecap="round" stroke-linejoin="round"`;
+      // chevron apex points at the hinge side (matches HD0921L convention)
+      if (opts.chevron === 'left')  s += `<polyline points="${x+w-35},${y+35} ${x+35},${midY} ${x+w-35},${y+h-35}" ${dash}/>`;
+      if (opts.chevron === 'right') s += `<polyline points="${x+35},${y+35} ${x+w-35},${midY} ${x+35},${y+h-35}" ${dash}/>`;
+      if (opts.arrow) {
+        const cx = x + w/2, ax = opts.arrow === 'left' ? -1 : 1;
+        s += `<path d="M${cx - 60*ax},${midY} L${cx + 60*ax},${midY} M${cx + 35*ax},${midY-25} L${cx + 60*ax},${midY} M${cx + 35*ax},${midY+25} L${cx + 60*ax},${midY}" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`;
       }
-      if (opts.classic) {
-        parts += `<line x1="${x + w/2}" y1="${midY}" x2="${x + w/2}" y2="${bottom}" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
-      }
-      if (opts.cape) {
-        parts += `<line x1="${x + w/3}" y1="${top}" x2="${x + w/3}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
-        parts += `<line x1="${x + (w*2/3)}" y1="${top}" x2="${x + (w*2/3)}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
-        parts += `<line x1="${x + w/2}" y1="${midY}" x2="${x + w/2}" y2="${bottom}" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
+      if (opts.bars) {
+        for (let i = 1; i < opts.bars; i++)
+          s += `<rect x="${x + (w/opts.bars)*i - 6}" y="${y}" width="12" height="${h}" fill="${D.GOLD}"/>`;
+        s += `<rect x="${x}" y="${y + h*0.28}" width="${w}" height="12" fill="${D.GOLD}"/>`;
+        s += `<rect x="${x}" y="${y + h*0.75}" width="${w}" height="12" fill="${D.GOLD}"/>`;
       }
       if (opts.louvre) {
-        for (let ly = top + 6; ly < bottom - 4; ly += 6) {
-          parts += `<line x1="${x+2}" y1="${ly}" x2="${x+w-2}" y2="${ly+3}" stroke="${DOOR_CLR.line}" stroke-width="0.75" opacity="0.85"/>`;
-        }
+        for (let ly = y + 120; ly < y + h - 60; ly += 140)
+          s += `<rect x="${x+30}" y="${ly}" width="${w-60}" height="26" fill="${D.GOLD}" opacity="0.85"/>`;
       }
       if (opts.cladding) {
-        for (let ly = top + 6; ly < bottom - 4; ly += 8) {
-          parts += `<line x1="${x+2}" y1="${ly}" x2="${x+w-2}" y2="${ly}" stroke="${DOOR_CLR.line}" stroke-width="0.8" opacity="0.85"/>`;
-        }
+        const n = Math.max(3, Math.round(w / 150));
+        for (let i = 1; i < n; i++)
+          s += `<rect x="${x + (w/n)*i - 5}" y="${y}" width="10" height="${h}" fill="${D.GOLD}" opacity="0.85"/>`;
       }
-      if (opts.handle) {
-        const hx = hingeLeft ? right - 6 : left + 6;
-        parts += `<circle cx="${hx}" cy="${midY}" r="1.5" fill="${DOOR_CLR.line}"/>`;
-      }
-      return parts;
+      if (opts.stable) s += `<rect x="${x}" y="${y + h*0.48}" width="${w}" height="50" fill="${D.GOLD}"/>`;
+      return s;
     }
 
+    function leafOptsFor(style) {
+      return {
+        classic:  { bars: 2 },
+        cape:     { bars: 3 },
+        louvre:   { louvre: true },
+        cladding: { cladding: true },
+        stable:   { stable: true },
+      }[style] || {};
+    }
+
+
     function hingedStyleSVG(style, widthClass, W, H) {
-      const doubleLeaf = widthClass === 'double';
-      const gap = 4;
-      const frameX = 10;
-      const frameY = 10;
-      const frameW = W - 20;
-      const frameH = H - 20;
-      let inner = '';
-      if (doubleLeaf) {
-        const leafW = (frameW - gap) / 2;
-        inner += swingLeaf(frameX, frameY, leafW, frameH, {
-          hingeLeft: true,
-          handle: true,
-          midrail: style !== 'large',
-          classic: style === 'classic',
-          cape: style === 'cape',
-          louvre: style === 'louvre',
-          cladding: style === 'cladding'
-        });
-        inner += swingLeaf(frameX + leafW + gap, frameY, leafW, frameH, {
-          hingeLeft: false,
-          handle: true,
-          midrail: style !== 'large',
-          classic: style === 'classic',
-          cape: style === 'cape',
-          louvre: style === 'louvre',
-          cladding: style === 'cladding'
-        });
-      } else if (style === 'stable') {
-        inner += swingLeaf(frameX, frameY, frameW, frameH, { hingeLeft: true, handle: true, midrail: true });
-        const splitY = frameY + frameH / 2;
-        inner += `<line x1="${frameX}" y1="${splitY}" x2="${frameX + frameW}" y2="${splitY}" stroke="${DOOR_CLR.line}" stroke-width="1"/>`;
-      } else {
-        inner += swingLeaf(frameX, frameY, frameW, frameH, {
-          hingeLeft: true,
-          handle: true,
-          midrail: style !== 'large',
-          classic: style === 'classic',
-          cape: style === 'cape',
-          louvre: style === 'louvre',
-          cladding: style === 'cladding'
-        });
+      const extras = leafOptsFor(style);
+      if (widthClass === 'double') {
+        const leafW = 800, mmW = 2*D.FR + 2*leafW + D.GAP;
+        return doorShellSVG(mmW,
+          doorPanel(D.FR, leafW, { chevron: 'left', ...extras }) +
+          doorPanel(D.FR + leafW + D.GAP, leafW, { chevron: 'right', ...extras }));
       }
-      return baseDoorSVG(W, H, inner);
+      const mmW = 890;
+      return doorShellSVG(mmW, doorPanel(D.FR, mmW - 2*D.FR, { chevron: 'left', ...extras }));
     }
 
     function pivotDoorSVG(style, W, H) {
-      const x = 24;
-      const y = 10;
-      const w = W - 48;
-      const h = H - 20;
-      let inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>`;
-      inner += `<line x1="${x + w*0.72}" y1="${y}" x2="${x + w*0.28}" y2="${y + h/2}" stroke="${DOOR_CLR.line}" stroke-width="0.85"/>`;
-      inner += `<line x1="${x + w*0.72}" y1="${y+h}" x2="${x + w*0.28}" y2="${y + h/2}" stroke="${DOOR_CLR.line}" stroke-width="0.85"/>`;
-      if (style === 'classic') {
-        const midY = y + h*0.55;
-        inner += `<line x1="${x}" y1="${midY}" x2="${x+w}" y2="${midY}" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>`;
-      }
-      return baseDoorSVG(W, H, inner);
+      const mmW = 890, w = mmW - 2*D.FR;
+      let inner = doorPanel(D.FR, w, leafOptsFor(style));
+      // pivot axis at roughly a third in
+      const px = D.FR + w * 0.3;
+      inner += `<line x1="${px}" y1="${D.FR}" x2="${px}" y2="${D.H - D.FR}" stroke="#fff" stroke-width="8" stroke-dasharray="14,14" stroke-linecap="round"/>`;
+      return doorShellSVG(mmW, inner);
     }
 
     function slidingSVG(panels, W, H) {
-      const panelW = W / panels.length;
-      let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
-      svg += `<rect width="${W}" height="${H}" fill="none" stroke="${DOOR_CLR.frame}" stroke-width="1.2"/>`;
-
-      for (let i = 0; i < panels.length; i++) {
-        const x = i * panelW;
-        const isOpen = panels[i] === 'O';
-        svg += `<rect x="${x}" y="0" width="${panelW}" height="${H}" fill="rgba(58,107,194,0.08)" stroke="${DOOR_CLR.line}" stroke-width="0.9"/>`;
-        if (isOpen) {
-          svg += `<text x="${x + panelW/2}" y="${H/2}" text-anchor="middle" dominant-baseline="middle" font-size="24" font-weight="bold" fill="${DOOR_CLR.line}" opacity="0.7">→</text>`;
-        }
-      }
-      svg += `</svg>`;
-      return svg;
+      const paneW = 820;
+      const mmW = 2*D.FR + panels.length*paneW + (panels.length-1)*D.GAP;
+      const firstO = panels.indexOf('O');
+      let inner = '';
+      panels.forEach((p, i) => {
+        const x = D.FR + i*(paneW + D.GAP);
+        if (p === 'O') inner += doorPanel(x, paneW, { fixed: true });
+        else inner += doorPanel(x, paneW, { arrow: (firstO !== -1 && firstO < i) ? 'left' : 'right' });
+      });
+      return doorShellSVG(mmW, inner);
     }
 
     function foldingSVG(leaves, W, H, activeIndex = 0) {
-      const leafW = W / leaves;
-      let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
-      svg += `<rect width="${W}" height="${H}" fill="none" stroke="${DOOR_CLR.frame}" stroke-width="1.2"/>`;
-
+      const leafW = 620;
+      const mmW = 2*D.FR + leaves*leafW + (leaves-1)*D.GAP;
+      let inner = '';
       for (let i = 0; i < leaves; i++) {
-        const x = i * leafW;
-        svg += `<rect x="${x}" y="0" width="${leafW}" height="${H}" fill="rgba(58,107,194,0.08)" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
-        svg += `<line x1="${x + leafW - 3}" y1="2" x2="${x + leafW - 3}" y2="${H-2}" stroke="${DOOR_CLR.line}" stroke-width="0.7" opacity="0.7"/>`;
-        if (i === activeIndex) {
-          svg += `<line x1="${x + 6}" y1="8" x2="${x + leafW - 6}" y2="${H/2}" stroke="${DOOR_CLR.line}" stroke-width="0.8" stroke-dasharray="4 3"/>`;
-        }
-        if (i > 0) {
-          svg += `<path d="M ${x - 4} ${H+4} l 6 6 l 6 -6" fill="none" stroke="${DOOR_CLR.line}" stroke-width="0.8"/>`;
-        }
+        const x = D.FR + i*(leafW + D.GAP);
+        inner += doorPanel(x, leafW, i === activeIndex ? { chevron: 'left' } : {});
       }
-      svg += `</svg>`;
-      return svg;
+      // fold zigzag across the leaf boundaries
+      const zy = D.FR + 160, amp = 110;
+      let pts = '';
+      for (let i = 0; i <= leaves; i++) {
+        const x = D.FR + i*(leafW + D.GAP) - (i > 0 ? D.GAP/2 : 0);
+        pts += `${x},${zy + (i % 2 ? amp : 0)} `;
+      }
+      inner += `<polyline points="${pts.trim()}" fill="none" stroke="#fff" stroke-width="8" stroke-dasharray="14,14" stroke-linecap="round" stroke-linejoin="round"/>`;
+      return doorShellSVG(mmW, inner);
     }
 
     const DOORS = {
