@@ -9,6 +9,11 @@ desktop.ini
 # local test server logs
 test-server.out.log
 test-server.err.log
+tablet-server.out.log
+tablet-server.err.log
+
+# Netlify CLI local state (netlify.toml itself is intentional deploy config)
+.netlify/
 _test_quote*.pdf
 _test_quote*.txt
 _test_quote*.json
