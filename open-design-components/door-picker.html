@@ -279,9 +279,17 @@
     // Drawn in mm so every config renders its true proportions.
     const D = {
       GOLD: '#c29b27',
-      FIX: 'rgba(40,100,180,0.6)',
-      SASH: 'rgba(40,150,70,0.6)',
-      H: 2090, FR: 55, GAP: 35, MID: 1170,
+      // Glass reads BLUE throughout (Bizman convention). Sash vs fixed is
+      // carried by the gold sash border + opening chevron, not by colour —
+      // the green/gold scheme did not work on the tablet.
+      GLASSBASE: '#0f1012',
+      FIX:  'rgba(40,100,180,0.60)',
+      SASH: 'rgba(40,100,180,0.60)',
+      H: 2090,
+      FR: 80,          // outer frame — heavier, it needs to read as the frame
+      GAP: 35,
+      MID: 1170,
+      MIDH: 95,        // midrail: one solid band, never two thin lines
     };
 
     function doorShellSVG(mmW, inner) {
@@ -293,9 +301,15 @@
     // arrow l/r, bars, louvre, cladding, stable — leaf details in gold.
     function doorPanel(x, w, opts = {}) {
       const y = D.FR, h = D.H - 2 * D.FR;
-      let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${opts.fixed ? D.FIX : D.SASH}" stroke="#000" stroke-width="2"/>`;
-      if (opts.midrail !== false) s += `<rect x="${x}" y="${D.MID}" width="${w}" height="40" fill="${D.GOLD}"/>`;
+      // Glass is TWO layers, exactly as the hand-drawn Anglo assets do it:
+      // a dark base, then the translucent colour over it. Laying the
+      // translucent blue straight onto the gold frame washes it out to grey.
+      let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${D.GLASSBASE}" stroke="#000" stroke-width="2"/>`
+            + `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${opts.fixed ? D.FIX : D.SASH}"/>`;
+      // sash border FIRST, then the midrail on top — drawing the midrail
+      // underneath let the border's stroke cut it into two thin lines
       if (!opts.fixed) s += `<rect x="${x+15}" y="${y+15}" width="${w-30}" height="${h-30}" fill="none" stroke="${D.GOLD}" stroke-width="30"/>`;
+      if (opts.midrail !== false) s += `<rect x="${x}" y="${D.MID}" width="${w}" height="${D.MIDH}" fill="${D.GOLD}"/>`;
       const midY = y + h / 2;
       const dash = `fill="none" stroke="#fff" stroke-width="8" stroke-dasharray="14,14" stroke-linecap="round" stroke-linejoin="round"`;
       // chevron apex points at the hinge side (matches HD0921L convention)
