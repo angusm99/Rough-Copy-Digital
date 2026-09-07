@@ -116,6 +116,18 @@
       gap: 10px;
     }
     .door-card.selected { border-color: color-mix(in oklab, var(--accent) 56%, var(--border)); }
+    /* confirm straight from the card — no scrolling to the side panel */
+    .card-use {
+      margin-top: 2px; min-height: 44px; width: 100%;
+      border-radius: 10px; cursor: pointer;
+      border: 1px solid color-mix(in oklab, var(--accent) 55%, var(--border));
+      background: color-mix(in oklab, var(--accent) 16%, var(--surface-2));
+      color: var(--fg); font: inherit; font-weight: 600;
+    }
+    .card-use:hover { background: color-mix(in oklab, var(--accent) 30%, var(--surface-2)); }
+    .door-card.selected .card-use {
+      background: var(--accent); color: #1a1400; border-color: var(--accent);
+    }
     .door-graphic {
       height: 120px;
       border-radius: 12px;
@@ -558,6 +570,7 @@
                   <div class="door-graphic">${svgContent}</div>
                   <strong>${door.label}</strong>
                   <div class="label">${door.code}</div>
+                  <button class="card-use" data-use="${door.id}">Use this ✓</button>
                 </article>
               `;
             }).join('')}
@@ -576,6 +589,16 @@
 
       document.querySelectorAll('.door-card').forEach(card => {
         card.addEventListener('click', () => selectDoor(family, card.dataset.id));
+      });
+
+      // Select + confirm in one tap, straight from the card. Reps were having
+      // to scroll to the side panel to confirm a pick.
+      document.querySelectorAll('.door-card [data-use]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectDoor(family, btn.dataset.use);
+          saveDoorSelection();
+        });
       });
     }
 
