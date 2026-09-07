@@ -83,7 +83,10 @@
     }
     if (/pivot/.test(blob)) return { type: "Pivot Door", tags };
     if (/vistafold|fold/.test(blob)) return { type: "Vistafold", tags };
-    if (/\bcas[\s.]*\d/.test(blob) || /casement/.test(blob)) return { type: "Casement", tags };
+    // "70mm OuterFrame-30.5mm case" is how the casement templates describe
+    // themselves. Requires "<n>mm case" so "26B OUTERFRAME[Shop]" stays a shopfront.
+    if (/\bcas[\s.]*\d/.test(blob) || /casement/.test(blob) ||
+        /\d+(?:\.\d+)?mm\s*case\b/.test(blob)) return { type: "Casement", tags };
     if (/slat/.test(blob)) return { type: "Cladding Slats", tags };
     if (/shop/.test(blob)) return { type: "Shopfront", tags };
     if (/slid|patio|\bxo\b|\box\b|\boxxo\b/.test(blob)) return { type: "Sliding Door", tags };
@@ -430,7 +433,16 @@
       // light inference when no recognisable product tag
       if (!type) {
         const ref = (location || "").toUpperCase();
-        if (/^D\d|DOOR/.test(ref) || (quoteHeight && quoteHeight >= 1900)) {
+        // Bizman casement template codes are authoritative: PT/PTT/P4T are
+        // top-hung, SH/SHH side-hung. These must be checked BEFORE the height
+        // heuristic below — otherwise a 2090-tall top-hung window (PTT0621,
+        // PTT0912) is called a door, and door lines get forced onto safety
+        // glass with the window glass options hidden.
+        if (/^P\d?T{1,2}\d/.test(ref)) {
+          type = "Top Hung";
+        } else if (/^SHH?\d/.test(ref)) {
+          type = "Side Hung";
+        } else if (/^D\d|DOOR/.test(ref) || (quoteHeight && quoteHeight >= 1900)) {
           type = "Door (confirm type)";
         } else if (/^W\d/.test(ref)) {
           type = "Window (confirm type)";
