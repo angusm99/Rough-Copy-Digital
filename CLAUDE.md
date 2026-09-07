@@ -2,6 +2,20 @@
 
 This repo is the active Anglo Windows Digital Rough Copy project.
 
+## Current continuation - 2026-09-07 field1
+
+Read `FIELD-WORKFLOW-2026-09-07.md` first. It supersedes the June/July capability
+and tablet snapshots below. Claude's base was `b261d6d`; Codex added Elite/Knysna,
+shared Palace/Valencia slider layouts, outside-view O=fixed/X=sliding rules,
+explicit required-site confirmation, complete line readiness, original quote
+references and stronger field UI. Run `tools/verify-project.ps1` (includes nine
+field regression tests) before commit. Do not infer publication from local HEAD.
+
+Prefer `tools/start-preview.ps1 -Port 5179` bound to loopback. Today's handoff
+identifies HTC `FS44BPC01077`; verify devices before `adb -s <serial> reverse
+tcp:5179 tcp:5179`. Do not use the old ...070 floor tablet or LAN instructions
+below by default. Physical tablet/offline proof remains outstanding for field1.
+
 ## Start Here
 
 - Active app path: `open-design-components/`

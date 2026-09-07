@@ -25,6 +25,8 @@ _quote*.json
 tablet-screen*.png
 tablet-test-files/
 tmp/
+.playwright-cli/
+output/playwright/
 
 # legacy local prototype/debug exports kept out of the active repo
 /all_crops_preview.html

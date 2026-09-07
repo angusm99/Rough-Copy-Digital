@@ -11,7 +11,7 @@
      is wasted bandwidth on a phone hotspot.
 
    Bump CACHE when shipping — old caches are dropped on activate. */
-const CACHE = 'anglo-rc-v2';
+const CACHE = 'anglo-rc-20260907-field1-release';
 
 const SHELL = [
   './',
@@ -21,6 +21,13 @@ const SHELL = [
   'door-picker.html',
   'window-builder.html',
   'quote-parser.js',
+  'field-rules.js',
+  'sliding-configs.js',
+  'picker-reference.js',
+  'field-ui.css',
+  'assets/brand/anglo-logo-gold.png',
+  'assets/brand/anglo-logo-black.png',
+  'vendor/anglo-logo.b64',
   'vendor/pdf.min.js',
   'vendor/pdf.worker.min.js',
 ];
@@ -37,7 +44,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('anglo-rc-') && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -51,25 +58,26 @@ self.addEventListener('fetch', (e) => {
 
   const isAppCode = /\.html$/.test(url.pathname)
                  || url.pathname.endsWith('/')
-                 || url.pathname.endsWith('quote-parser.js');
+                 || /\.(js|css)$/.test(url.pathname) && !url.pathname.includes('/vendor/');
 
   if (isAppCode) {
     // network-first: latest code when online, cached shell when not
     e.respondWith(
       fetch(req)
         .then((res) => {
+          if (!res.ok) throw new Error('App unavailable');
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
           return res;
         })
-        .catch(() => caches.match(req).then((hit) => hit || caches.match('workspace.html')))
+        .catch(() => caches.open(CACHE).then((c) => c.match(req, { ignoreSearch: true })).then(hit => hit || Response.error()))
     );
     return;
   }
 
   // cache-first for assets
   e.respondWith(
-    caches.match(req).then((hit) => hit || fetch(req).then((res) => {
+    caches.open(CACHE).then(c => c.match(req, { ignoreSearch: true })).then((hit) => hit || fetch(req).then((res) => {
       const copy = res.clone();
       caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
       return res;

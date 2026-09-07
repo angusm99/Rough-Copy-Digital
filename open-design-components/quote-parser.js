@@ -71,6 +71,9 @@
       .map((t) => t.replace(/[\[\]]/g, "").trim());
     const blob = (tags.join(" ") + " " + desc).toLowerCase();
 
+    if (/knysna/.test(blob)) return { type: "Knysna Sliding Window", tags };
+    if (/elite|\behs\b/.test(blob)) return { type: "Elite Sliding Window", tags };
+
     if (/stable\s*door/.test(blob)) return { type: "Stable Door", tags };
     if (/boabab|baobab/.test(blob)) return { type: "Boabab-40 Window", tags };
     if (/double\s*hinged/.test(blob)) return { type: "Hinged Double Door", tags };
@@ -78,7 +81,8 @@
     if (/palace/.test(blob)) {
       if (/oxxo/.test(blob)) return { type: "Palace Sliding OXXO (4 panel)", tags };
       if (/\boxx\b/.test(blob)) return { type: "Palace Sliding OXX (3 panel)", tags };
-      if (/\b(ox|xo)\b/.test(blob)) return { type: "Palace Sliding OX (2 panel)", tags };
+      const layout = (blob.match(/\b([ox]{2,6})\b/) || [])[1];
+      if (layout) return { type: `Palace Sliding ${layout.toUpperCase()} (${layout.length} panel)`, tags };
       return { type: "Palace Sliding", tags };
     }
     if (/pivot/.test(blob)) return { type: "Pivot Door", tags };

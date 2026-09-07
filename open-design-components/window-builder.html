@@ -188,6 +188,8 @@
       });
     }
   </script>
+  <link rel="stylesheet" href="field-ui.css?v=20260907-field1" />
+  <script src="picker-reference.js?v=20260907-field1"></script>
 </head>
 <body>
 <div class="modal">
@@ -581,6 +583,7 @@ function useDesign() {
       code,
       name: `Custom ${wb.W}×${wb.H} (${wb.cols}×${wb.rows})`,
       family: 'custom',
+      ...PickerReference.spec(),
       note: 'Builder: ' + specString().replace(/\n/g, ' · '),
       svg: drawSVG(tW, tH, false),
     }));

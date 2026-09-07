@@ -396,6 +396,8 @@
       });
     }
   </script>
+  <link rel="stylesheet" href="field-ui.css?v=20260907-field1" />
+  <script src="field-rules.js?v=20260907-field1"></script>
 </head>
 <body>
   <main class="app">
@@ -456,6 +458,10 @@
             <div class="label">Site details — fill in before measuring</div>
           </div>
           <span class="status info" id="siteStatus">0 of 8 captured</span>
+        </div>
+        <div class="site-gate" id="siteGate" role="status" aria-live="polite">
+          <p id="siteGateMessage">Confirm the site conditions before capturing any line.</p>
+          <button class="primary" id="confirmSiteBtn" type="button">Confirm site details — start capturing</button>
         </div>
         <div class="site-grid" id="siteGrid">
           <label><span class="label">Job ref</span><input class="input" data-site="jobRef" /></label>
@@ -578,7 +584,10 @@
           <div class="editor-type full">
             <span class="label">2 · Unit type</span>
             <div class="editor-type-row">
-              <div class="editor-diag" id="edDiag">—</div>
+              <div class="diagram-pair">
+                <div><span class="label">Selected site design</span><div class="editor-diag" id="edDiag">—</div></div>
+                <figure class="quote-reference" id="edQuoteReference"><span class="label">Original quote — reference only</span><div id="edQuoteDrawing"></div><figcaption id="edQuoteCaption"></figcaption></figure>
+              </div>
               <div style="flex:1;min-width:140px">
                 <div id="edTypeName" style="font-weight:600">Not set</div>
                 <div class="label" id="edTypeCode" style="margin-top:3px"></div>
@@ -589,6 +598,7 @@
             </div>
           </div>
 
+          <div class="full review-checklist" id="edChecklist" role="status" aria-live="polite"></div>
           <!-- 3. how big -->
           <div class="full">
             <span class="label">3 · Size — quote vs final site measurement</span>
@@ -726,7 +736,7 @@
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>');
     }
   </script>
-  <script src="quote-parser.js?v=20260907"></script>
+  <script src="quote-parser.js?v=20260907-field1"></script>
   <script>
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";
@@ -762,7 +772,7 @@
         notes: "", diagSVG: "",
         config: "", handleSide: "", openingDirection: "",
         specialColour: "", customColour: "", customColourCode: "",
-        sizeConfirmed: false,
+        sizeConfirmed: false, designSelected: false,
         ...overrides,
       };
     }
@@ -861,14 +871,17 @@
     }
 
     // ---------- persistence ----------
+    let storageWarningShown = false;
     function save() {
       try {
         localStorage.setItem(STORE_KEY, JSON.stringify(state));
+        storageWarningShown = false;
+        return true;
       } catch (e) {
-        // storage full — drop the bulky quote diagram crops and retry
-        state.lines.forEach((l) => { delete l.quoteDiagPNG; });
-        try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
-        catch (e2) { console.error("save failed:", e2); }
+        // Never silently delete the original quote references to make room.
+        if (!storageWarningShown) alert('Device storage is full. This latest edit is not saved. Keep this page open; do not reload or leave it. Quote drawings have not been deleted.');
+        storageWarningShown = true;
+        return false;
       }
     }
     function load() {
@@ -881,6 +894,7 @@
       state.site = state.site || {};
       state.lines = (state.lines || []).map((l) => blankLine({
         notes: "", diagSVG: "", code: "", ...l,
+        designSelected: l.designSelected === true || (l.designSelected == null && !!l.diagSVG),
       }));
     }
 
@@ -1118,6 +1132,7 @@
     }
 
     function applyGenericImport(data) {
+      state.site.captureConfirmed = '';
       const incoming = data.site || {};
       state.job = {
         ...(state.job || {}),
@@ -1234,10 +1249,11 @@
 
     function applyParsedQuote(parsed) {
       state.job = parsed.job;
-      state.lines = parsed.lines.map((l) => blankLine({ notes: "", diagSVG: "", code: "", ...l }));
+      state.lines = parsed.lines.map((l) => blankLine({ notes: "", code: "", ...l,
+        quoteProduct: l.product || "", quoteCode: l.code || "", diagSVG: "", designSelected: false, sizeConfirmed: false }));
       // quote pre-fills site details; rep completes the rest on site
       const fromQuote = siteFromJob(parsed.job, parsed.lines);
-      SITE_FIELDS.forEach((f) => { if (fromQuote[f]) state.site[f] = fromQuote[f]; });
+      state.site = { ...fromQuote, captureConfirmed: "" };
       // Material comes off the quote's "Ex:" line — pre-fill it, but keep it
       // flagged until the rep confirms what is actually on site.
       state.site.materialFromQuote = !!fromQuote.material;
@@ -1260,12 +1276,11 @@
 
     // ---------- line status ----------
     function lineStatus(l) {
-      if (!l.product) return ["warn", "Needs type"];
-      if (!l.sizeConfirmed) return ["danger", "Needs size"];
-      if (!doorOperationReady(l)) return ["warn", "Needs handing"];
+      const missing = FieldRules.lineMissing(l, state.site);
+      if (missing.length) return ["warn", "Needs: " + missing.join(", ")];
       return ["ready", "Ready"];
     }
-    function lineReady(l) { return !!l.product && !!l.sizeConfirmed && doorOperationReady(l); }
+    function lineReady(l) { return !FieldRules.lineMissing(l, state.site).length; }
 
     // ---------- rendering ----------
     function renderJobTitle() {
@@ -1276,7 +1291,7 @@
       document.getElementById("quickQuoteRef").textContent = (j && j.quoteRef) || "—";
       const note = document.getElementById("colourNote");
       if (j && j.colourNote) {
-        note.innerHTML = "<strong>Colour note:</strong> " + j.colourNote;
+        note.innerHTML = "<strong>Colour note:</strong> " + escapeHTML(j.colourNote);
         note.classList.remove("hidden");
       } else {
         note.classList.add("hidden");
@@ -1284,7 +1299,7 @@
       // header spec bullets from the quote (kickplates, hinges, handles…)
       const qn = document.getElementById("quoteNotes");
       if (j && j.headerNotes && j.headerNotes.length) {
-        qn.innerHTML = "<strong>Quote notes:</strong> " + j.headerNotes.join(" • ");
+        qn.innerHTML = "<strong>Quote notes:</strong> " + j.headerNotes.map(escapeHTML).join(" • ");
         qn.classList.remove("hidden");
       } else {
         qn.classList.add("hidden");
@@ -1315,6 +1330,31 @@
       const el = document.getElementById("siteStatus");
       el.textContent = `${filled} of ${fields.length} captured`;
       el.className = "status " + (filled === fields.length ? "ready" : "info");
+      const missing = FieldRules.siteMissing(state.site);
+      const ready = FieldRules.siteReady(state.site);
+      el.textContent = ready ? "Site confirmed" : "Site review required";
+      el.className = "status " + (ready ? "ready" : "warn");
+      document.getElementById("siteGateMessage").textContent = ready
+        ? "Site conditions confirmed. You can capture the openings below. Changing a required field will ask for confirmation again."
+        : missing.length ? "Before line capture, complete: " + missing.join(", ") + "."
+        : "Review the building type, existing material, wall and colour, then confirm. Imported values are not site confirmation.";
+      const btn = document.getElementById("confirmSiteBtn");
+      btn.disabled = missing.length > 0 || ready;
+      btn.textContent = ready ? "✓ Site confirmed" : "Confirm site details — start capturing";
+      document.querySelectorAll('#siteGrid [data-site]').forEach(input => {
+        input.classList.toggle('required-missing', FieldRules.siteKeys.includes(input.dataset.site) && !input.value && !input.closest('.hidden') && input.dataset.site !== 'customColourCode');
+      });
+      document.querySelectorAll('#lineBody input, #lineBody button, #editorCard input, #editorCard select, #editorCard textarea, #editorCard button').forEach(input => {
+        if (!ready) { if (!input.disabled) input.dataset.siteLocked = '1'; input.disabled = true; }
+        else if (input.dataset.siteLocked) { input.disabled = false; delete input.dataset.siteLocked; }
+      });
+      ['addLineBtn', 'useAllQuoteBtn', 'confirmAllBtn'].forEach(id => { document.getElementById(id).disabled = !ready; });
+    }
+    function requireSite() {
+      if (FieldRules.siteReady(state.site)) return true;
+      document.getElementById('siteGate').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      updateSiteStatus();
+      return false;
     }
 
     // _6 cascade: NEW BUILDING → WRAP all round; ENCLOSURE → NO-WRAP.
@@ -1377,7 +1417,7 @@
       const materialField = document.getElementById("materialField");
       const enclosureSelect = enclosureField.querySelector("select");
       enclosureField.classList.toggle("hidden", !isNew);
-      materialField.classList.toggle("hidden", isNew);
+      materialField.classList.remove("hidden");
       // pulled off the quote's "Ex:" line — flag until the rep confirms it
       materialField.classList.toggle(
         "from-quote",
@@ -1429,6 +1469,7 @@
       return /DOOR|STABLE|PALACE|VALENCIA|CLS-?250|HEAVY DUTY|VISTAFOLD|SLIDING FOLDING|PIVOT/i.test(l.product || "");
     }
     function needsDoorOperation(l) {
+      if (isDoorLine(l)) return true;
       const fam = (l.family || "").toLowerCase();
       if (["hinged", "vistafold", "pivot"].includes(fam)) return true;
       return /HINGED|STABLE|VISTAFOLD|FOLDING|PIVOT/i.test(l.product || "");
@@ -1498,6 +1539,7 @@
         .map((l, i) => `<tr data-i="${i}" class="${i === editingIndex ? "editing" : ""}">${rowHTML(l, i)}</tr>`)
         .join("");
       wireTable();
+      updateSiteStatus();
     }
 
     // Surgical row refresh — never rebuilds an element the user is typing in.
@@ -1534,6 +1576,7 @@
     }
 
     function setLineSize(i, f, val) {
+      if (!requireSite()) return;
       const l = state.lines[i];
       l[f] = val ? +val : null;
       l.size = l.width && l.height ? `${l.width} × ${l.height}` : "";
@@ -1546,6 +1589,7 @@
     }
 
     function setLineText(i, f, val) {
+      if (!requireSite()) return;
       const l = state.lines[i];
       if (!l) return;
       const clean = f === "ref" ? String(val || "").toUpperCase().trim() : String(val || "").trim();
@@ -1557,8 +1601,9 @@
     }
 
     function toggleConfirm(i) {
+      if (!requireSite()) return;
       const l = state.lines[i];
-      if (!l.sizeConfirmed && !(l.width && l.height)) return;
+      if (!l.sizeConfirmed && !(FieldRules.positive(l.width) && FieldRules.positive(l.height))) return;
       l.sizeConfirmed = !l.sizeConfirmed;
       save();
       refreshRowChrome(i);
@@ -1567,6 +1612,7 @@
     }
 
     function useQuoteSize(i) {
+      if (!requireSite()) return;
       const l = state.lines[i];
       if (!l.quoteWidth || !l.quoteHeight) return;
       l.width = l.quoteWidth;
@@ -1580,8 +1626,10 @@
     }
 
     function useAllQuoteSizes() {
+      if (!requireSite()) return;
       let changed = 0;
       state.lines.forEach((l) => {
+        if (l.width || l.height) return; // never overwrite site measurements
         if (!l.quoteWidth || !l.quoteHeight) return;
         l.width = l.quoteWidth;
         l.height = l.quoteHeight;
@@ -1600,10 +1648,11 @@
     }
 
     function confirmAllSizes() {
+      if (!requireSite()) return;
       let confirmed = 0;
       const missing = [];
       state.lines.forEach((l) => {
-        if (l.width && l.height) {
+        if (FieldRules.positive(l.width) && FieldRules.positive(l.height) && l.designSelected) {
           l.sizeConfirmed = true;
           confirmed++;
         } else {
@@ -1615,9 +1664,9 @@
       renderSummary();
       if (editingIndex >= 0) renderEditor();
       if (!confirmed) {
-        alert("No final sizes are available to confirm yet.");
+        alert("No picked designs with valid final sizes are available to confirm yet. Pick a design for each imported line first.");
       } else if (missing.length) {
-        alert(`Confirmed ${confirmed} line${confirmed === 1 ? "" : "s"}. Still missing final sizes for: ${missing.join(", ")}`);
+        alert(`Confirmed sizes for ${confirmed} line${confirmed === 1 ? "" : "s"}. Still needing a picked design or final sizes: ${missing.join(", ")}. Other line details must still be completed.`);
       }
     }
 
@@ -1676,14 +1725,16 @@
     function tallyFor(l) {
       const qty = l.qty || 1;
       const fam = (l.family || "").toLowerCase();
-      const blob = `${l.product || ""} ${l.code || ""} ${l.rawDescription || ""}`.toUpperCase();
+      const blob = `${l.product || ""} ${l.code || ""} ${l.config || ""} ${l.designSelected ? "" : l.rawDescription || ""}`.toUpperCase();
       const cfgTok = (blob.match(/\b([OX]{2,6})\b/) || [])[1] || "";
       const nPanel = +(blob.match(/(\d+)\s*PANEL/) || [])[1] || cfgTok.length || 0;
       const nLeaf = +(blob.match(/(\d+)\s*-?\s*L(?:EAF)?\b/) || [])[1] || 0;
       const t = { hinged: 0, windows: 0, palace: 0, folding: 0, sliding: 0, fixed: 0, other: 0 };
 
       // picker-set family is authoritative; quote imports fall back to text
-      if (fam === "vistafold" || /VISTAFOLD|FOLDING/.test(blob)) {
+      if (["elite", "knysna"].includes(fam)) {
+        t.sliding = (nPanel || 2) * qty;
+      } else if (fam === "vistafold" || /VISTAFOLD|FOLDING/.test(blob)) {
         t.folding = (nLeaf || nPanel || 3) * qty;
       } else if (fam === "multislide" || /PALACE|VALENCIA|CLS-?250|HEAVY DUTY|MULTI-?SLIDE|\bMS-\d/.test(blob)) {
         t.palace = (nPanel || 2) * qty;
@@ -1749,11 +1800,11 @@
       tracker.textContent = `${confirmed} of ${total} sizes confirmed`;
       tracker.className = "status " + (total && confirmed === total ? "ready" : "warn");
 
-      const allReady = total > 0 && open === 0;
+      const allReady = total > 0 && open === 0 && FieldRules.siteReady(state.site);
       document.getElementById("exportBtn").disabled = !allReady;
       document.getElementById("exportHeading").textContent = allReady
         ? "Export package — ready"
-        : `Export package — locked (${open} line${open === 1 ? "" : "s"} to complete)`;
+        : !FieldRules.siteReady(state.site) ? "Export locked — confirm site details first" : `Export package — locked (${open} line${open === 1 ? "" : "s"} to complete)`;
       renderTally();
     }
 
@@ -1767,6 +1818,7 @@
 
     // ---------- line editor (paper capture flow) ----------
     function openEditor(i) {
+      if (!requireSite()) return;
       editingIndex = i;
       document.querySelectorAll("#lineBody tr").forEach((tr) =>
         tr.classList.toggle("editing", +tr.dataset.i === i)
@@ -1825,13 +1877,21 @@
       document.getElementById("doorDecisionFields").classList.toggle("hidden", !needsDoorOperation(l));
       document.getElementById("edTypeName").textContent = lineProductTitle(l) || "Not set";
       document.getElementById("edTypeCode").textContent = l.code || "";
-      document.getElementById("edDiag").innerHTML = lineDiagHTML(l);
+      document.getElementById("edDiag").innerHTML = l.diagSVG || '<span class="label">Pick a window or door design</span>';
+      const quoteDrawing = document.getElementById("edQuoteDrawing");
+      quoteDrawing.replaceChildren();
+      if (/^data:image\/(png|jpeg);base64,/.test(l.quoteDiagPNG || '')) {
+        const img = document.createElement('img'); img.src = l.quoteDiagPNG; img.alt = 'Original quote drawing'; quoteDrawing.append(img);
+      } else quoteDrawing.textContent = 'No quote drawing available — refer to the original document.';
+      document.getElementById("edQuoteCaption").textContent = [l.quoteProduct || (!l.designSelected ? l.product : ''), l.quoteCode, l.quoteSize && 'Quote: ' + l.quoteSize].filter(Boolean).join(' · ');
+      document.getElementById("edChecklist").textContent = lineReady(l) ? '✓ Line ready' : 'Still to complete: ' + FieldRules.lineMissing(l, state.site).join(', ');
       document.getElementById("edQuoteSize").textContent =
         l.quoteSize ? `Quote: ${l.quoteSize}` : "No quote size";
       const cBtn = document.getElementById("edConfirm");
       cBtn.classList.toggle("done", !!l.sizeConfirmed);
       cBtn.textContent = l.sizeConfirmed ? "✓ Confirmed" : "Confirm size";
       cBtn.disabled = !l.sizeConfirmed && !(l.width && l.height);
+      updateSiteStatus();
     }
     function setVal(id, v) {
       const el = document.getElementById(id);
@@ -1896,10 +1956,12 @@
         const evt = el.tagName === "SELECT" ? "change" : "input";
         el.addEventListener(evt, (e) => {
           if (editingIndex < 0) return;
+          if (!requireSite()) return;
           fn(state.lines[editingIndex], e.target.value);
           save();
           refreshRowChrome(editingIndex);
           renderSummary();
+          document.getElementById('edChecklist').textContent = lineReady(state.lines[editingIndex]) ? '✓ Line ready' : 'Still to complete: ' + FieldRules.lineMissing(state.lines[editingIndex], state.site).join(', ');
         });
       };
       bind("edRoom", (l, v) => { l.location = v; });
@@ -1958,15 +2020,23 @@
 
     // ---------- picker round-trip ----------
     function openPicker(kind) {
+      if (!requireSite()) return;
       if (editingIndex < 0) return;
+      if (!save()) return;
       const l = state.lines[editingIndex];
-      localStorage.setItem(CTX_KEY, JSON.stringify({
+      try { localStorage.setItem(CTX_KEY, JSON.stringify({
         i: editingIndex,
         ref: l.ref || "",
         room: l.location || "",
         quoteW: l.quoteWidth || l.width || null,
         quoteH: l.quoteHeight || l.height || null,
-      }));
+        quoteDiagPNG: l.quoteDiagPNG || '', quoteProduct: l.quoteProduct || l.product || '', quoteCode: l.quoteCode || '',
+        glass: l.glass || '', customGlass: l.customGlass || '',
+        colour: l.colour || state.site.colour || '',
+        specialColour: l.specialColour || state.site.specialColour || '',
+        customColour: l.customColour || state.site.customColour || '',
+        customColourCode: l.customColourCode || state.site.customColourCode || '',
+      })); } catch (_) { alert('Not enough device storage to open the picker with its quote reference. Keep this page open.'); return; }
       location.href =
         kind === "door" ? "door-picker.html" :
         kind === "builder" ? "window-builder.html" :
@@ -1981,15 +2051,20 @@
       l.product = res.name || res.code || l.product;
       l.code = res.code || "";
       if (res.family) l.family = res.family;
+      l.system = res.system || '';
       // Window results always own the config slot (fix position or blank) so a
       // stale door config / old fix position can't linger on a re-picked line.
       if (res.kind === "window" || typeof res.config === "string") l.config = res.config || "";
-      if (res.handleSide) l.handleSide = res.handleSide;
-      if (res.openingDirection) l.openingDirection = res.openingDirection;
+      l.handleSide = res.handleSide || '';
+      l.openingDirection = res.openingDirection || '';
       if (res.glass) l.glass = res.glass;
-      if (res.customGlass) l.customGlass = res.customGlass;
+      l.customGlass = res.customGlass || '';
       if (res.colour) l.colour = res.colour;
       if (res.svg) l.diagSVG = res.svg;
+      l.designSelected = !!res.svg;
+      l.specialColour = res.specialColour || '';
+      l.customColour = res.customColour || '';
+      l.customColourCode = res.customColourCode || '';
       if (res.note && !(l.notes || "").includes(res.note)) {
         l.notes = (l.notes ? l.notes + "\n" : "") + res.note;
       }
@@ -2020,6 +2095,7 @@
     document.getElementById("useAllQuoteBtn").addEventListener("click", useAllQuoteSizes);
     document.getElementById("confirmAllBtn").addEventListener("click", confirmAllSizes);
     document.getElementById("addLineBtn").addEventListener("click", () => {
+      if (!requireSite()) return;
       state.lines.push(blankLine());
       save();
       renderTable();
@@ -2120,6 +2196,7 @@
     }
 
     async function exportPDF() {
+      if (!requireSite() || !state.lines.length) return;
       const open = state.lines.filter((l) => !lineReady(l));
       if (open.length) {
         alert("Cannot export yet. Complete: " + open.map((l) => l.ref || "?").join(", "));
@@ -2134,6 +2211,7 @@
     function handleSiteFieldChange(el) {
       const key = el.dataset.site;
       state.site[key] = el.value;
+      if (FieldRules.siteKeys.includes(key)) state.site.captureConfirmed = '';
 
       // keep any duplicate inputs for the same field (header ↔ site card) in sync
       document.querySelectorAll('.workspace [data-site="' + key + '"]').forEach((o) => {
@@ -2163,6 +2241,7 @@
       save();
       updateSiteStatus();
       renderJobTitle();
+      renderSummary();
       if (editingIndex >= 0) renderEditor(); // wrap auto-label follows site rule
     }
 
@@ -2171,6 +2250,13 @@
       el.addEventListener(evt, () => handleSiteFieldChange(el));
     });
 
+    document.getElementById('confirmSiteBtn').addEventListener('click', () => {
+      if (FieldRules.siteMissing(state.site).length) return;
+      state.site.captureConfirmed = FieldRules.fingerprint(state.site);
+      state.site.materialFromQuote = false;
+      save(); renderAll();
+      document.querySelector('.table-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
     // Yes/No toggles (e.g. Standard flats & angles) — not [data-site] inputs
     document.querySelectorAll(".toggle-opt[data-toggle]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -2213,5 +2299,6 @@
     // line context unconsumed until a manual refresh — force a real reload.
     window.addEventListener("pageshow", (e) => { if (e.persisted) location.reload(); });
   </script>
+  <div class="build-stamp">Field build · 2026-09-07 / field1</div>
 </body>
 </html>

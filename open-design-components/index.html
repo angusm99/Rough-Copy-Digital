@@ -152,6 +152,8 @@
       });
     }
   </script>
+  <link rel="stylesheet" href="field-ui.css?v=20260907-field1" />
+  <script src="field-rules.js?v=20260907-field1"></script>
 </head>
 <body>
 <div class="page">
@@ -323,7 +325,7 @@
     const lines = saved.lines || [];
     const unconfirmed = lines.filter(l => !l.sizeConfirmed).length;
     const typed = lines.filter(l => l.family || l.product).length;
-    const ready = lines.filter(l => l.sizeConfirmed && (l.family || l.product)).length;
+    const ready = lines.filter(l => !FieldRules.lineMissing(l, saved.site || {}).length).length;
 
     document.getElementById('statLines').textContent = lines.length;
     document.getElementById('statUnconfirmed').textContent = unconfirmed;
@@ -340,7 +342,9 @@
     const allConfirmed = lines.length > 0 && lines.every(l => l.sizeConfirmed);
     const allTyped = lines.length > 0 && lines.every(l => l.family || l.product);
     let statusClass = 's-draft', statusLabel = 'Draft';
-    if (lines.length > 0 && allConfirmed && allTyped) { statusClass = 's-ready'; statusLabel = 'Ready'; }
+    if (lines.length > 0 && ready === lines.length && FieldRules.siteReady(saved.site || {})) { statusClass = 's-ready'; statusLabel = 'Ready'; }
+    else if (!FieldRules.siteReady(saved.site || {})) { statusClass = 's-check'; statusLabel = 'Confirm site details'; }
+    else if (ready < lines.length) { statusClass = 's-check'; statusLabel = (lines.length - ready) + ' need review'; }
     else if (lines.length > 0 && unconfirmed > 0) { statusClass = 's-check'; statusLabel = unconfirmed + ' need size'; }
 
     document.getElementById('noJobMsg').style.display = 'none';
@@ -366,5 +370,6 @@
   }
 })();
 </script>
+  <div class="build-stamp">Field build · 2026-09-07 / field1</div>
 </body>
 </html>

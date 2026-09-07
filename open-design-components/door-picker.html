@@ -195,6 +195,9 @@
       });
     }
   </script>
+  <link rel="stylesheet" href="field-ui.css?v=20260907-field1" />
+  <script src="sliding-configs.js?v=20260907-field1"></script>
+  <script src="picker-reference.js?v=20260907-field1"></script>
 </head>
 <body>
   <div class="wrap">
@@ -409,16 +412,7 @@
     }
 
     function slidingSVG(panels, W, H) {
-      const paneW = 820;
-      const mmW = 2*D.FR + panels.length*paneW + (panels.length-1)*D.GAP;
-      const firstO = panels.indexOf('O');
-      let inner = '';
-      panels.forEach((p, i) => {
-        const x = D.FR + i*(paneW + D.GAP);
-        if (p === 'O') inner += doorPanel(x, paneW, { fixed: true });
-        else inner += doorPanel(x, paneW, { arrow: (firstO !== -1 && firstO < i) ? 'left' : 'right' });
-      });
-      return doorShellSVG(mmW, inner);
+      return SlidingConfigs.svg(panels.join(''), Math.max(1600, panels.length * 820), 2090);
     }
 
     function foldingSVG(leaves, W, H, activeIndex = 0) {
@@ -449,26 +443,9 @@
         { id:'SWG-LP-DA12', group:'Large Pane Swing', config:'DA', lock:'Centre', open:'Open in', code:'SWG-LP-DA12', label:'Large Pane Double Active 1200', style:'large-double', note:'Large pane double active swing door, 1200.' },
         { id:'SWG-LP-DA15', group:'Large Pane Swing', config:'DA', lock:'Centre', open:'Open in', code:'SWG-LP-DA15', label:'Large Pane Double Active 1500', style:'large-double', note:'Large pane double active swing door, 1500.' }
       ],
-      patio: [
-        { id: 'SL-2-OX', config: 'OX', lock: 'Left', open: 'Slide right', code: 'SL-2-OX', label: 'Patio Slider OX (2 panel)', panels: ['O', 'X'], svg: slidingSVG },
-        { id: 'SL-2-XO', config: 'XO', lock: 'Right', open: 'Slide left', code: 'SL-2-XO', label: 'Patio Slider XO (2 panel)', panels: ['X', 'O'], svg: slidingSVG },
-        { id: 'SL-3-OXX', config: 'OXX', lock: 'Right', open: 'Slide left', code: 'SL-3-OXX', label: 'Patio 3-Panel OXX', panels: ['O', 'X', 'X'], svg: slidingSVG },
-        { id: 'SL-3-XXO', config: 'XXO', lock: 'Left', open: 'Slide right', code: 'SL-3-XXO', label: 'Patio 3-Panel XXO', panels: ['X', 'X', 'O'], svg: slidingSVG },
-        { id: 'SL-4-OXXO', config: 'OXXO', lock: 'Centre', open: 'Bi-part', code: 'SL-4-OXXO', label: 'Patio 4-Panel OXXO', panels: ['O', 'X', 'X', 'O'], svg: slidingSVG },
-        { id: 'SL-6', config: '6-panel', lock: 'Custom', open: 'Custom', code: 'SL-6', label: 'Patio 6-Panel', panels: ['O', 'X', 'X', 'X', 'X', 'O'], svg: slidingSVG }
-      ],
-      multislide: [
-        { id: 'HDS-PAL-2-OX', group:'Palace Door', config: 'OX', lock: 'Right', open: 'Slide left', code: 'PAL-2-OX', label: 'Palace Door OX', brand: 'PALACE', panels: ['O', 'X'], svg: slidingSVG },
-        { id: 'HDS-PAL-2-XO', group:'Palace Door', config: 'XO', lock: 'Left', open: 'Slide right', code: 'PAL-2-XO', label: 'Palace Door XO', brand: 'PALACE', panels: ['X', 'O'], svg: slidingSVG },
-        { id: 'HDS-PAL-4-OXXO', group:'Palace Door', config: 'OXXO', lock: 'Centre', open: 'Bi-part', code: 'PAL-4-OXXO', label: 'Palace Door 4-Panel', brand: 'PALACE', panels: ['O', 'X', 'X', 'O'], svg: slidingSVG },
-        { id: 'HDS-VAL-2-OX', group:'Valencia', config: 'OX', lock: 'Right', open: 'Slide left', code: 'VAL-2-OX', label: 'Valencia OX', brand: 'VALENCIA', panels: ['O', 'X'], svg: slidingSVG },
-        { id: 'HDS-VAL-2-XO', group:'Valencia', config: 'XO', lock: 'Left', open: 'Slide right', code: 'VAL-2-XO', label: 'Valencia XO', brand: 'VALENCIA', panels: ['X', 'O'], svg: slidingSVG },
-        { id: 'HDS-VAL-3-OXX', group:'Valencia', config: 'OXX', lock: 'Right', open: 'Slide left', code: 'VAL-3-OXX', label: 'Valencia OXX', brand: 'VALENCIA', panels: ['O', 'X', 'X'], svg: slidingSVG },
-        { id: 'HDS-VAL-3-XXO', group:'Valencia', config: 'XXO', lock: 'Left', open: 'Slide right', code: 'VAL-3-XXO', label: 'Valencia XXO', brand: 'VALENCIA', panels: ['X', 'X', 'O'], svg: slidingSVG },
-        { id: 'HDS-CLS-2-OX', group:'CLS-250 Lift and Slide', config: 'OX', lock: 'Right', open: 'Slide left', code: 'CLS250-2-OX', label: 'CLS-250 OX', brand: 'CLS-250', panels: ['O', 'X'], svg: slidingSVG },
-        { id: 'HDS-CLS-2-XO', group:'CLS-250 Lift and Slide', config: 'XO', lock: 'Left', open: 'Slide right', code: 'CLS250-2-XO', label: 'CLS-250 XO', brand: 'CLS-250', panels: ['X', 'O'], svg: slidingSVG },
-        { id: 'HDS-CLS-3-OXX', group:'CLS-250 Lift and Slide', config: 'OXX', lock: 'Right', open: 'Slide left', code: 'CLS250-3-OXX', label: 'CLS-250 OXX', brand: 'CLS-250', panels: ['O', 'X', 'X'], svg: slidingSVG }
-      ],
+      // Filled from SlidingConfigs.layouts below so these systems cannot drift.
+      patio: [],
+      multislide: [],
       vistafold: [
         { id: 'VF-3L', group:'3 Panel', config: '3-panel', lock: 'Left', open: 'Stack right', code: 'VF-3L', label: 'Sliding Folding 3 Panel', leaves: 3, activeLeaf: 0, note:'Three-panel sliding folding door.' },
         { id: 'VF-4L', group:'4 Panel', config: '4-panel', lock: 'Left', open: 'Open out', code: 'VF-4L', label: 'Sliding Folding 4 Panel', leaves: 4, activeLeaf: 0, note:'Four-panel sliding folding door.' },
@@ -516,6 +493,20 @@
         { id:'HDSTAB-S-O-60', group:'Stable (HDSTAB)', config:'Full slats', lock:'Left', open:'Open out', code:'HDSTAB-S-O-60', label:'Stable Full Slats · Open Out · 60mm', style:'stableSlats', widthClass:'single', note:'SINGLE STABLE DOOR-FULL SLATS-OPEN OUT-60mm STILES.' }
       ]
     };
+
+    // A shared configuration set, with system identity kept explicit. Codes here
+    // are picker IDs, not a claim that every combination is a Bizman stock code.
+    DOORS.multislide = [
+      ['PAL', 'Palace Door', 'PALACE'], ['VAL', 'Valencia', 'VALENCIA'], ['CLS', 'CLS-250 Lift and Slide', 'CLS-250']
+    ].flatMap(([key, group, brand]) => SlidingConfigs.layouts.map(config => ({
+      id: `HDS-${key}-${config.length}-${config}`, code: `${key}-${config.length}-${config}`,
+      group, brand, label: `${group} ${config}`, config, panels: config.split(''),
+      lock: '', open: '', note: `${SlidingConfigs.describe(config)} — viewed from outside. Confirm handle / lead side and travel direction separately.`
+    })));
+    DOORS.patio = SlidingConfigs.layouts.map(config => ({
+      id: `SL-${config.length}-${config}`, code: `SL-${config.length}-${config}`, label: `Patio Slider ${config}`,
+      config, panels: config.split(''), lock: '', open: '', note: `${SlidingConfigs.describe(config)} — viewed from outside.`
+    }));
 
     let currentFamily = 'hinged';
     let selectedDoor = null;
@@ -625,6 +616,8 @@
     }
 
     function doorSVG(door, W, H) {
+      // Do not hand-mirror an O/X configuration: that would silently turn OX into XO.
+      if (door.panels) return slidingSVG(door.panels, W, H);
       const drawing = doorDrawingMarkupFor(door);
       if (drawing) return handMirror(drawing, door.handleSide);
       let out;
@@ -752,6 +745,7 @@
           glass: glassChoice.glass,
           customGlass: glassChoice.customGlass,
           colour: document.getElementById('colourField').value,
+          ...PickerReference.spec(),
           // thumbnail is mirrored to match the handing the rep just confirmed
           svg: doorSVG({ ...selectedDoor, handleSide }, 88, 64)
         }));

@@ -179,6 +179,9 @@
       });
     }
   </script>
+  <link rel="stylesheet" href="field-ui.css?v=20260907-field1" />
+  <script src="sliding-configs.js?v=20260907-field1"></script>
+  <script src="picker-reference.js?v=20260907-field1"></script>
 </head>
 <body>
 <div class="modal">
@@ -213,6 +216,8 @@
       <button class="tab" data-filter="tophung" onclick="setFilter('tophung')">Top Hung</button>
       <button class="tab" data-filter="sidehung" onclick="setFilter('sidehung')">Side Hung</button>
       <button class="tab" data-filter="fixed" onclick="setFilter('fixed')">Fixed</button>
+      <button class="tab" data-filter="elite" onclick="setFilter('elite')">Elite sliders</button>
+      <button class="tab" data-filter="knysna" onclick="setFilter('knysna')">Knysna sliders</button>
     </div>
   </nav>
 
@@ -414,6 +419,7 @@ function drawingMarkupFor(windowItem) {
 }
 
 function renderWindowGraphic(windowItem, width, height, couplingEdge) {
+  if (windowItem.panels) return SlidingConfigs.svg(windowItem.config, windowItem.W, windowItem.H);
   const drawing = drawingMarkupFor(windowItem);
   if (drawing) return drawing;
   return presetSVG(windowItem, width, height, couplingEdge);
@@ -422,6 +428,7 @@ function renderWindowGraphic(windowItem, width, height, couplingEdge) {
 // ── Window catalog — active picker baseline ────────────────────────────
 // family: tophung | sidehung | fixed
 const CATALOG = [
+  ...SlidingConfigs.windowPresets(),
   // ── Top Hung standards from 30.5mm casement sheet ───────────────────
   makeTopHung({ name:'Top Hung 600×600', code:'PT66', W:600, H:600, colW:[600], rowH:[600], types:['TOP'], sub:'Single vent • PT66' }),
   makeTopHung({ name:'Top Hung 600×900', code:'PT69', W:600, H:900, colW:[600], rowH:[450,450], types:['TOP','FIXED'], sub:'Top vent + fixed base • PT69' }),
@@ -681,7 +688,7 @@ function renderCatalog() {
 
   const label = {
     all:'All window types', tophung:'Top Hung — vents only',
-    sidehung:'Side Hung', fixed:'Fixed — full fix'
+    sidehung:'Side Hung', fixed:'Fixed — full fix', elite:'Elite sliders — O fixed / X sliding · outside view', knysna:'Knysna sliders — O fixed / X sliding · outside view'
   }[activeFilter] || 'All';
 
   document.getElementById('sectionLabel').textContent = label;
@@ -786,10 +793,12 @@ function useSelected() {
     localStorage.setItem('aw_picker_result', JSON.stringify({
       i: CTX.i, kind: 'window',
       code: w.code, name: w.name, family: w.family,
-      config: FIX_CONFIG_TEXT[fixPos] || '',
+      config: w.config || FIX_CONFIG_TEXT[fixPos] || '',
+      system: w.system || '',
       fixPosition: fixPos,
       glass: document.getElementById('glassField').value,
       colour: document.getElementById('colourField').value,
+      ...PickerReference.spec(),
       svg
     }));
   }
@@ -807,6 +816,7 @@ function useCard(code) {
 // ── Open the selected preset in the custom builder for modification ─────
 function openInBuilder() {
   const w = CATALOG.find(x => x.code === selectedCode);
+  if (w?.panels) { alert('Sliding layouts are edited in this picker. The custom builder currently supports casements and fixed frames only.'); return; }
   if (w && w.colW && w.rowH && w.types) {
     localStorage.setItem('aw_builder_seed', JSON.stringify({
       W: w.W, H: w.H, colW: w.colW, rowH: w.rowH, types: w.types, name: w.name

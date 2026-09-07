@@ -1,0 +1,38 @@
+/* Shared outdoor/tablet treatment. Quote sizes remain muted reference text. */
+@media screen {
+  :root { --accent: #f4c84d; --muted: #dbd8cd; --text: #f7f5ee;
+    --outline-gold: #b89332; --outline-gold-strong: #e7b941; --outline-gold-soft: #a88836; }
+  body { font-size: 16px; }
+  .label { font-size: 12px; letter-spacing: .075em; line-height: 1.5; }
+  input:not([type=file]), select, textarea, .input, .hdr-input, .line-text-input {
+    border: 2px solid #bd993d; font-size: 16px; min-height: 46px; color: #f7f5ee;
+  }
+  input::placeholder, textarea::placeholder { color: #bcb8ab; opacity: 1; }
+  button, .tab, .option, .card-use, .usequote, .confirm-btn { min-height: 44px; font-size: 14px; }
+  :is(input, select, textarea, button, a):focus-visible { outline: 3px solid #ffe083; outline-offset: 3px; }
+  .site-card, .table-card, .editor-card, .panel { border: 2px solid var(--outline-gold); }
+  .site-gate { margin: 12px 0; padding: 14px; border: 2px solid var(--accent); border-radius: 10px; line-height: 1.5; }
+  .site-gate p { margin: 0 0 10px; }
+  .required-missing { border-color: #ff936d !important; }
+  .review-checklist { padding: 12px; border-left: 4px solid var(--accent); line-height: 1.6; }
+  .quote-reference { margin: 0; padding: 12px; border: 2px solid #a88836; border-radius: 12px; background: #181a1d; }
+  .quote-reference img { width: 100%; max-height: 240px; object-fit: contain; background: white; }
+  .quote-reference figcaption { color: #dbd8cd; font-size: 14px; line-height: 1.5; }
+  .diagram-pair { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; width: 100%; }
+  .diagram-pair .editor-diag { width: 100%; height: 220px; }
+  .build-stamp { color: #dbd8cd; font-size: 12px; padding: 6px 12px; }
+  #lineTable { min-width: 900px; }
+  #lineTable .status { white-space: normal; line-height: 1.45; }
+  #lineTable input { min-width: 65px; }
+  .qref { color: #a8acb2; font-size: 13px; line-height: 1.5; }
+  input[readonly] { color: #d0cbbb; border-color: #81734d; }
+  button:disabled { cursor: not-allowed; opacity: .55; }
+  @media (min-width: 720px) and (max-width: 1100px) {
+    .has-quote-reference .content, .has-quote-reference .body { grid-template-columns: minmax(0,1fr) 285px; align-items: start; }
+    .has-quote-reference aside.side { position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; padding: 12px; min-width: 0; }
+    .has-quote-reference .quote-reference img { max-height: 160px; }
+    .has-quote-reference .cards, .has-quote-reference .group-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .has-quote-reference .panel-grid, .has-quote-reference .form-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) { .diagram-pair { grid-template-columns: 1fr; } }
+}

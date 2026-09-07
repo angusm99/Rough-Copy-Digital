@@ -22,6 +22,12 @@ Write-Host "Verifying Rough Copy Digital at $repoRoot"
 Write-Host ""
 
 $requiredFiles = @(
+    "index.html",
+    "field-rules.js",
+    "sliding-configs.js",
+    "picker-reference.js",
+    "field-ui.css",
+    "sw.js",
     "workspace.html",
     "quote-parser.js",
     "window-picker.html",
@@ -59,11 +65,21 @@ else {
     }
 
     $htmlFiles = @(
+        "index.html",
         "workspace.html",
         "window-picker.html",
         "window-builder.html",
         "door-picker.html"
     )
+
+    foreach ($module in @("field-rules.js", "sliding-configs.js", "picker-reference.js", "sw.js")) {
+        & $node.Source --check (Join-Path $activeDir $module)
+        if ($LASTEXITCODE -eq 0) { Add-Pass "$module syntax" }
+        else { Add-Failure "$module syntax" }
+    }
+    & $node.Source --test (Join-Path $repoRoot "tools/test-field-workflow.cjs")
+    if ($LASTEXITCODE -eq 0) { Add-Pass "field workflow regression tests" }
+    else { Add-Failure "field workflow regression tests" }
 
     $tempDir = Join-Path $env:TEMP "rough-copy-digital-verify"
     if (Test-Path -LiteralPath $tempDir) {
