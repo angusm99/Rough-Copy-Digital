@@ -309,10 +309,15 @@
       // sash border FIRST, then the midrail on top — drawing the midrail
       // underneath let the border's stroke cut it into two thin lines
       if (!opts.fixed) s += `<rect x="${x+15}" y="${y+15}" width="${w-30}" height="${h-30}" fill="none" stroke="${D.GOLD}" stroke-width="30"/>`;
-      if (opts.midrail !== false) s += `<rect x="${x}" y="${D.MID}" width="${w}" height="${D.MIDH}" fill="${D.GOLD}"/>`;
+      // Midrail is OPT-IN. It used to default on, which put a midrail on every
+      // sliding-folding, pivot and patio leaf — only the M codes have one.
+      if (opts.midrail === true) s += `<rect x="${x}" y="${D.MID}" width="${w}" height="${D.MIDH}" fill="${D.GOLD}"/>`;
       const midY = y + h / 2;
       const dash = `fill="none" stroke="#fff" stroke-width="8" stroke-dasharray="14,14" stroke-linecap="round" stroke-linejoin="round"`;
-      // chevron apex points at the hinge side (matches HD0921L convention)
+      // The apex points at the HANDLE side (Angus, 2026-09-07): "wherever the
+      // handle is, that's the way they must point". So on a double door both
+      // apexes point inward to the centre, where the handles meet.
+      // chevron:'left'/'right' names where the APEX sits.
       if (opts.chevron === 'left')  s += `<polyline points="${x+w-35},${y+35} ${x+35},${midY} ${x+w-35},${y+h-35}" ${dash}/>`;
       if (opts.chevron === 'right') s += `<polyline points="${x+35},${y+35} ${x+w-35},${midY} ${x+35},${y+h-35}" ${dash}/>`;
       if (opts.arrow) {
@@ -348,12 +353,12 @@
     //   PH parliament hinges (same leaf, different hardware)
     function leafOptsFor(style) {
       return {
-        glass:      { midrail: false },
-        midrail:    {},                      // doorPanel draws the midrail by default
-        parliament: { midrail: false },
-        slats:      { louvre: true, midrail: false },
+        glass:      {},
+        midrail:    { midrail: true },       // only the M codes carry a midrail
+        parliament: {},
+        slats:      { louvre: true },
         slatBottom: { slatBottom: true },
-        stableSlats:      { stable: true, louvre: true, midrail: false },
+        stableSlats:      { stable: true, louvre: true },
         stableSlatBottom: { stable: true, slatBottom: true },
         classic:  { bars: 2 },
         cape:     { bars: 3 },
@@ -367,11 +372,16 @@
     function hingedStyleSVG(style, widthClass, W, H) {
       const extras = leafOptsFor(style);
       if (widthClass === 'double') {
+        // Handles meet at the centre, and the apex follows the handle — so
+        // BOTH apexes point inward: left leaf's apex on its right, right
+        // leaf's apex on its left.
         const leafW = 800, mmW = 2*D.FR + 2*leafW + D.GAP;
         return doorShellSVG(mmW,
-          doorPanel(D.FR, leafW, { chevron: 'left', ...extras }) +
-          doorPanel(D.FR + leafW + D.GAP, leafW, { chevron: 'right', ...extras }));
+          doorPanel(D.FR, leafW, { chevron: 'right', ...extras }) +
+          doorPanel(D.FR + leafW + D.GAP, leafW, { chevron: 'left', ...extras }));
       }
+      // Single leaf is drawn handle-LEFT (apex left); handMirror() flips it
+      // when the rep confirms the handle on the right.
       const mmW = 890;
       return doorShellSVG(mmW, doorPanel(D.FR, mmW - 2*D.FR, { chevron: 'left', ...extras }));
     }
@@ -557,8 +567,11 @@
       // full-glass codes use the generated drawing, which has no midrail.
       'HDM-I-60':  'Anglo-HD0921L.svg',
       'HDM-O-60':  'Anglo-HD0921L.svg',
-      'HDDM-I-60': 'Anglo-DD1821.svg',
-      'HDDM-O-60': 'Anglo-DD1821.svg',
+      // ⚠️ Anglo-DD1521/DD1821 are NOT mapped: their chevron apexes sit at the
+      // OUTER edges, i.e. handles on the jambs. Per Angus the apex follows the
+      // handle and a double door's handles meet in the CENTRE, so those two
+      // hand-drawn files are drawn wrong and would teach reps the wrong thing.
+      // The doubles use the generated drawing until the assets are redrawn.
       // Patio Sliding
       'SL-2-OX':   'Anglo-PD1821OX.svg',
       'SL-2-XO':   'Anglo-PD1821XO.svg',
@@ -587,11 +600,10 @@
 
     // dispatch to the architectural drawing if available, else the generated SVG
     // Handing is a mirror, not a second drawing. Drawings are always viewed
-    // from OUTSIDE (canonical Anglo rule), so lock/handle on the RIGHT means
-    // hinges on the LEFT — which is how the base drawings are already drawn.
-    // Lock on the LEFT therefore mirrors horizontally.
+    // from OUTSIDE (canonical Anglo rule) and the chevron apex follows the
+    // HANDLE. Base single leaf is drawn handle-LEFT, so handle RIGHT mirrors.
     function handMirror(svg, handleSide) {
-      if (String(handleSide || '').toUpperCase() !== 'LEFT') return svg;
+      if (String(handleSide || '').toUpperCase() !== 'RIGHT') return svg;
       if (/^\s*<img/i.test(svg)) {
         return svg.replace('<img ', '<img style="transform:scaleX(-1)" ');
       }
