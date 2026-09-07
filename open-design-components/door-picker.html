@@ -297,6 +297,21 @@
         `<rect x="0" y="0" width="${mmW}" height="${D.H}" rx="4" fill="${D.GOLD}"/>${inner}</svg>`;
     }
 
+    // Slatted areas are SOLID in the frame colour, divided by black lines so
+    // the individual slats read, with an outline showing the panel's extent.
+    // (Angus, 2026-09-07 — the old version drew separate bars with glass
+    // showing between them, which is not how a slatted leaf looks.)
+    function slatPanel(x, y, w, h) {
+      if (w <= 0 || h <= 0) return '';
+      const PITCH = 105;
+      let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${D.GOLD}"`
+            + ` stroke="#000" stroke-width="6"/>`;
+      for (let ly = y + PITCH; ly < y + h - 4; ly += PITCH) {
+        s += `<line x1="${x}" y1="${ly}" x2="${x + w}" y2="${ly}" stroke="#000" stroke-width="5"/>`;
+      }
+      return s;
+    }
+
     // One glass panel. opts: fixed, midrail(false to skip), chevron l/r,
     // arrow l/r, bars, louvre, cladding, stable — leaf details in gold.
     function doorPanel(x, w, opts = {}) {
@@ -330,10 +345,7 @@
         s += `<rect x="${x}" y="${y + h*0.28}" width="${w}" height="12" fill="${D.GOLD}"/>`;
         s += `<rect x="${x}" y="${y + h*0.75}" width="${w}" height="12" fill="${D.GOLD}"/>`;
       }
-      if (opts.louvre) {
-        for (let ly = y + 120; ly < y + h - 60; ly += 140)
-          s += `<rect x="${x+30}" y="${ly}" width="${w-60}" height="26" fill="${D.GOLD}" opacity="0.85"/>`;
-      }
+      if (opts.louvre) s += slatPanel(x + 30, y + 30, w - 60, h - 60);
       if (opts.cladding) {
         const n = Math.max(3, Math.round(w / 150));
         for (let i = 1; i < n; i++)
@@ -341,9 +353,10 @@
       }
       if (opts.stable) s += `<rect x="${x}" y="${y + h*0.48}" width="${w}" height="50" fill="${D.GOLD}"/>`;
       // Bizman "BOTTOM SLATS" — slats below the midrail only, glass above.
+      // bottom slats: solid panel from just below the midrail to the bottom rail
       if (opts.slatBottom) {
-        for (let ly = D.MID + 110; ly < y + h - 60; ly += 140)
-          s += `<rect x="${x+30}" y="${ly}" width="${w-60}" height="26" fill="${D.GOLD}" opacity="0.85"/>`;
+        const top = D.MID + D.MIDH;
+        s += slatPanel(x + 30, top, w - 60, (y + h - 30) - top);
       }
       return s;
     }
