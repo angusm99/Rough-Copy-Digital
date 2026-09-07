@@ -81,6 +81,7 @@
       if (/\b(ox|xo)\b/.test(blob)) return { type: "Palace Sliding OX (2 panel)", tags };
       return { type: "Palace Sliding", tags };
     }
+    if (/pivot/.test(blob)) return { type: "Pivot Door", tags };
     if (/vistafold|fold/.test(blob)) return { type: "Vistafold", tags };
     if (/\bcas[\s.]*\d/.test(blob) || /casement/.test(blob)) return { type: "Casement", tags };
     if (/slat/.test(blob)) return { type: "Cladding Slats", tags };
