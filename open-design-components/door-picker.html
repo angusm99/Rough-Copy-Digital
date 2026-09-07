@@ -310,11 +310,26 @@
           s += `<rect x="${x + (w/n)*i - 5}" y="${y}" width="10" height="${h}" fill="${D.GOLD}" opacity="0.85"/>`;
       }
       if (opts.stable) s += `<rect x="${x}" y="${y + h*0.48}" width="${w}" height="50" fill="${D.GOLD}"/>`;
+      // Bizman "BOTTOM SLATS" — slats below the midrail only, glass above.
+      if (opts.slatBottom) {
+        for (let ly = D.MID + 110; ly < y + h - 60; ly += 140)
+          s += `<rect x="${x+30}" y="${ly}" width="${w-60}" height="26" fill="${D.GOLD}" opacity="0.85"/>`;
+      }
       return s;
     }
 
+    // Bizman treatment codes → how the leaf is drawn.
+    //   (none) FULL GLASS · M midrail · S full slats · SB/BS bottom slats
+    //   PH parliament hinges (same leaf, different hardware)
     function leafOptsFor(style) {
       return {
+        glass:      { midrail: false },
+        midrail:    {},                      // doorPanel draws the midrail by default
+        parliament: { midrail: false },
+        slats:      { louvre: true, midrail: false },
+        slatBottom: { slatBottom: true },
+        stableSlats:      { stable: true, louvre: true, midrail: false },
+        stableSlatBottom: { stable: true, slatBottom: true },
         classic:  { bars: 2 },
         cape:     { bars: 3 },
         louvre:   { louvre: true },
@@ -415,36 +430,42 @@
         { id: 'VF-8L', group:'8 Panel', config: '8-panel', lock: 'Left', open: 'Open out', code: 'VF-8L', label: 'Sliding Folding 8 Panel', leaves: 8, activeLeaf: 0, note:'Eight-panel sliding folding door. Typical widths 4800 to 7200.' },
         { id: 'VF-10L', group:'10 Panel', config: '10-panel', lock: 'Centre', open: 'Open out', code: 'VF-10L', label: 'Sliding Folding 10 Panel', leaves: 10, activeLeaf: 4, note:'Ten-panel sliding folding door. Typical widths 6000 to 7200.' }
       ],
+      // ── Hinged doors — Bizman template codes (C8135) ────────────────────
+      // Grammar: [HD|HDD|HDSTAB|PIV][treatment]-[I|O]-[60|90]
+      //   treatment: (none) full glass · M midrail · S full slats
+      //              SB/BS slat bottom · PH parliament hinges
+      //   I = open in · O = open out · 60/90 = stile width (mm)
+      // Sizes are Bizman nominals less 10mm (890 = 900, 1790 = 1800).
+      // Drawings are ALWAYS viewed from outside (canonical Anglo rule).
       hinged: [
-        { id:'H-LP-900', group:'Large Pane', config:'Single', lock:'Left', open:'Open in', code:'H-LP-900', label:'Large Pane Single 900', style:'large', widthClass:'single', note:'Large pane single hinged door, 900 wide.' },
-        { id:'H-LP-1000', group:'Large Pane', config:'Single', lock:'Left', open:'Open in', code:'H-LP-1000', label:'Large Pane Single 1000', style:'large', widthClass:'single', note:'Large pane single hinged door, 1000 wide.' },
-        { id:'H-LP-1200', group:'Large Pane', config:'Single', lock:'Left', open:'Open in', code:'H-LP-1200', label:'Large Pane Single 1200', style:'large', widthClass:'single', note:'Large pane single hinged door, 1200 wide.' },
-        { id:'H-LP-1600', group:'Large Pane', config:'Double', lock:'Centre', open:'Open in', code:'H-LP-1600', label:'Large Pane Double 1600', style:'large', widthClass:'double', note:'Large pane double hinged door, 1600 wide.' },
-        { id:'H-LP-1800', group:'Large Pane', config:'Double', lock:'Centre', open:'Open in', code:'H-LP-1800', label:'Large Pane Double 1800', style:'large', widthClass:'double', note:'Large pane double hinged door, 1800 wide.' },
+        // Single hinged — 900 x 2100
+        { id:'HD-I-60', group:'Single Hinged (HD)', config:'Full glass', lock:'Left', open:'Open in', code:'HD-I-60', label:'Single Hinged · Open In · 60mm', style:'glass', widthClass:'single', note:'SINGLE HINGED DOOR-OPEN IN-60mm STILES. 900x2100.' },
+        { id:'HD-O-60', group:'Single Hinged (HD)', config:'Full glass', lock:'Left', open:'Open out', code:'HD-O-60', label:'Single Hinged · Open Out · 60mm', style:'glass', widthClass:'single', note:'SINGLE HINGED DOOR-OPEN OUT-60mm STILES. 900x2100.' },
+        { id:'HD-O-90', group:'Single Hinged (HD)', config:'Full glass', lock:'Left', open:'Open out', code:'HD-O-90', label:'Single Hinged · Open Out · 90mm', style:'glass', widthClass:'single', note:'SINGLE HINGED DOOR-OPEN OUT-90mm STILES. 900x2100.' },
+        { id:'HDM-I-60', group:'Single Hinged (HD)', config:'Midrail', lock:'Left', open:'Open in', code:'HDM-I-60', label:'Single Hinged Midrail · Open In · 60mm', style:'midrail', widthClass:'single', note:'SINGLE HINGED DOOR MIDRAIL-OPEN IN-60mm STILES.' },
+        { id:'HDM-O-60', group:'Single Hinged (HD)', config:'Midrail', lock:'Left', open:'Open out', code:'HDM-O-60', label:'Single Hinged Midrail · Open Out · 60mm', style:'midrail', widthClass:'single', note:'SINGLE HINGED DOOR MIDRAIL-OPEN OUT-60mm STILES.' },
+        { id:'HDPH-O-60', group:'Single Hinged (HD)', config:'Parliament hinges', lock:'Left', open:'Open out', code:'HDPH-O-60', label:'Single Hinged Parliament · Open Out · 60mm', style:'parliament', widthClass:'single', note:'SINGLE HINGED DOOR-PARLIAMENT HINGES-OPEN OUT-60mm STILES.' },
+        { id:'HD-SB-I-60', group:'Single Hinged (HD)', config:'Slat bottom', lock:'Left', open:'Open in', code:'HD-SB-I-60', label:'Single Hinged Slat Bottom · Open In · 60mm', style:'slatBottom', widthClass:'single', note:'SINGLE HINGED DOOR-BOTTOM SLATS-OPEN IN-60mm STILES.' },
+        { id:'HD-S-I-60', group:'Single Hinged (HD)', config:'Full slats', lock:'Left', open:'Open in', code:'HD-S-I-60', label:'Single Hinged Full Slats · Open In · 60mm', style:'slats', widthClass:'single', note:'SINGLE HINGED DOOR-FULL SLATS-OPEN IN-60mm STILES.' },
+        { id:'HD-S-O-60', group:'Single Hinged (HD)', config:'Full slats', lock:'Left', open:'Open out', code:'HD-S-O-60', label:'Single Hinged Full Slats · Open Out · 60mm', style:'slats', widthClass:'single', note:'SINGLE HINGED DOOR-FULL SLATS-OPEN OUT-60mm STILES.' },
 
-        { id:'H-CL-900', group:'Classic', config:'Single', lock:'Left', open:'Open in', code:'H-CL-900', label:'Classic Single 900', style:'classic', widthClass:'single', note:'Classic single hinged door, 900 wide.' },
-        { id:'H-CL-1000', group:'Classic', config:'Single', lock:'Left', open:'Open in', code:'H-CL-1000', label:'Classic Single 1000', style:'classic', widthClass:'single', note:'Classic single hinged door, 1000 wide.' },
-        { id:'H-CL-1200', group:'Classic', config:'Single', lock:'Left', open:'Open in', code:'H-CL-1200', label:'Classic Single 1200', style:'classic', widthClass:'single', note:'Classic single hinged door, 1200 wide.' },
-        { id:'H-CL-1600', group:'Classic', config:'Double', lock:'Centre', open:'Open in', code:'H-CL-1600', label:'Classic Double 1600', style:'classic', widthClass:'double', note:'Classic double hinged door, 1600 wide.' },
-        { id:'H-CL-1800', group:'Classic', config:'Double', lock:'Centre', open:'Open in', code:'H-CL-1800', label:'Classic Double 1800', style:'classic', widthClass:'double', note:'Classic double hinged door, 1800 wide.' },
+        // Double hinged — 1800 x 2100
+        { id:'HDD-I-60', group:'Double Hinged (HDD)', config:'Full glass', lock:'Centre', open:'Open in', code:'HDD-I-60', label:'Double Hinged · Open In · 60mm', style:'glass', widthClass:'double', note:'DOUBLE HINGED DOOR-OPEN IN-60mm STILES. 1800x2100.' },
+        { id:'HDD-O-60', group:'Double Hinged (HDD)', config:'Full glass', lock:'Centre', open:'Open out', code:'HDD-O-60', label:'Double Hinged · Open Out · 60mm', style:'glass', widthClass:'double', note:'DOUBLE HINGED DOOR-OPEN OUT-60mm STILES. 1800x2100.' },
+        { id:'HDD-O-90', group:'Double Hinged (HDD)', config:'Full glass', lock:'Centre', open:'Open out', code:'HDD-O-90', label:'Double Hinged · Open Out · 90mm', style:'glass', widthClass:'double', note:'DOUBLE HINGED DOOR-OPEN OUT-90mm STILES.' },
+        { id:'HDDM-I-60', group:'Double Hinged (HDD)', config:'Midrail', lock:'Centre', open:'Open in', code:'HDDM-I-60', label:'Double Hinged Midrail · Open In · 60mm', style:'midrail', widthClass:'double', note:'DOUBLE HINGED DOOR MIDRAIL-OPEN IN-60mm STILES.' },
+        { id:'HDDM-O-60', group:'Double Hinged (HDD)', config:'Midrail', lock:'Centre', open:'Open out', code:'HDDM-O-60', label:'Double Hinged Midrail · Open Out · 60mm', style:'midrail', widthClass:'double', note:'DOUBLE HINGED DOOR MIDRAIL-OPEN OUT-60mm STILES.' },
+        { id:'HDDPH-O-60', group:'Double Hinged (HDD)', config:'Parliament hinges', lock:'Centre', open:'Open out', code:'HDDPH-O-60', label:'Double Hinged Parliament · Open Out · 60mm', style:'parliament', widthClass:'double', note:'DOUBLE HINGED DOOR-PARLIAMENT HINGES-OPEN OUT-60mm STILES.' },
+        { id:'HDD-SB-I-60', group:'Double Hinged (HDD)', config:'Slat bottom', lock:'Centre', open:'Open in', code:'HDD-SB-I-60', label:'Double Hinged Slat Bottom · Open In · 60mm', style:'slatBottom', widthClass:'double', note:'DOUBLE HINGED DOOR-BOTTOM SLATS-OPEN IN-60mm STILES.' },
+        { id:'HDD-SB-O-60', group:'Double Hinged (HDD)', config:'Slat bottom', lock:'Centre', open:'Open out', code:'HDD-SB-O-60', label:'Double Hinged Slat Bottom · Open Out · 60mm', style:'slatBottom', widthClass:'double', note:'DOUBLE HINGED DOOR-BOTTOM SLATS-OPEN OUT-60mm STILES.' },
+        { id:'HDD-S-I-60', group:'Double Hinged (HDD)', config:'Full slats', lock:'Centre', open:'Open in', code:'HDD-S-I-60', label:'Double Hinged Full Slats · Open In · 60mm', style:'slats', widthClass:'double', note:'DOUBLE HINGED DOOR-FULL SLATS-OPEN IN-60mm STILES.' },
+        { id:'HDD-S-O-60', group:'Double Hinged (HDD)', config:'Full slats', lock:'Centre', open:'Open out', code:'HDD-S-O-60', label:'Double Hinged Full Slats · Open Out · 60mm', style:'slats', widthClass:'double', note:'DOUBLE HINGED DOOR-FULL SLATS-OPEN OUT-60mm STILES.' },
 
-        { id:'H-CV-900', group:'Cape Victorian', config:'Single', lock:'Left', open:'Open in', code:'H-CV-900', label:'Cape Victorian Single 900', style:'cape', widthClass:'single', note:'Cape Victorian single hinged door, 900 wide.' },
-        { id:'H-CV-1000', group:'Cape Victorian', config:'Single', lock:'Left', open:'Open in', code:'H-CV-1000', label:'Cape Victorian Single 1000', style:'cape', widthClass:'single', note:'Cape Victorian single hinged door, 1000 wide.' },
-        { id:'H-CV-1200', group:'Cape Victorian', config:'Single', lock:'Left', open:'Open in', code:'H-CV-1200', label:'Cape Victorian Single 1200', style:'cape', widthClass:'single', note:'Cape Victorian single hinged door, 1200 wide.' },
-        { id:'H-CV-1600', group:'Cape Victorian', config:'Double', lock:'Centre', open:'Open in', code:'H-CV-1600', label:'Cape Victorian Double 1600', style:'cape', widthClass:'double', note:'Cape Victorian double hinged door, 1600 wide.' },
-        { id:'H-CV-1800', group:'Cape Victorian', config:'Double', lock:'Centre', open:'Open in', code:'H-CV-1800', label:'Cape Victorian Double 1800', style:'cape', widthClass:'double', note:'Cape Victorian double hinged door, 1800 wide.' },
-
-        { id:'H-ST-GL', group:'Stable', config:'Glass', lock:'Left', open:'Open in', code:'H-ST-GL', label:'Stable Glass 900', style:'stable', widthClass:'single', note:'Stable door with glazed upper and lower leaves.' },
-        { id:'H-ST-CL', group:'Stable', config:'Cladding', lock:'Left', open:'Open in', code:'H-ST-CL', label:'Stable Cladding 900', style:'cladding', widthClass:'single', note:'Stable-style cladding door.' },
-        { id:'H-ST-YL', group:'Stable', config:'Y-Louvre Inserts', lock:'Left', open:'Open in', code:'H-ST-YL', label:'Stable Y-Louvre 900', style:'louvre', widthClass:'single', note:'Stable door with Y-louvre inserts.' },
-        { id:'H-ST-HC', group:'Stable', config:'1/2 Glass & 1/2 Cladding', lock:'Left', open:'Open in', code:'H-ST-HC', label:'Stable Half Glass / Half Cladding 900', style:'classic', widthClass:'single', note:'Stable door with half glass and half cladding.' },
-
-        { id:'H-LV-900', group:'Louvre / Cladding', config:'Single Louvre', lock:'Left', open:'Open in', code:'H-LV-900', label:'Louvre Single 900', style:'louvre', widthClass:'single', note:'Single louvre door, 900 wide.' },
-        { id:'H-LV-1000', group:'Louvre / Cladding', config:'Single Louvre', lock:'Left', open:'Open in', code:'H-LV-1000', label:'Louvre Single 1000', style:'louvre', widthClass:'single', note:'Single louvre door, 1000 wide.' },
-        { id:'H-LV-1600', group:'Louvre / Cladding', config:'Double Louvre', lock:'Centre', open:'Open in', code:'H-LV-1600', label:'Louvre Double 1600', style:'louvre', widthClass:'double', note:'Double louvre door, 1600 wide.' },
-        { id:'H-LV-1800', group:'Louvre / Cladding', config:'Double Louvre', lock:'Centre', open:'Open in', code:'H-LV-1800', label:'Louvre Double 1800', style:'louvre', widthClass:'double', note:'Double louvre door, 1800 wide.' },
-        { id:'H-CLD-900', group:'Louvre / Cladding', config:'Single Cladding', lock:'Left', open:'Open in', code:'H-CLD-900', label:'Cladding Single 900', style:'cladding', widthClass:'single', note:'Single full cladding door, 900 wide.' },
-        { id:'H-CLD-1600', group:'Louvre / Cladding', config:'Double Cladding', lock:'Centre', open:'Open in', code:'H-CLD-1600', label:'Cladding Double 1600', style:'cladding', widthClass:'double', note:'Double full cladding door, 1600 wide.' }
+        // Stable doors — BS and SB both mean slat bottom (Bizman inconsistency)
+        { id:'HDSTAB-I-60', group:'Stable (HDSTAB)', config:'Stable glass', lock:'Left', open:'Open in', code:'HDSTAB-I-60', label:'Stable · Open In · 60mm', style:'stable', widthClass:'single', note:'SINGLE STABLE DOOR-OPEN IN-60mm STILES.' },
+        { id:'HDSTAB-O-60', group:'Stable (HDSTAB)', config:'Stable glass', lock:'Left', open:'Open out', code:'HDSTAB-O-60', label:'Stable · Open Out · 60mm', style:'stable', widthClass:'single', note:'SINGLE STABLE DOOR-OPEN OUT-60mm STILES.' },
+        { id:'HDSTAB-BS-O-60', group:'Stable (HDSTAB)', config:'Slat bottom', lock:'Left', open:'Open out', code:'HDSTAB-BS-O-60', label:'Stable Slat Bottom · Open Out · 60mm', style:'stableSlatBottom', widthClass:'single', note:'SINGLE STABLE DOOR-BOTTOM SLATS-OPEN OUT-60mm STILES.' },
+        { id:'HDSTAB-S-O-60', group:'Stable (HDSTAB)', config:'Full slats', lock:'Left', open:'Open out', code:'HDSTAB-S-O-60', label:'Stable Full Slats · Open Out · 60mm', style:'stableSlats', widthClass:'single', note:'SINGLE STABLE DOOR-FULL SLATS-OPEN OUT-60mm STILES.' }
       ]
     };
 
@@ -504,12 +525,16 @@
     // an asset wins when present, otherwise we fall back to the generated SVG.
     const DOOR_DRAWING_BASE = 'assets/architectural-doors/';
     const DOOR_DRAWING_ASSETS = {
-      // Hinged — Large Pane (full-glass gold-frame style)
-      'H-LP-900':  'Anglo-HD0921L.svg',
-      'H-LP-1000': 'Anglo-HD0921L.svg',
-      'H-LP-1200': 'Anglo-HD0921L.svg',
-      'H-LP-1600': 'Anglo-DD1521.svg',   // double-leaf hinged
-      'H-LP-1800': 'Anglo-DD1821.svg',   // double-leaf hinged
+      // Hinged — full-glass singles/doubles now keyed on Bizman codes.
+      // The hand-drawn HD/DD assets are full-glass leaves, so they only map
+      // onto the plain (no-treatment) codes; midrail/slat/parliament
+      // variants fall through to the generated drawing.
+      'HD-I-60':  'Anglo-HD0921L.svg',
+      'HD-O-60':  'Anglo-HD0921L.svg',
+      'HD-O-90':  'Anglo-HD0921L.svg',
+      'HDD-I-60': 'Anglo-DD1821.svg',
+      'HDD-O-60': 'Anglo-DD1821.svg',
+      'HDD-O-90': 'Anglo-DD1821.svg',
       // Patio Sliding
       'SL-2-OX':   'Anglo-PD1821OX.svg',
       'SL-2-XO':   'Anglo-PD1821XO.svg',
@@ -537,13 +562,28 @@
     }
 
     // dispatch to the architectural drawing if available, else the generated SVG
+    // Handing is a mirror, not a second drawing. Drawings are always viewed
+    // from OUTSIDE (canonical Anglo rule), so lock/handle on the RIGHT means
+    // hinges on the LEFT — which is how the base drawings are already drawn.
+    // Lock on the LEFT therefore mirrors horizontally.
+    function handMirror(svg, handleSide) {
+      if (String(handleSide || '').toUpperCase() !== 'LEFT') return svg;
+      if (/^\s*<img/i.test(svg)) {
+        return svg.replace('<img ', '<img style="transform:scaleX(-1)" ');
+      }
+      return svg.replace(/^(<svg[^>]*>)/i, '$1<g transform="scale(-1,1)" transform-origin="center">')
+                .replace(/<\/svg>\s*$/i, '</g></svg>');
+    }
+
     function doorSVG(door, W, H) {
       const drawing = doorDrawingMarkupFor(door);
-      if (drawing) return drawing;
-      if (door.panels) return slidingSVG(door.panels, W, H);
-      if (door.leaves) return foldingSVG(door.leaves, W, H, door.activeLeaf || 0);
-      if (door.family === 'pivot') return pivotDoorSVG(door.style && door.style.startsWith('classic') ? 'classic' : 'large', W, H);
-      return hingedStyleSVG(door.style || 'large', door.widthClass || 'single', W, H);
+      if (drawing) return handMirror(drawing, door.handleSide);
+      let out;
+      if (door.panels) out = slidingSVG(door.panels, W, H);
+      else if (door.leaves) out = foldingSVG(door.leaves, W, H, door.activeLeaf || 0);
+      else if (door.family === 'pivot') out = pivotDoorSVG(door.style || 'glass', W, H);
+      else out = hingedStyleSVG(door.style || 'glass', door.widthClass || 'single', W, H);
+      return handMirror(out, door.handleSide);
     }
 
     function renderCatalog(family) {
@@ -663,7 +703,8 @@
           glass: glassChoice.glass,
           customGlass: glassChoice.customGlass,
           colour: document.getElementById('colourField').value,
-          svg: doorSVG(selectedDoor, 88, 64)
+          // thumbnail is mirrored to match the handing the rep just confirmed
+          svg: doorSVG({ ...selectedDoor, handleSide }, 88, 64)
         }));
       }
       localStorage.removeItem('aw_picker_ctx');

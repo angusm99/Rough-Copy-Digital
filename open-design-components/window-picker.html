@@ -473,7 +473,11 @@ const CATALOG = [
   makeTopHung({ name:'Top Hung 2400×600 (Twin Side)', code:'PTT246', W:2400, H:600, colW:[600,1200,600], rowH:[600], types:['TOP','FIXED','TOP'], sub:'Twin side vents + centre fixed • PTT246' }),
   makeTopHung({ name:'Top Hung 2400×900', code:'PT249', W:2400, H:900, colW:[1200,1200], rowH:[450,450], types:['TOP','FIXED','FIXED','FIXED'], sub:'Top vent + wide fixed • PT249' }),
   makeTopHung({ name:'Top Hung 2400×900 (Twin Side)', code:'PTT249', W:2400, H:900, colW:[600,1200,600], rowH:[450,450], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Twin side vents + centre fixed • PTT249' }),
-  makeTopHung({ name:'Top Hung 2400×1200', code:'PTT2412', W:2400, H:1200, colW:[1200,1200], rowH:[600,600], types:['TOP','FIXED','TOP','FIXED'], sub:'Double vent stack + wide fixed • PTT2412' }),
+  // Proportions measured off the hand-drawn Anglo-PTT2412.svg: vent stack is
+  // ~900 of the 2400, fixed ~1500. (The real drawing's fixed is one undivided
+  // pane; the grid model splits it per row — cosmetic only, and the hand-drawn
+  // asset is what actually renders for this code.)
+  makeTopHung({ name:'Top Hung 2400×1200', code:'PTT2412', W:2400, H:1200, colW:[900,1500], rowH:[600,600], types:['TOP','FIXED','TOP','FIXED'], sub:'Double vent stack + wide fixed • PTT2412' }),
   makeTopHung({ name:'Top Hung 2400×1200 (Four Vent)', code:'P4T2412', W:2400, H:1200, colW:[600,1200,600], rowH:[600,600], types:['TOP','FIXED','TOP','TOP','FIXED','TOP'], sub:'Four vents with centre fixed • P4T2412' }),
   makeTopHung({ name:'Top Hung 2400×1500', code:'PTT2415', W:2400, H:1500, colW:[1200,1200], rowH:[500,500,500], types:['TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Stacked vents + wide fixed • PTT2415' }),
   makeTopHung({ name:'Top Hung 2400×1500 (Four Vent)', code:'P4T2415', W:2400, H:1500, colW:[600,1200,600], rowH:[500,500,500], types:['TOP','FIXED','TOP','TOP','FIXED','TOP','FIXED','FIXED','FIXED'], sub:'Four vents with fixed base • P4T2415' }),
