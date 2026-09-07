@@ -1,0 +1,12 @@
+{
+  "name": "Anglo Windows — Digital Rough Copy",
+  "short_name": "Rough Copy",
+  "start_url": "workspace.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1012",
+  "theme_color": "#c29b27",
+  "icons": [
+    { "src": "assets/brand/anglo-logo-gold.png", "sizes": "192x192", "type": "image/png", "purpose": "any" }
+  ]
+}
