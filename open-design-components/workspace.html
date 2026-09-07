@@ -277,9 +277,15 @@
       background: color-mix(in oklab, var(--surface) 72%, var(--surface-3));
       border: 1px solid var(--outline-gold-strong);
     }
-    #enclosureField.needs-selection select {
+    #enclosureField.needs-selection select,
+    #materialField.from-quote select {
       border-color: color-mix(in oklab, var(--accent) 68%, var(--border));
       box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 36%, transparent);
+    }
+    /* pulled off the quote — reference only until the rep confirms it on site */
+    #materialField.from-quote .label::after {
+      content: " — from quote, confirm";
+      color: var(--accent);
     }
     .hidden { display: none !important; }
 
@@ -709,7 +715,7 @@
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>');
     }
   </script>
-  <script src="quote-parser.js"></script>
+  <script src="quote-parser.js?v=20260907"></script>
   <script>
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";
@@ -1174,11 +1180,14 @@
 
     function siteFromJob(j, lines) {
       const jt = (j.jobType || "").toUpperCase();
+      // older quotes: "EX WOOD TO WHITE ALU" in the scope line.
+      // newer quotes: "Ex: Wood - White Alu", parsed into j.material.
       const material =
         /EX\s*WOOD/.test(jt) ? "EX WOOD" :
         /EX\s*STEEL/.test(jt) ? "EX STEEL" :
         /EX\s*ALU/.test(jt) ? "EX ALU" :
-        /EX\s*NEW/.test(jt) ? "NEW OPENING" : "";
+        /EX\s*NEW/.test(jt) ? "NEW OPENING" :
+        (j.material || "");
       // site colour: standard name in the scope line, else derive from the
       // line colours (special powder-coat codes -> SPECIAL)
       const colourM = jt.match(/TO\s+(WHITE|BRONZE|CHARCOAL|BLACK|SILVER)/);
@@ -1218,6 +1227,9 @@
       // quote pre-fills site details; rep completes the rest on site
       const fromQuote = siteFromJob(parsed.job, parsed.lines);
       SITE_FIELDS.forEach((f) => { if (fromQuote[f]) state.site[f] = fromQuote[f]; });
+      // Material comes off the quote's "Ex:" line — pre-fill it, but keep it
+      // flagged until the rep confirms what is actually on site.
+      state.site.materialFromQuote = !!fromQuote.material;
       // A fresh import is a new job — refresh the Project/site line to the new
       // quote project/site (rep can type an actual site address over it).
       state.site.project = fromQuote.project || fromQuote.address || "";
@@ -1355,6 +1367,11 @@
       const enclosureSelect = enclosureField.querySelector("select");
       enclosureField.classList.toggle("hidden", !isNew);
       materialField.classList.toggle("hidden", isNew);
+      // pulled off the quote's "Ex:" line — flag until the rep confirms it
+      materialField.classList.toggle(
+        "from-quote",
+        !!state.site.materialFromQuote && !!state.site.material
+      );
 
       if (!isNew) {
         state.site.enclosure = "";
@@ -2111,6 +2128,12 @@
       document.querySelectorAll('.workspace [data-site="' + key + '"]').forEach((o) => {
         if (o !== el && o.value !== el.value) o.value = el.value;
       });
+
+      // the rep touching Material is the confirmation — drop the quote flag
+      if (key === "material") {
+        state.site.materialFromQuote = false;
+        syncSiteFields();
+      }
 
       if (key === "building") {
         if (el.value !== "NEW") state.site.enclosure = "";

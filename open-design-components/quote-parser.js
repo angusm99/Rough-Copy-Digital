@@ -1,6 +1,7 @@
 /* ============================================================
    Anglo Windows — Bizman Quotation Parser
-   Parses text extracted from a Bizman 6.3.x "Supply and Fit"
+   Parses text extracted from Bizman 6.3.x-6.5.x "Supply and Fit" /
+   "Supply only"
    quotation PDF into structured job + line data for the
    Digital Rough Copy.
 
@@ -162,12 +163,26 @@
       }
     }
 
+    // existing material: newer Bizman headers carry "Ex: Wood - White Alu"
+    // (older ones used "EX WOOD TO WHITE ALU", which the jobType scan below
+    // still handles). Maps the FROM side onto the site Material options.
+    // Reference only — the rep must confirm it on site.
+    let material = "";
+    const exLine = get(/(?:^|\n)\s*Ex:\s*([^\n]+)/i);
+    if (exLine) {
+      const from = exLine.split(/\s+-\s+/)[0] || exLine;
+      if (/\bnew\b/i.test(from)) material = "NEW OPENING";
+      else if (/wood|timber/i.test(from)) material = "EX WOOD";
+      else if (/steel/i.test(from)) material = "EX STEEL";
+      else if (/alu/i.test(from)) material = "EX ALU";
+    }
+
     // job type / scope: header-region line describing the work —
     // "EX WOOD TO WHITE ALU SUPPLY AND INSTALL" or "- EX NEW TO PEBBLE GREY - …"
     let jobType = "";
     for (const l of header) {
       const t = l.trim();
-      if (/Supply and Fit:/i.test(t)) continue;
+      if (/Supply (?:and Fit|only|& Deliver):/i.test(t)) continue;
       if (/supply\s*(and|&)?\s*(install|fit|only)/i.test(t) || /\bEX\s+\w+.*\bTO\s+/i.test(t)) {
         jobType = t.replace(/^[-•\s]+/, "").trim();
         break;
@@ -307,6 +322,7 @@
 
     return {
       jobType,
+      material,
       headerNotes,
       address,
       quoteRef,
@@ -338,7 +354,7 @@
     // anchor on every "Supply and Fit:" occurrence
     const anchors = [];
     lines.forEach((l, i) => {
-      if (/Supply and Fit:/i.test(l)) anchors.push(i);
+      if (/Supply (?:and Fit|only|& Deliver):/i.test(l)) anchors.push(i);
     });
 
     // a Bizman "table row" header: "<CODE> <QTY> Set R <unit> R <total>"
@@ -352,7 +368,7 @@
         const t = lines[j].trim();
         if (!t || isJunk(t) || isMoney(t)) continue;
         if (qtyOnlyRe.test(t) || rowRe.test(t)) continue;
-        if (/Supply and Fit:|Overall\s*size:/i.test(t)) continue;
+        if (/Supply (?:and Fit|only|& Deliver):|Overall\s*size:/i.test(t)) continue;
         return t;
       }
       return "";
@@ -405,8 +421,8 @@
 
       // ---- description: "Supply and Fit:" up to "Overall size:" -----
       const descM = blockText.replace(/\n/g, " ")
-        .match(/Supply and Fit:\s*(.*?)\s*(?:TOP|BOTTOM)?\s*Overall\s*size:/i);
-      const desc = (descM ? descM[1] : supplyLine.replace(/.*Supply and Fit:\s*/i, ""))
+        .match(/Supply (?:and Fit|only|& Deliver):\s*(.*?)\s*(?:TOP|BOTTOM)?\s*Overall\s*size:/i);
+      const desc = (descM ? descM[1] : supplyLine.replace(/.*Supply (?:and Fit|only|& Deliver):\s*/i, ""))
         .replace(/\s+/g, " ").trim();
 
       let { type, tags } = productType(desc);
@@ -426,7 +442,7 @@
       for (let j = 1; j < blockLines.length; j++) {
         const t = blockLines[j].trim();
         if (!t || isMoney(t) || isQty(t)) continue;
-        if (/Supply and Fit:|Overall\s*size:/i.test(t)) continue;
+        if (/Supply (?:and Fit|only|& Deliver):|Overall\s*size:/i.test(t)) continue;
         // colour merged into the Windload row ("WHITE Windload: 1000 Pa …")
         if (/Windload/i.test(t)) {
           const c = t.split(/Windload/i)[0].trim();
