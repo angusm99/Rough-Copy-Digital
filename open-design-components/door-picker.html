@@ -536,16 +536,15 @@
     // an asset wins when present, otherwise we fall back to the generated SVG.
     const DOOR_DRAWING_BASE = 'assets/architectural-doors/';
     const DOOR_DRAWING_ASSETS = {
-      // Hinged — full-glass singles/doubles now keyed on Bizman codes.
-      // The hand-drawn HD/DD assets are full-glass leaves, so they only map
-      // onto the plain (no-treatment) codes; midrail/slat/parliament
-      // variants fall through to the generated drawing.
-      'HD-I-60':  'Anglo-HD0921L.svg',
-      'HD-O-60':  'Anglo-HD0921L.svg',
-      'HD-O-90':  'Anglo-HD0921L.svg',
-      'HDD-I-60': 'Anglo-DD1821.svg',
-      'HDD-O-60': 'Anglo-DD1821.svg',
-      'HDD-O-90': 'Anglo-DD1821.svg',
+      // Hinged, keyed on Bizman codes.
+      // NOTE: every hand-drawn HD/DD asset carries a gold band at y=1170 on
+      // each leaf — that is a MIDRAIL, so these files are HDM/HDDM doors, not
+      // full glass. They are mapped onto the M codes accordingly; the plain
+      // full-glass codes use the generated drawing, which has no midrail.
+      'HDM-I-60':  'Anglo-HD0921L.svg',
+      'HDM-O-60':  'Anglo-HD0921L.svg',
+      'HDDM-I-60': 'Anglo-DD1821.svg',
+      'HDDM-O-60': 'Anglo-DD1821.svg',
       // Patio Sliding
       'SL-2-OX':   'Anglo-PD1821OX.svg',
       'SL-2-XO':   'Anglo-PD1821XO.svg',
