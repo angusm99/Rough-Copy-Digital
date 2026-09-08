@@ -179,9 +179,9 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260907-field1" />
-  <script src="sliding-configs.js?v=20260907-field1"></script>
-  <script src="picker-reference.js?v=20260907-field1"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field3" />
+  <script src="sliding-configs.js?v=20260908-field3"></script>
+  <script src="picker-reference.js?v=20260908-field3"></script>
 </head>
 <body>
 <div class="modal">
@@ -291,7 +291,7 @@ function presetSVG(p, W, H, couplingEdge) {
   const GAP = 14;       // gold gap between panes (mullion/transom)
   const SASH = 22;      // sash inner gold border
   const GOLD = '#ffcc00', GLASS = '#0f1012';
-  const TINT_S = 'rgba(163,224,163,0.28)', TINT_F = 'rgba(163,210,224,0.28)';
+  const TINT_S = 'rgba(40,100,180,0.60)', TINT_F = 'rgba(40,100,180,0.60)';
   const OPEN = 'rgba(255,255,255,0.6)';
   let colXs=[0]; p.colW.forEach(w=>colXs.push(colXs[colXs.length-1]+w));
   let rowYs=[0]; p.rowH.forEach(h=>rowYs.push(rowYs[rowYs.length-1]+h));
@@ -622,6 +622,12 @@ const CATALOG = [
     group:'Side Hung - Twin sashes', colW:[600,1200,600], rowH:[1200,600], types:['SIDE','FIXED','SIDE','FIXED','FIXED','FIXED'],
     sub:'Tall twin sashes over base • 2400×1800', note:'Tall twin side-hung sashes with wide centre fixed and deeper base band.' }),
   // ── Fixed — full fix presets ─────────────────────────────────────────
+  ...[[3,2],[1,4],[4,1]].map(([cols,rows]) => makeGridPreset({
+    name: 'Fix '+cols+'×'+rows, code:'FIX-'+cols+'X'+rows, W:cols*600, H:rows*600, family:'fixed',
+    group:'Full fix presets', colW:Array(cols).fill(600), rowH:Array(rows).fill(600),
+    types:Array(cols*rows).fill('FIXED'), sub:cols+' columns × '+rows+' rows',
+    note:'Full fix. Columns × rows; confirm final size and coupling edge on site.'
+  })),
   // Panes-only fixes. The Fix position selector (Toplight / Sublight /
   // Sidelight) marks the stronger coupling mullion as a red edge line:
   // toplight = red below, sublight = red above, sidelight = red left/right.

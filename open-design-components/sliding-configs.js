@@ -37,8 +37,8 @@
       if (p === 'X') {
         s += `<rect x="${x + frame * .5}" y="${frame * 1.4}" width="${pw - frame}" height="${ph - frame * .8}" fill="none" stroke="#d7ad35" stroke-width="${frame * .22}"/>`;
       }
-      // O/X labels avoid inventing a stacking/travel direction for XXX/XXXX.
-      s += `<text x="${x + pw / 2}" y="${H / 2}" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="${Math.min(pw * .25, ph * .22)}" font-weight="700">${p}</text></g>`;
+      // Sash outlines distinguish sliding panels; O/X remains in the title, not the drawing.
+      s += '</g>';
     });
     return s + '</svg>';
   }

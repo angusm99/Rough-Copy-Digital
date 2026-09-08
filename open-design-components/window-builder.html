@@ -158,6 +158,7 @@
     }
     .legend { display: grid; gap: 7px; font-size: 13px; }
     .legend span { display: inline-block; width: 13px; height: 13px; border-radius: 3px; margin-right: 8px; vertical-align: -2px; }
+    .legend .swatch { width: 16px; height: 16px; margin-right: 8px; vertical-align: -3px; border-radius: 3px; }
     .spec {
       font-family: var(--font-mono);
       font-size: 11px;
@@ -188,8 +189,8 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260907-field1" />
-  <script src="picker-reference.js?v=20260907-field1"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field3" />
+  <script src="picker-reference.js?v=20260908-field3"></script>
 </head>
 <body>
 <div class="modal">
@@ -251,10 +252,10 @@
     <div class="tool-group" style="margin-left:auto">
       <span class="label">Tap a cell to cycle its type</span>
       <div class="legend" style="display:flex;gap:14px">
-        <small><span style="background:#3a6bc2"></span>Fixed</small>
-        <small><span style="background:#2e9e68"></span>Top hung</small>
-        <small><span style="background:#2e9e68"></span>Side hung</small>
-        <small><span style="background:#7a5ea8"></span>Toplight</small>
+        <small><svg class="swatch" viewBox="0 0 16 16" aria-hidden="true"><rect x="0" y="0" width="16" height="16" fill="#0d1319"/><rect x="0" y="0" width="16" height="16" fill="rgba(40,100,180,0.60)" stroke="#d0ae62" stroke-width="1.6"/></svg>Fixed</small>
+        <small><svg class="swatch" viewBox="0 0 16 16" aria-hidden="true"><rect x="0" y="0" width="16" height="16" fill="#0d1319"/><rect x="0" y="0" width="16" height="16" fill="rgba(40,100,180,0.60)" stroke="#d0ae62" stroke-width="1.6"/><path d="M3 4 L13 4 L8 13 Z" fill="none" stroke="#fff" stroke-width="1.4" stroke-dasharray="2 2" stroke-linejoin="round"/></svg>Top hung</small>
+        <small><svg class="swatch" viewBox="0 0 16 16" aria-hidden="true"><rect x="0" y="0" width="16" height="16" fill="#0d1319"/><rect x="0" y="0" width="16" height="16" fill="rgba(40,100,180,0.60)" stroke="#d0ae62" stroke-width="1.6"/><path d="M4 3 L13 8 L4 13 Z" fill="none" stroke="#fff" stroke-width="1.4" stroke-dasharray="2 2" stroke-linejoin="round"/></svg>Side hung</small>
+        <small><svg class="swatch" viewBox="0 0 16 16" aria-hidden="true"><rect x="0" y="0" width="16" height="16" fill="#0d1319"/><rect x="0" y="0" width="16" height="16" fill="rgba(40,100,180,0.60)" stroke="#d0ae62" stroke-width="1.6"/><path d="M2 14 L7 2 M7 14 L12 2 M12 14 L16 4" fill="none" stroke="#7fa8e0" stroke-width="1.1" opacity=".8"/></svg>Toplight</small>
       </div>
     </div>
   </nav>
@@ -296,9 +297,9 @@
 // ── colours match rough-copy-digital_6 WB_COLOURS ─────────────────────────
 const CLR = {
   FIXED:'#3a6bc2',
-  TOP:'#2e9e68',
-  SIDE:'#2e9e68',
-  TOPLIGHT:'#7a5ea8',
+  TOP:'#3a6bc2',
+  SIDE:'#3a6bc2',
+  TOPLIGHT:'#3a6bc2',
   MULLION:'#3a6bc2',
   FRAME:'#f5d13a'
 };
@@ -449,18 +450,18 @@ function drawSVG(W, H, interactive) {
     const gh = Math.max(2, h - profile * 2);
     s += `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" fill="${fillClr}12" stroke="none"/>`;
     s += `<rect x="${gx}" y="${gy}" width="${gw}" height="${gh}" fill="#0d1319" stroke="#d0ae62" stroke-width="${Math.max(.8, profile * .16)}"/>`;
-    s += `<rect x="${gx + 1}" y="${gy + 1}" width="${Math.max(1, gw - 2)}" height="${Math.max(1, gh - 2)}" fill="${fillClr}18" stroke="#1b242b" stroke-width="${Math.max(.6, profile * .12)}"/>`;
+    s += `<rect x="${gx + 1}" y="${gy + 1}" width="${Math.max(1, gw - 2)}" height="${Math.max(1, gh - 2)}" fill="rgba(40,100,180,0.60)" stroke="#1b242b" stroke-width="${Math.max(.6, profile * .12)}"/>`;
     if (t === 'TOP') {
       const topY = gy + sashInset;
       const apexY = gy + Math.round(gh * .86);
       const midX = Math.round(gx + gw / 2);
-      s += `<path d="M ${gx + sashInset} ${topY} L ${gx + gw - sashInset} ${topY} L ${midX} ${apexY} Z" fill="none" stroke="${CLR.TOP}" stroke-width="${Math.max(1.2, profile * .28)}" stroke-linejoin="round" pointer-events="none"/>`;
+      s += `<path d="M ${gx + sashInset} ${topY} L ${gx + gw - sashInset} ${topY} L ${midX} ${apexY} Z" fill="none" stroke="#fff" stroke-dasharray="4 4" stroke-width="${Math.max(1.2, profile * .28)}" stroke-linejoin="round" pointer-events="none"/>`;
     }
     if (t === 'SIDE') {
       const leftX = gx + sashInset;
       const apexX = gx + Math.round(gw * .86);
       const midY = Math.round(gy + gh / 2);
-      s += `<path d="M ${leftX} ${gy + sashInset} L ${apexX} ${midY} L ${leftX} ${gy + gh - sashInset} Z" fill="none" stroke="${CLR.SIDE}" stroke-width="${Math.max(1.2, profile * .28)}" stroke-linejoin="round" pointer-events="none"/>`;
+      s += `<path d="M ${leftX} ${gy + sashInset} L ${apexX} ${midY} L ${leftX} ${gy + gh - sashInset} Z" fill="none" stroke="#fff" stroke-dasharray="4 4" stroke-width="${Math.max(1.2, profile * .28)}" stroke-linejoin="round" pointer-events="none"/>`;
     }
     if (t === 'TOPLIGHT') {
       for (let hx = gx + 4; hx < gx + gw; hx += 7)

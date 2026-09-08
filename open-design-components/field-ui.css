@@ -1,21 +1,22 @@
 /* Shared outdoor/tablet treatment. Quote sizes remain muted reference text. */
 @media screen {
-  :root { --accent: #f4c84d; --muted: #dbd8cd; --text: #f7f5ee;
-    --outline-gold: #b89332; --outline-gold-strong: #e7b941; --outline-gold-soft: #a88836; }
+  :root { --accent: #ffcf01; --muted: #eeeae0; --text: #f7f5ee;
+    --outline-gold: #ffcf01; --outline-gold-strong: #ffcf01; --outline-gold-soft: #e0b528;
+    --outline-w: 3px; }
   body { font-size: 16px; }
-  .label { font-size: 12px; letter-spacing: .075em; line-height: 1.5; }
+  .label { font-size: 14px; letter-spacing: .075em; line-height: 1.5; }
   input:not([type=file]), select, textarea, .input, .hdr-input, .line-text-input {
-    border: 2px solid #bd993d; font-size: 16px; min-height: 46px; color: #f7f5ee;
+    border: 2px solid var(--outline-gold-soft); font-size: 16px; min-height: 46px; color: #f7f5ee;
   }
   input::placeholder, textarea::placeholder { color: #bcb8ab; opacity: 1; }
   button, .tab, .option, .card-use, .usequote, .confirm-btn { min-height: 44px; font-size: 14px; }
   :is(input, select, textarea, button, a):focus-visible { outline: 3px solid #ffe083; outline-offset: 3px; }
-  .site-card, .table-card, .editor-card, .panel { border: 2px solid var(--outline-gold); }
+  .site-card, .table-card, .editor-card, .panel { border: var(--outline-w) solid var(--outline-gold); }
   .site-gate { margin: 12px 0; padding: 14px; border: 2px solid var(--accent); border-radius: 10px; line-height: 1.5; }
   .site-gate p { margin: 0 0 10px; }
   .required-missing { border-color: #ff936d !important; }
   .review-checklist { padding: 12px; border-left: 4px solid var(--accent); line-height: 1.6; }
-  .quote-reference { margin: 0; padding: 12px; border: 2px solid #a88836; border-radius: 12px; background: #181a1d; }
+  .quote-reference { margin: 0; padding: 12px; border: var(--outline-w) solid var(--outline-gold); border-radius: 12px; background: #181a1d; }
   .quote-reference img { width: 100%; max-height: 240px; object-fit: contain; background: white; }
   .quote-reference figcaption { color: #dbd8cd; font-size: 14px; line-height: 1.5; }
   .diagram-pair { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; width: 100%; }
@@ -35,4 +36,19 @@
     .has-quote-reference .panel-grid, .has-quote-reference .form-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 600px) { .diagram-pair { grid-template-columns: 1fr; } }
+}
+@media screen {
+  .app, .header, .head, .site-card, .table-card, .editor-card, .panel, .side, .drawer, .screen-card, .workflow-step { border: var(--outline-w) solid var(--outline-gold); }
+  .diagram-pair > div, .quote-reference { border:var(--outline-w) solid var(--outline-gold); border-radius:12px; padding:12px; min-width:0; }
+  .design-actions, .confirm-line-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  .design-actions button { flex:1 1 120px; }
+  .confirm-line-actions { border-top:var(--outline-w) solid var(--outline-gold); padding-top:16px; }
+  #edDraftStatus { flex:1 1 100%; font-size:16px; }
+  .quote-reference img { display:block; width:auto; height:auto; max-width:100%; max-height:240px; margin:8px auto; }
+  .live-door-preview { height:210px; display:flex; justify-content:center; margin:10px 0; }
+  .live-door-preview svg { max-width:100%; height:100%; }
+  .glass-policy { padding:14px; border:var(--outline-w) solid var(--outline-gold); border-radius:12px; }
+  .glass-policy label { display:grid; gap:6px; margin-bottom:10px; }
+  .glass-policy p { font-size:15px; line-height:1.5; }
+  #edQuoteReviewStatus { display:block; margin-top:8px; }
 }

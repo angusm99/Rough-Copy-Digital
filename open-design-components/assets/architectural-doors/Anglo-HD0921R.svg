@@ -2,7 +2,7 @@
       <style>
         .frame-bg { fill: #c29b27; }
         .glass-fixed { fill: rgba(40, 100, 180, 0.6); stroke: #000; stroke-width: 2; }
-        .glass-sash { fill: rgba(40, 150, 70, 0.6); stroke: #000; stroke-width: 2; }
+        .glass-sash { fill: rgba(40, 100, 180, 0.6); stroke: #000; stroke-width: 2; }
         .glass-highlight { fill: url(#glow); opacity: 0.15; }
         .sash { fill: none; stroke: #c29b27; stroke-width: 24; }
         .sash-door { fill: none; stroke: #c29b27; stroke-width: 30; }

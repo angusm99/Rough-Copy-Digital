@@ -396,8 +396,11 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260907-field1" />
-  <script src="field-rules.js?v=20260907-field1"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field3" />
+  <script src="field-rules.js?v=20260908-field3"></script>
+  <script src="sliding-configs.js?v=field3"></script>
+  <script src="door-drawings.js?v=field3"></script>
+  <script src="quote-drawing.js?v=field3"></script>
 </head>
 <body>
   <main class="app">
@@ -519,7 +522,17 @@
               <button type="button" class="toggle-opt" data-toggle="flatsAngles" data-val="NO">No</button>
             </div>
           </label>
-          <label><span class="label">Floor #</span><input class="input" data-site="floor" inputmode="numeric" /></label>
+          <label><span class="label">Floor — required</span><select data-site="floor"><option value="">— select —</option><option>GROUND</option><option>FIRST</option><option>SECOND</option><option>THIRD</option><option>OTHER</option></select></label>
+          <label id="floorDetailField" class="hidden"><span class="label">Floor / levels</span><input class="input" data-site="floorDetail" placeholder="e.g. Fourth; Ground and First" /></label>
+          <label><span class="label">Arrange access</span><select data-site="access"><option value="">— not checked —</option><option value="YES">Required</option><option value="NO">Not required</option></select></label>
+<label><span class="label">Arrange parking</span><select data-site="parking"><option value="">— not checked —</option><option value="YES">Required</option><option value="NO">Not required</option></select></label>
+<label><span class="label">Caution barriers — chevrons and tape</span><select data-site="barriers"><option value="">— not checked —</option><option value="YES">Required</option><option value="NO">Not required</option></select></label>
+          <div class="full glass-policy">
+            <label><span class="label">Job glass policy</span><select data-site="glassPolicy"><option value="QUOTE">Use glass from each quote item</option><option value="GLOBAL">Use a specified glass</option><option value="MANUAL">Choose per line</option></select></label>
+            <div id="globalGlassFields" class="hidden"><label><span class="label">Glass specification</span><input class="input" data-site="globalGlass" placeholder="e.g. 6mm TSG" /></label><label><span class="label">Special variant (if glass is SPECIAL)</span><input class="input" data-site="globalCustomGlass" /></label></div>
+            <button class="secondary" id="applyGlassBtn" type="button">Apply glass policy to lines…</button>
+            <p>Quote policy preserves each item's glass. Per-line exceptions remain possible; unsafe or missing door glass must be resolved.</p>
+          </div>
         </div>
         <div class="note-banner hidden" id="siteRuleNote"></div>
         <div class="note-banner hidden" id="colourNote"></div>
@@ -534,14 +547,14 @@
       <section class="table-card">
         <div class="table-head">
           <div class="label">Openings</div>
-          <h2 style="margin:5px 0 0;font-size:21px">Tap a line to capture it: room → type → size → spec.</h2>
+          <h2 style="margin:5px 0 0;font-size:21px">Capture: reference → design → measurements → specifications → confirm.</h2>
         </div>
         <div class="table-tools">
           <div class="summary" id="summary"><span class="status info">No lines</span></div>
           <div class="summary" style="gap:6px;align-items:center">
             <span class="status warn" id="confirmTracker">0 of 0 sizes confirmed</span>
             <button class="secondary" id="useAllQuoteBtn" style="min-height:34px;padding:5px 11px;font-size:12px">Use all quote sizes</button>
-            <button class="secondary" id="confirmAllBtn" style="min-height:34px;padding:5px 11px;font-size:12px">Confirm all</button>
+            <button class="secondary" id="confirmAllBtn" style="min-height:34px;padding:5px 11px;font-size:12px">Confirm all sizes</button>
           </div>
         </div>
         <div class="table-scroll">
@@ -569,15 +582,15 @@
           <div class="editor-nav">
             <button class="secondary" id="edPrev">← Prev</button>
             <button class="secondary" id="edNext">Next →</button>
-            <button class="secondary" id="edClose">Done</button>
+            <button class="secondary" id="edClose">Close draft</button>
           </div>
         </div>
 
         <div class="editor-grid">
           <!-- 1. where -->
-          <label class="wide"><span class="label">1 · Room / location</span>
+          <label class="wide"><span class="label">1 · Reference — required</span><input class="input" id="edRef" required placeholder="e.g. D1 or W1" /></label>
+          <label class="wide"><span class="label">Room / location — optional</span>
             <input class="input" id="edRoom" placeholder="e.g. Kitchen east" /></label>
-          <label><span class="label">Ref</span><input class="input" id="edRef" /></label>
           <label><span class="label">Qty</span><input class="input" id="edQty" type="number" min="1" inputmode="numeric" /></label>
 
           <!-- 2. what -->
@@ -585,16 +598,17 @@
             <span class="label">2 · Unit type</span>
             <div class="editor-type-row">
               <div class="diagram-pair">
-                <div><span class="label">Selected site design</span><div class="editor-diag" id="edDiag">—</div></div>
-                <figure class="quote-reference" id="edQuoteReference"><span class="label">Original quote — reference only</span><div id="edQuoteDrawing"></div><figcaption id="edQuoteCaption"></figcaption></figure>
+                <div>
+                  <div class="design-actions"><button class="secondary" id="edPickWindow">Pick window…</button><button class="secondary" id="edPickDoor">Pick door…</button><button class="secondary" id="edOpenBuilder">Builder…</button><button class="secondary" id="edUseQuote">Use quote drawing</button></div>
+                  <span class="label" id="edDesignLabel">Selected site design</span><div class="editor-diag" id="edDiag">—</div>
+                </div>
+                <figure class="quote-reference" id="edQuoteReference"><span class="label">Original quote — reference only</span><div id="edQuoteDrawing"></div><figcaption id="edQuoteCaption"></figcaption><button class="secondary" id="edResetCrop">Reset quote crop</button></figure>
               </div>
               <div style="flex:1;min-width:140px">
                 <div id="edTypeName" style="font-weight:600">Not set</div>
                 <div class="label" id="edTypeCode" style="margin-top:3px"></div>
               </div>
-              <button class="secondary" id="edPickWindow">Pick window…</button>
-              <button class="secondary" id="edPickDoor">Pick door…</button>
-              <button class="secondary" id="edOpenBuilder">Builder…</button>
+
             </div>
           </div>
 
@@ -650,8 +664,9 @@
             </select>
           </label>
 
+          <label class="full hidden" id="edConfigField"><span class="label">Panel configuration — outside view (O fixed / X sliding)</span><input class="input" id="edConfig" placeholder="e.g. OXXO" /></label>
           <div class="full hidden" id="doorDecisionFields">
-            <span class="label">4 · Door operation</span>
+            <span class="label">Door operation — handle and opening</span>
             <div class="editor-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));padding:10px 0 0">
               <label><span class="label">Handle / lead side</span>
                 <select id="edHandleSide">
@@ -678,10 +693,12 @@
             </div>
           </div>
 
+          <label class="full hidden" id="edQuoteReviewField"><span class="label">Quote drawing review</span><button class="secondary" id="edReviewQuote">Drawing matches this configuration / handing</button><span id="edQuoteReviewStatus"></span></label>
           <!-- 5. notes -->
           <label class="full"><span class="label">5 · Notes (handles, burglar bars, access, sashes)</span>
             <textarea id="edNotes" placeholder="Anything the workshop or installer must know about this opening"></textarea>
           </label>
+          <div class="full confirm-line-actions"><span id="edDraftStatus" role="status">Draft — changes saved automatically</span><button class="primary" id="edConfirmUse">Confirm and use</button><button class="secondary" id="edConfirmNext">Confirm and next →</button></div>
         </div>
       </section>
 
@@ -736,7 +753,7 @@
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>');
     }
   </script>
-  <script src="quote-parser.js?v=20260907-field1"></script>
+  <script src="quote-parser.js?v=20260908-field3"></script>
   <script>
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";
@@ -750,7 +767,7 @@
     const SITE_FIELDS = [
       "jobRef","workpoolRef","date","client","phone","address","email","rep",
       "building","enclosure","material","wall","colour","specialColour",
-      "customColour","customColourCode","floor"
+      "customColour","customColourCode","floor","floorDetail","access","parking","barriers","glassPolicy","globalGlass","globalCustomGlass"
     ];
     const WINDOW_GLASS_OPTIONS = ["", "4mm Clear", "4mm Obscure", "6.38 Clear Lam", "6.38 Safety", "Bronze"];
     const DOOR_GLASS_OPTIONS = [
@@ -859,6 +876,8 @@
       add("Handle/lead", l.handleSide);
       add("Opening", l.openingDirection);
       add("Code", l.code);
+      add("Builder", l.pickerNote);
+      if (l.designSource === "quote") add("Design", "Quote drawing reviewed on site");
       const raw = cleanText(l.rawDescription);
       const title = cleanText(lineProductTitle(l));
       if (raw && raw !== title && raw !== cleanText(l.product)) add("Quote item", raw);
@@ -898,6 +917,19 @@
       }));
     }
 
+    async function trimSavedQuoteDrawings() {
+      const lines=state.lines;
+      for(const l of lines) {
+        if(!l.quoteDiagPNG || l.quoteCropVersion) continue;
+        const source=l.quoteDiagPNG;
+        try {
+          const trimmed=await QuoteDrawing.trim(source);
+          if(state.lines!==lines || l.quoteDiagPNG!==source) continue;
+          l.quoteOriginalPNG ||= source; l.quoteDiagPNG=trimmed; l.quoteCropVersion='field3';
+        } catch(e) { console.warn('Quote crop retained',e); }
+      }
+      if(state.lines===lines) { save(); renderTable(); renderSummary(); if(editingIndex>=0) renderEditor(); }
+    }
     // ---------- PDF text extraction (rows keep page + y for diagram crops) ----------
     async function extractRows(pdf) {
       const pageRows = [];
@@ -976,7 +1008,7 @@
       }
 
       if (!best) return null;
-      const pad = 10;
+      const pad = 3;
       return {
         x: Math.max(0, x0 + best.minX - pad),
         y: Math.max(0, y0 + best.minY - pad),
@@ -1041,7 +1073,9 @@
         out.width = Math.round(cropW);
         out.height = Math.round(cropH);
         out.getContext("2d").drawImage(c, cx1, cropY, cropW, cropH, 0, 0, out.width, out.height);
-        lines[k].quoteDiagPNG = out.toDataURL("image/jpeg", 0.78);
+        lines[k].quoteOriginalPNG = out.toDataURL("image/png");
+        lines[k].quoteDiagPNG = await QuoteDrawing.trim(lines[k].quoteOriginalPNG);
+        lines[k].quoteCropVersion='field3';
       }
     }
 
@@ -1250,10 +1284,10 @@
     function applyParsedQuote(parsed) {
       state.job = parsed.job;
       state.lines = parsed.lines.map((l) => blankLine({ notes: "", code: "", ...l,
-        quoteProduct: l.product || "", quoteCode: l.code || "", diagSVG: "", designSelected: false, sizeConfirmed: false }));
+        quoteFamily: l.family || "", quoteConfig: l.config || "", quoteProduct: l.product || "", quoteCode: l.code || "", quoteGlass: l.glass || "", quoteCustomGlass: l.customGlass || "", diagSVG: "", designSelected: false, sizeConfirmed: false }));
       // quote pre-fills site details; rep completes the rest on site
       const fromQuote = siteFromJob(parsed.job, parsed.lines);
-      state.site = { ...fromQuote, captureConfirmed: "" };
+      state.site = { ...fromQuote, glassPolicy: "QUOTE", captureConfirmed: "" };
       // Material comes off the quote's "Ex:" line — pre-fill it, but keep it
       // flagged until the rep confirms what is actually on site.
       state.site.materialFromQuote = !!fromQuote.material;
@@ -1269,6 +1303,7 @@
 
     // line diagram: user-picked SVG wins, else the crop from the quote PDF
     function lineDiagHTML(l) {
+      if (l.designSource === 'quote' && /^data:image\/(png|jpeg);base64,/.test(l.quoteDiagPNG || '')) return '<img src="' + l.quoteDiagPNG + '" alt="Selected quote drawing" />';
       if (l.diagSVG) return l.diagSVG;
       if (l.quoteDiagPNG) return `<img src="${l.quoteDiagPNG}" alt="quote diagram" />`;
       return '<span class="label" style="font-size:9px">—</span>';
@@ -1307,8 +1342,11 @@
     }
 
     function renderSite() {
+      state.site.glassPolicy ||= 'QUOTE';
       document.querySelectorAll(".workspace [data-site]").forEach((el) => {
-        el.value = state.site[el.dataset.site] || "";
+        const value = state.site[el.dataset.site] || "";
+        if (el.tagName === 'SELECT' && value && ![...el.options].some(o=>o.value === value)) el.add(new Option(value,value));
+        el.value = value;
       });
       syncSiteFields();
       updateSiteStatus();
@@ -1377,6 +1415,9 @@
       return changed;
     }
     function syncSiteFields() {
+      document.getElementById('floorDetailField').classList.toggle('hidden', state.site.floor !== 'OTHER');
+      document.getElementById('globalGlassFields').classList.toggle('hidden', state.site.glassPolicy !== 'GLOBAL');
+
       // ── Colour → Special colour → Custom cascade ──
       const colourIsSpecial = state.site.colour === "SPECIAL";
       const specialField = document.getElementById("specialColourField");
@@ -1469,6 +1510,7 @@
       return /DOOR|STABLE|PALACE|VALENCIA|CLS-?250|HEAVY DUTY|VISTAFOLD|SLIDING FOLDING|PIVOT/i.test(l.product || "");
     }
     function needsDoorOperation(l) {
+      if (FieldRules.slider(l)) return false;
       if (isDoorLine(l)) return true;
       const fam = (l.family || "").toLowerCase();
       if (["hinged", "vistafold", "pivot"].includes(fam)) return true;
@@ -1480,14 +1522,9 @@
     function isDoorSafetyGlass(g) {
       return /TSG|laminat|lam\b|\.38|safety|special/i.test(g || "");
     }
-    function enforceDoorGlass(l) {
-      if (isDoorLine(l) && !isDoorSafetyGlass(l.glass)) {
-        l.glass = "6.38mm Clear Lam";
-        l.customGlass = "";
-        return true;
-      }
-      return false;
-    }
+    // Never silently replace quoted glass. FieldRules blocks unsafe door glass.
+    function enforceDoorGlass(l) { return false; }
+
 
     function rowHTML(l, i) {
       const [cls, txt] = lineStatus(l);
@@ -1850,7 +1887,7 @@
       }
       const l = state.lines[editingIndex];
       card.classList.remove("hidden");
-      // doors always safety glass (_6 rule) — correct silently if needed
+      // Preserve the quote specification; unsafe door glass is a validation error.
       if (enforceDoorGlass(l)) { save(); refreshRowChrome(editingIndex); }
       document.getElementById("editorTitle").textContent =
         `Line ${l.ref || editingIndex + 1} — ${l.location || "unnamed room"}`;
@@ -1864,9 +1901,18 @@
       syncLineGlassFields(l);
       setSelect("edColour", l.colour);
       syncLineColourFields(l);
+      const hinged = !FieldRules.slider(l) && (l.family==='hinged' || l.family==='pivot' || /HINGED|STABLE|PIVOT/i.test(l.product));
+      const opOptions = hinged ? ['', 'OPEN OUT','OPEN IN','CUSTOM'] : ['', 'OPEN OUT','OPEN IN','STACK LEFT','STACK RIGHT','CUSTOM'];
+      document.getElementById('edOpeningDirection').innerHTML=opOptions.map(o=>'<option value="'+o+'">'+(o || '— confirm —')+'</option>').join('');
+      if (hinged && !l.openingDirection) {
+        l.openingDirection = /(?:-|\b)I-(60|90)\b|OPEN IN/i.test((l.code || '')+' '+(l.rawDescription || l.product || '')) ? 'OPEN IN' : 'OPEN OUT';
+        save();
+      }
       setSelect("edHandleSide", l.handleSide);
       setSelect("edOpeningDirection", l.openingDirection);
       setVal("edNotes", l.notes);
+      document.getElementById('edConfigField').classList.toggle('hidden', !FieldRules.slider(l));
+      setVal('edConfig',l.config); document.getElementById('edConfig').readOnly=l.designSource!=='quote';
       // Door lines stay editable but only offer safety glass options.
       const glassEl = document.getElementById("edGlass");
       glassEl.disabled = false;
@@ -1877,7 +1923,13 @@
       document.getElementById("doorDecisionFields").classList.toggle("hidden", !needsDoorOperation(l));
       document.getElementById("edTypeName").textContent = lineProductTitle(l) || "Not set";
       document.getElementById("edTypeCode").textContent = l.code || "";
-      document.getElementById("edDiag").innerHTML = l.diagSVG || '<span class="label">Pick a window or door design</span>';
+      document.getElementById("edDiag").innerHTML = l.designSelected ? lineDiagHTML(l) : '<span class="label">Pick a design or use the quote drawing</span>';
+      document.getElementById('edDesignLabel').textContent = l.designSource === 'quote' ? 'Selected site design — quote drawing' : 'Selected site design';
+      document.getElementById('edUseQuote').disabled = !l.quoteDiagPNG;
+      document.getElementById('edResetCrop').disabled = !l.quoteOriginalPNG;
+      document.getElementById('edQuoteReviewField').classList.toggle('hidden', l.designSource !== 'quote');
+      document.getElementById('edQuoteReviewStatus').textContent = l.quoteDesignConfirmed === FieldRules.quoteDesignFingerprint(l) ? '✓ Drawing reviewed' : 'Review required after configuration / handing changes';
+      document.getElementById('edDraftStatus').textContent = lineReady(l) ? '✓ Confirmed line' : 'Draft — saved on this device; not yet confirmed';
       const quoteDrawing = document.getElementById("edQuoteDrawing");
       quoteDrawing.replaceChildren();
       if (/^data:image\/(png|jpeg);base64,/.test(l.quoteDiagPNG || '')) {
@@ -1958,7 +2010,8 @@
           if (editingIndex < 0) return;
           if (!requireSite()) return;
           fn(state.lines[editingIndex], e.target.value);
-          save();
+          const saved = save();
+          document.getElementById('edDraftStatus').textContent = saved ? 'Draft saved — confirm this line when finished' : 'NOT SAVED — keep this page open';
           refreshRowChrome(editingIndex);
           renderSummary();
           document.getElementById('edChecklist').textContent = lineReady(state.lines[editingIndex]) ? '✓ Line ready' : 'Still to complete: ' + FieldRules.lineMissing(state.lines[editingIndex], state.site).join(', ');
@@ -1969,6 +2022,7 @@
       bind("edQty", (l, v) => { l.qty = v ? +v : 1; });
       bind("edGlass", (l, v) => {
         l.glass = v;
+        l.glassOverride = true;
         syncLineGlassFields(l, true);
       });
       bind("edCustomGlass", (l, v) => { l.customGlass = v; });
@@ -1983,9 +2037,10 @@
       bind("edCustomColour", (l, v) => { l.customColour = v; });
       bind("edCustomColourCode", (l, v) => { l.customColourCode = v; });
       bind("edWrap", (l, v) => { l.wrap = v; });
-      bind("edHandleSide", (l, v) => { l.handleSide = v; });
-      bind("edOpeningDirection", (l, v) => { l.openingDirection = v; });
+      bind("edHandleSide", (l, v) => { l.handleSide = v; updateLineDrawing(l); });
+      bind("edOpeningDirection", (l, v) => { l.openingDirection = v; updateLineDrawing(l, true); });
       bind("edNotes", (l, v) => { l.notes = v; });
+      bind("edConfig",(l,v)=>{ l.config=v.toUpperCase().trim(); });
       ["edW", "edH"].forEach((id, idx) =>
         document.getElementById(id).addEventListener("input", (e) => {
           if (editingIndex < 0) return;
@@ -2004,12 +2059,85 @@
       document.getElementById("edConfirm").addEventListener("click", () => {
         if (editingIndex >= 0) toggleConfirm(editingIndex);
       });
+      document.getElementById('edUseQuote').addEventListener('click', useQuoteDrawing);
+      document.getElementById('edResetCrop').addEventListener('click', () => {
+        const l=state.lines[editingIndex]; if (!l?.quoteOriginalPNG) return;
+        l.quoteDiagPNG=l.quoteOriginalPNG; l.quoteCropVersion='original'; l.lineConfirmed='';
+        save(); refreshRowChrome(editingIndex); renderEditor(); renderSummary();
+      });
+      document.getElementById('edReviewQuote').addEventListener('click', () => {
+        const l=state.lines[editingIndex]; l.quoteDesignConfirmed=FieldRules.quoteDesignFingerprint(l);
+        save(); renderEditor(); refreshRowChrome(editingIndex); renderSummary();
+      });
+      document.getElementById('edConfirmUse').addEventListener('click', () => confirmLine(false));
+      document.getElementById('edConfirmNext').addEventListener('click', () => confirmLine(true));
       document.getElementById("edPrev").addEventListener("click", () => stepEditor(-1));
       document.getElementById("edNext").addEventListener("click", () => stepEditor(1));
       document.getElementById("edClose").addEventListener("click", closeEditor);
       document.getElementById("edPickWindow").addEventListener("click", () => openPicker("window"));
       document.getElementById("edPickDoor").addEventListener("click", () => openPicker("door"));
       document.getElementById("edOpenBuilder").addEventListener("click", () => openPicker("builder"));
+    }
+    function updateLineDrawing(l, openingChanged=false) {
+      if (l.designSource === 'quote') {
+        document.getElementById('edQuoteReviewStatus').textContent='Review required — quote drawing is unchanged';
+        return;
+      }
+      let design=l.design || DoorDrawings.find(l.code);
+      if (!design || !DoorDrawings.hinged(design)) return;
+      design={...design, handleSide:l.handleSide};
+      if (openingChanged) {
+        design=DoorDrawings.openingVariant(design,l.openingDirection);
+        l.code=design.code; l.product=design.label;
+        document.getElementById('edTypeCode').textContent=l.code;
+        document.getElementById('edTypeName').textContent=l.product;
+      }
+      l.design=design; l.diagSVG=DoorDrawings.doorSVG(design);
+      document.getElementById('edDiag').innerHTML=l.diagSVG;
+    }
+    function useQuoteDrawing() {
+      if (!requireSite() || editingIndex<0) return;
+      const l=state.lines[editingIndex]; if (!l.quoteDiagPNG) return;
+      l.product=l.quoteProduct || l.product; l.code=l.quoteCode || '';
+      l.family=l.quoteFamily || ''; l.config=l.quoteConfig || ((l.product+' '+(l.rawDescription || '')).match(/\b[OX]{2,6}\b/i) || [''])[0].toUpperCase();
+      l.design=null; l.designSource='quote'; l.designSelected=true; l.diagSVG='';
+      if (FieldRules.slider(l)) { l.handleSide=''; l.openingDirection=''; }
+      else if (needsDoorOperation(l) && !l.openingDirection) l.openingDirection='OPEN OUT';
+      l.quoteDesignConfirmed=''; l.lineConfirmed='';
+      save(); refreshRowChrome(editingIndex); renderEditor(); renderSummary();
+    }
+    function confirmLine(next) {
+      if (!requireSite() || editingIndex<0) return;
+      const l=state.lines[editingIndex];
+      const candidate={...l,sizeConfirmed:true};
+      const missing=FieldRules.lineMissing(candidate,state.site,true);
+      if (missing.length) {
+        document.getElementById('edChecklist').textContent='Cannot confirm yet: '+missing.join(', ');
+        document.getElementById('edChecklist').scrollIntoView({behavior:'smooth',block:'center'});
+        return;
+      }
+      l.sizeConfirmed=true; l.lineConfirmed=FieldRules.lineFingerprint(l,state.site);
+      if (!save()) { l.lineConfirmed=''; return; }
+      refreshRowChrome(editingIndex); renderSummary();
+      if (next) {
+        const remaining=state.lines.map((_,i)=>i).filter(i=>i!==editingIndex && !lineReady(state.lines[i]));
+        const i=remaining.find(i=>i>editingIndex) ?? remaining[0];
+        if (i!==undefined) { openEditor(i); return; }
+      }
+      closeEditor();
+    }
+    function applyGlassPolicy() {
+      const mode=state.site.glassPolicy || 'QUOTE';
+      if (mode==='MANUAL') return;
+      if (mode==='GLOBAL' && !String(state.site.globalGlass || '').trim()) { alert('Enter the glass specification first.'); return; }
+      if (!confirm('Apply this glass policy to all lines? This replaces existing glass overrides and requires affected lines to be reviewed again.')) return;
+      for (const l of state.lines) {
+        const glass=mode==='QUOTE' ? l.quoteGlass : state.site.globalGlass;
+        if (mode==='QUOTE' && glass===undefined) continue; // manual lines have no quoted glass
+        l.glass=glass || ''; l.customGlass=mode==='QUOTE' ? l.quoteCustomGlass || '' : state.site.globalCustomGlass || '';
+        l.glassOverride=false; l.lineConfirmed='';
+      }
+      save(); renderAll();
     }
     function stepEditor(d) {
       if (editingIndex < 0) return;
@@ -2024,14 +2152,19 @@
       if (editingIndex < 0) return;
       if (!save()) return;
       const l = state.lines[editingIndex];
+      if (l.quoteWidth || l.quoteDiagPNG || l.rawDescription) {
+        l.quoteProduct ||= l.rawDescription || l.product; l.quoteCode ??= l.code || ''; l.quoteFamily ??= l.family || ''; l.quoteConfig ??= l.config || '';
+        l.quoteGlass ??= l.glass || ''; l.quoteCustomGlass ??= l.customGlass || '';
+      }
+      if (!save()) return;
       try { localStorage.setItem(CTX_KEY, JSON.stringify({
         i: editingIndex,
         ref: l.ref || "",
         room: l.location || "",
-        quoteW: l.quoteWidth || l.width || null,
-        quoteH: l.quoteHeight || l.height || null,
-        quoteDiagPNG: l.quoteDiagPNG || '', quoteProduct: l.quoteProduct || l.product || '', quoteCode: l.quoteCode || '',
-        glass: l.glass || '', customGlass: l.customGlass || '',
+        quoteW: l.quoteWidth || null,
+        quoteH: l.quoteHeight || null,
+        quoteDiagPNG: l.quoteDiagPNG || '', quoteProduct: l.quoteProduct || '', quoteCode: l.quoteCode || '',
+        glass: l.glass || '', customGlass: l.customGlass || '', preserveGlass: true,
         colour: l.colour || state.site.colour || '',
         specialColour: l.specialColour || state.site.specialColour || '',
         customColour: l.customColour || state.site.customColour || '',
@@ -2057,17 +2190,18 @@
       if (res.kind === "window" || typeof res.config === "string") l.config = res.config || "";
       l.handleSide = res.handleSide || '';
       l.openingDirection = res.openingDirection || '';
-      if (res.glass) l.glass = res.glass;
+      if (typeof res.glass === 'string') l.glass = res.glass;
       l.customGlass = res.customGlass || '';
+      l.glassOverride = l.glass !== l.quoteGlass || l.customGlass !== l.quoteCustomGlass;
       if (res.colour) l.colour = res.colour;
       if (res.svg) l.diagSVG = res.svg;
       l.designSelected = !!res.svg;
+      l.design = res.design || null; l.designSource='picker'; l.lineConfirmed='';
       l.specialColour = res.specialColour || '';
       l.customColour = res.customColour || '';
       l.customColourCode = res.customColourCode || '';
-      if (res.note && !(l.notes || "").includes(res.note)) {
-        l.notes = (l.notes ? l.notes + "\n" : "") + res.note;
-      }
+      // Generated details stay separate from rep notes; handing is a live field.
+      l.pickerNote = res.kind === 'window' ? res.note || '' : '';
       enforceDoorGlass(l);
       save();
       editingIndex = res.i;
@@ -2092,16 +2226,17 @@
       if (e.target.files[0]) importFile(e.target.files[0]);
       e.target.value = "";
     });
+    document.getElementById("applyGlassBtn").addEventListener('click',applyGlassPolicy);
     document.getElementById("useAllQuoteBtn").addEventListener("click", useAllQuoteSizes);
     document.getElementById("confirmAllBtn").addEventListener("click", confirmAllSizes);
     document.getElementById("addLineBtn").addEventListener("click", () => {
       if (!requireSite()) return;
-      state.lines.push(blankLine());
+      state.lines.push(blankLine(state.site.glassPolicy === 'GLOBAL' ? {glass:state.site.globalGlass || '', customGlass:state.site.globalCustomGlass || ''} : {}));
       save();
       renderTable();
       renderSummary();
       openEditor(state.lines.length - 1);
-      document.getElementById("edRoom").focus();
+      document.getElementById("edRef").focus();
     });
     document.getElementById("clearBtn").addEventListener("click", () => {
       if (!state.job && !state.lines.length && !Object.keys(state.site).length) return;
@@ -2153,6 +2288,11 @@
 
       const notes = [];
       notes.push("Standard flats & angles: " + (s.flatsAngles || "YES"));
+      notes.push("Access: "+(s.access==='YES'?'Arrange access':'Not required'));
+      notes.push("Parking: "+(s.parking==='YES'?'Arrange parking':'Not required'));
+      notes.push("Caution barriers: "+(s.barriers==='YES'?'Required — chevrons and tape':'Not required'));
+      notes.push("Floor: "+(s.floor==='OTHER'?s.floorDetail:s.floor || ''));
+      notes.push("Glass policy: "+(s.glassPolicy==='GLOBAL'?s.globalGlass:s.glassPolicy==='MANUAL'?'Per line':'As per each quote item'));
       if (s.workpoolRef || j.workpoolRef) notes.push("Workpool ref: " + (s.workpoolRef || j.workpoolRef));
       if (j.colourNote) notes.push("Colour note: " + j.colourNote);
       if (j.headerNotes && j.headerNotes.length) notes.push("Quote notes: " + j.headerNotes.join(" • "));
@@ -2211,6 +2351,7 @@
     function handleSiteFieldChange(el) {
       const key = el.dataset.site;
       state.site[key] = el.value;
+      if (['floor','glassPolicy'].includes(key)) syncSiteFields();
       if (FieldRules.siteKeys.includes(key)) state.site.captureConfirmed = '';
 
       // keep any duplicate inputs for the same field (header ↔ site card) in sync
@@ -2263,7 +2404,7 @@
         state.site[btn.dataset.toggle] = btn.dataset.val;
         syncSiteFields();
         save();
-        updateSiteStatus();
+        updateSiteStatus(); renderTable(); renderSummary(); if(editingIndex>=0) renderEditor();
       });
     });
 
@@ -2292,6 +2433,7 @@
     consumePickerResult();
     wireEditor();
     renderAll();
+    trimSavedQuoteDrawings();
     if (editingIndex >= 0) openEditor(editingIndex);
     else if (requestedLineIndex >= 0) setTimeout(() => scrollToLine(requestedLineIndex), 120);
 
@@ -2299,6 +2441,6 @@
     // line context unconsumed until a manual refresh — force a real reload.
     window.addEventListener("pageshow", (e) => { if (e.persisted) location.reload(); });
   </script>
-  <div class="build-stamp">Field build · 2026-09-07 / field1</div>
+  <div class="build-stamp">Field build · 2026-09-08 / field3</div>
 </body>
 </html>

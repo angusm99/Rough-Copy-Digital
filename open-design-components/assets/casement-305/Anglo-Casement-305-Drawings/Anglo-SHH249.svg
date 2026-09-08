@@ -2,8 +2,8 @@
         <style>
           .frame-bg { fill: #ffcc00; }
           .glass-base { fill: #0f1012; stroke: #000; stroke-width: 2; }
-          .glass-f { fill: rgba(163, 210, 224, 0.25); }
-          .glass-s { fill: rgba(163, 224, 163, 0.25); }
+          .glass-f { fill: rgba(40, 100, 180, 0.6); }
+          .glass-s { fill: rgba(40, 100, 180, 0.6); }
           .glass-highlight { fill: url(#glow); opacity: 0.15; }
           .glass-reflection { fill: url(#reflection); opacity: 0.6; mix-blend-mode: overlay; }
           .sash { fill: none; stroke: #ffcc00; stroke-width: 24; }
@@ -25,16 +25,6 @@
             <stop offset="0%" stop-color="#ffea80" />
             <stop offset="50%" stop-color="#ffcc00" />
             <stop offset="100%" stop-color="#b38f00" />
-          </linearGradient>
-          <linearGradient id="glassFixedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="rgba(163, 210, 224, 0.7)" />
-            <stop offset="40%" stop-color="rgba(103, 160, 184, 0.3)" />
-            <stop offset="100%" stop-color="rgba(20, 60, 80, 0.9)" />
-          </linearGradient>
-          <linearGradient id="glassSashGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="rgba(163, 224, 163, 0.7)" />
-            <stop offset="40%" stop-color="rgba(103, 184, 103, 0.3)" />
-            <stop offset="100%" stop-color="rgba(20, 80, 20, 0.9)" />
           </linearGradient>
         </defs>
       <rect class="frame-bg" x="0" y="0" width="2390" height="890" rx="4" /><rect class="glass-base" x="45" y="45" width="515.5" height="800" /><rect class="glass-s" x="45" y="45" width="515.5" height="800" /><polygon class="glass-highlight" points="45,45 560.5,45 45,845" /><rect class="sash" x="57" y="57" width="491.5" height="776" /><polyline class="opening" points="81,81 524.5,445 81,809" /><rect class="glass-base" x="585.5" y="45" width="1219" height="800" /><rect class="glass-f" x="585.5" y="45" width="1219" height="800" /><polygon class="glass-highlight" points="585.5,45 1804.5,45 585.5,845" /><rect class="glass-base" x="1829.5" y="45" width="515.5" height="800" /><rect class="glass-s" x="1829.5" y="45" width="515.5" height="800" /><polygon class="glass-highlight" points="1829.5,45 2345,45 1829.5,845" /><rect class="sash" x="1841.5" y="57" width="491.5" height="776" /><polyline class="opening" points="2309,81 1865.5,445 2309,809" /></svg>

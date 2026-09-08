@@ -3,9 +3,10 @@
   "configurations": [
     {
       "name": "rough-copy",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "7890", "--directory", "open-design-components"],
-      "port": 7890
+      "runtimeExecutable": "pwsh",
+      "runtimeArgs": ["-NoProfile", "-File", "tools/start-preview.ps1", "-Port", "5179"],
+      "port": 5179,
+      "url": "http://127.0.0.1:5179"
     }
   ]
 }
