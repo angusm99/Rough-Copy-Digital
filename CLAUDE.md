@@ -2,19 +2,31 @@
 
 This repo is the active Anglo Windows Digital Rough Copy project.
 
-## Current continuation - 2026-09-07 field1
+## Current continuation - 2026-09-08 field3
 
 Read `FIELD-WORKFLOW-2026-09-07.md` first. It supersedes the June/July capability
 and tablet snapshots below. Claude's base was `b261d6d`; Codex added Elite/Knysna,
 shared Palace/Valencia slider layouts, outside-view O=fixed/X=sliding rules,
 explicit required-site confirmation, complete line readiness, original quote
-references and stronger field UI. Run `tools/verify-project.ps1` (includes nine
-field regression tests) before commit. Do not infer publication from local HEAD.
+references and stronger field UI (`7adff36`). Claude then closed the reported
+green glass, border and step-numbering gaps (`f7f420c`). Run
+`tools/verify-project.ps1` (18 field regression tests) before commit. Do not
+infer publication from local HEAD.
 
-Prefer `tools/start-preview.ps1 -Port 5179` bound to loopback. Today's handoff
-identifies HTC `FS44BPC01077`; verify devices before `adb -s <serial> reverse
-tcp:5179 tcp:5179`. Do not use the old ...070 floor tablet or LAN instructions
-below by default. Physical tablet/offline proof remains outstanding for field1.
+**Cache key is `field3`.** The SVG assets are cache-first, so any asset change
+must bump `field2`->`field3`->... in `sw.js` and the `?v=` query strings, or
+tablets keep serving the old drawings. This is how the green glass survived two
+"fixed" rounds.
+
+**Glass is BLUE everywhere.** Sash vs fixed is carried by the gold sash border
+and the chevron, never by colour. Nothing in `assets/` is green-dominant as of
+`f7f420c`; if green reappears, an asset was reimported from an old zip.
+
+Prefer `tools/start-preview.ps1 -Port 5179` on loopback plus `adb reverse`.
+Verify devices before assuming a serial - as of 2026-09-08 the USB tablet
+`FS44BPC01077` was NOT attached (Windows saw the HTC over Bluetooth only);
+`192.168.0.160:5555` and `192.168.0.167:5555` answered over wireless ADB.
+Physical offline proof (flight mode, real Chrome) remains outstanding.
 
 ## Start Here
 
@@ -62,40 +74,39 @@ Core flow:
 From repo root:
 
 ```powershell
-.\tools\start-preview.ps1
+.\tools\start-preview.ps1 -Port 5179
 ```
 
 Open:
 
 ```text
-http://127.0.0.1:5178/workspace.html
+http://127.0.0.1:5179/workspace.html
 ```
 
 For a guaranteed blank job, use:
 
 ```text
-http://127.0.0.1:5178/workspace.html?new=1
+http://127.0.0.1:5179/workspace.html?new=1
 ```
 
 For a fresh document import flow, use:
 
 ```text
-http://127.0.0.1:5178/workspace.html?new=1&import=1
+http://127.0.0.1:5179/workspace.html?new=1&import=1
 ```
 
-For tablet testing on same Wi-Fi:
+For tablet testing, prefer ADB reverse over a LAN bind - it tunnels through the
+existing adb link, so the server never leaves loopback:
 
 ```powershell
-.\tools\start-preview.ps1 -Port 5179 -Bind 0.0.0.0
+.\tools\start-preview.ps1 -Port 5179
+adb -s <serial> reverse tcp:5179 tcp:5179
+adb -s <serial> shell am start -a android.intent.action.VIEW -d "http://127.0.0.1:5179/workspace.html"
 ```
 
-Open:
-
-```text
-http://<PC-LAN-IP>:5179/workspace.html
-```
-
-Use `Get-NetIPAddress -AddressFamily IPv4` to find the current PC LAN IP.
+`-Bind 0.0.0.0` still exists for when adb is unavailable, but it shares the app
+folder on the LAN for as long as it runs. Quotes go to the tablet via ADB push
+only, never over the LAN.
 
 The preview server serves only the app folder (`open-design-components/`) as its
 root, pinned via `--directory`. The landing page is at `/`, the workspace at
@@ -131,10 +142,10 @@ Once USB debugging or Wireless debugging is authorised:
 .\tools\tablet-adb.ps1 -OpenUrl -Url "http://<PC-LAN-IP>:5179/workspace.html"
 ```
 
-Confirmed device state as of 2026-06-15:
+Device state (serial corrected 2026-09-08):
 
-- USB ADB serial: `FS44BPC01070`
-- Wireless ADB: `192.168.0.159:5555`
+- USB ADB serial: `FS44BPC01077` (was `...070`; not attached as of 2026-09-08 — Windows sees the HTC over Bluetooth only)
+- Wireless ADB: `192.168.0.160:5555` and `192.168.0.167:5555` both authorised 2026-09-08 (`...159`/`...131` did not answer)
 - Model/OS: `HTC AT01`, Android `13`
 - Screen: `800x1280`
 - Sample quote location on tablet: `/sdcard/Download/Rough-Copy-Digital/ANNEMIE BRUCE JH532611 D2161-QUOTATION.pdf`
@@ -167,13 +178,13 @@ These patterns are in `.gitignore`, but still check `git status` before committi
 - Workspace line table has editable Ref and Room cells for tablet capture; portrait layout was rebalanced so Spec and Status stay visible.
 - Casement SVG artwork refreshed from `Anglo-Casement-305.zip`: 53 active files replaced in `open-design-components/assets/casement-305/Anglo-Casement-305-Drawings/`.
 - `Anglo-Windows-and-Doors2.zip` was inspected; its 16 door SVGs were byte-for-byte identical to the current `assets/architectural-doors/` files, so no door asset churn was needed.
-- HTC AT01 tablet browser testing is in progress. USB ADB serial remains `FS44BPC01070`; ADB reverse to local preview can use `adb reverse tcp:5179 tcp:5179`.
+- HTC AT01 tablet browser testing is in progress. USB ADB serial is `FS44BPC01077`; ADB reverse to local preview can use `adb reverse tcp:5179 tcp:5179`.
 - Window picker / builder baseline has moved onto the dark gold review theme. Builder selections now return richer profile-style SVGs to the workspace, not plain placeholder geometry.
 - Door picker category order is now `Hinged`, `Heavy Duty Slider`, `Sliding Folding`, `Pivot`, `Patio Sliding`.
 - Heavy Duty Slider groups are now `Valencia`, `Palace Door`, and `CLS-250 Lift and Slide`.
 - Architectural door SVGs have been supplied in `Anglo-Architectural-Drawings.zip`; door files are useful, window files should be ignored for that pass.
 - Architectural door drawings are wired into `door-picker.html` (2026-06-19): 16 SVGs in `open-design-components/assets/architectural-doors/`, mapped via `DOOR_DRAWING_ASSETS` (by door `id`) → `doorSVG()` returns the `<img>` when an asset exists, else the generated SVG. Covers Large Pane hinged singles (`HD0921L`), hinged doubles (`DD1521`/`DD1821`), and Patio/Heavy-Duty sliders (`PD…OX/XO/OXXO`). Pivot, sliding-folding, and non-large-pane hinged styles still need source drawings. Same asset pattern as the casement `DRAWING_ASSETS` map in `window-picker.html`.
-- Window + door drawings refreshed from `Anglo-Windows-and-Doors.zip` (2026-06-19): all 53 casement-305 window SVGs replaced in place with the updated palette (frame `#c29b27`, blue fixed / green sash); door set swapped to the cleaner-named, expanded set (adds `DD` double-doors, `PD2421OXXO`, `PD4021OXXO`). Also removed two dangling window map entries (`PT618`/`PT621` → files that never existed) so those configs fall back to the generated diagram instead of a broken image. Verified in browser: window-picker 46/46 assets load 0 broken; door-picker hinged/patio/heavy-duty all load 0 broken.
+- Window + door drawings refreshed from `Anglo-Windows-and-Doors.zip` (2026-06-19): all 53 casement-305 window SVGs replaced in place with the updated palette (frame `#c29b27`); glass is BLUE throughout as of `f7f420c` — sash vs fixed is carried by the gold sash border and chevron, never by colour; door set swapped to the cleaner-named, expanded set (adds `DD` double-doors, `PD2421OXXO`, `PD4021OXXO`). Also removed two dangling window map entries (`PT618`/`PT621` → files that never existed) so those configs fall back to the generated diagram instead of a broken image. Verified in browser: window-picker 46/46 assets load 0 broken; door-picker hinged/patio/heavy-duty all load 0 broken.
 - Best next SVG integration path: wire `Doors/Anglo-HD*.svg` and `Doors/Anglo-PD*.svg` into `door-picker.html` as asset-backed drawings, keeping generated SVGs as fallback for pivot / sliding folding / decorative hinged variants.
 - Photo/OCR import for handwritten rough copies is still outstanding.
 - Workshop Excel/export-to-external-system is still outstanding.
