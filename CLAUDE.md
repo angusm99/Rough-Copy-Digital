@@ -16,8 +16,12 @@ standard/parliament hinges, width grouping for Top Hung and Side Hung,
 continuous fixed panes shared by picker/builder, OPEN OUT for unset opening
 direction, easier Add opening controls, and consistent fonts/gutters.
 P4T912B is removed; PTT912B has one continuous fixed base.
-23 regression tests and syntax checks pass. Do not push main or deploy Netlify
-until Angus approves live release; GitHub main triggers automatic deployment.
+23 regression tests and syntax checks pass.
+
+**Pushing main no longer deploys.** `.github/workflows/deploy.yml` is
+`workflow_dispatch` only as of 2026-09-08 - every push used to spend Netlify
+build credits on work in progress. Push freely to back work up; release with
+`gh workflow run "Deploy to Netlify"` once Angus approves.
 
 ### Earlier continuation (historical)
 
@@ -40,10 +44,19 @@ and the chevron, never by colour. Nothing in `assets/` is green-dominant as of
 `f7f420c`; if green reappears, an asset was reimported from an old zip.
 
 Prefer `tools/start-preview.ps1 -Port 5179` on loopback plus `adb reverse`.
-Verify devices before assuming a serial - as of 2026-09-08 the USB tablet
-`FS44BPC01077` was NOT attached (Windows saw the HTC over Bluetooth only);
-`192.168.0.160:5555` and `192.168.0.167:5555` answered over wireless ADB.
-Physical offline proof (flight mode, real Chrome) remains outstanding.
+Verify devices before assuming a serial. USB `FS44BPC01077` is attached again
+as of 2026-09-08 15:00; `192.168.0.160:5555` and `192.168.0.167:5555` also
+answer over wireless ADB.
+
+**The `adb reverse` tunnel drops silently** - re-run `adb -s <serial> reverse
+tcp:5179 tcp:5179` and check `adb reverse --list` before concluding a build
+did not reach the tablet. A dropped tunnel looks exactly like a caching bug:
+the service worker correctly serves the last cached build and the device
+shows stale content.
+
+**Offline is PROVEN on the device** (2026-09-08). It was demonstrated by that
+same dropped tunnel: with no route to the server at all, the app rendered
+fully from cache. Flight-mode confirmation is no longer outstanding.
 
 ## Start Here
 
