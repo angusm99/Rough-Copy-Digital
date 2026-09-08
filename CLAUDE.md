@@ -2,7 +2,13 @@
 
 This repo is the active Anglo Windows Digital Rough Copy project.
 
-## Current continuation - 2026-09-08 field11 (local testing only)
+## Current continuation - 2026-09-08 field12 (local testing only)
+
+Field12 compacts site capture into paired customer/reference columns and two
+decision columns on portrait tablets (three on wide screens). Confirmation and
+Add opening sit below glass policy; existing validation remains intact. Tablet
+navigation is a 2x2 grid without keyboard shortcut hints. Verified at 800px and
+1280px without horizontal overflow; 23 regression tests pass. No live deployment.
 
 Reviewed Claude's pushed 3616682 (one-card configuration/stile selection) and
 177849a (blue artwork/cache fix). Field11 preserves those changes and adds
@@ -24,7 +30,7 @@ green glass, border and step-numbering gaps (`f7f420c`). Run
 `tools/verify-project.ps1` (18 field regression tests) before commit. Do not
 infer publication from local HEAD.
 
-**Current cache key is `field11`.** The SVG assets are cache-first, so any asset change
+**Current cache key is `field12`.** The SVG assets are cache-first, so any asset change
 must bump `field2`->`field3`->... in `sw.js` and the `?v=` query strings, or
 tablets keep serving the old drawings. This is how the green glass survived two
 "fixed" rounds.

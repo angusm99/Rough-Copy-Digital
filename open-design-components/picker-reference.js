@@ -37,7 +37,7 @@
       caption.textContent = [ctx.quoteProduct, ctx.quoteCode, ctx.quoteW && ctx.quoteH ? `${ctx.quoteW} × ${ctx.quoteH} mm` : ''].filter(Boolean).join(' · ');
       box.append(caption); host.prepend(box);
     }
-    const stamp = document.createElement('div'); stamp.className = 'build-stamp'; stamp.textContent = 'Field build · 2026-09-08 / field11 · Outside view';
+    const stamp = document.createElement('div'); stamp.className = 'build-stamp'; stamp.textContent = 'Field build · 2026-09-08 / field12 · Outside view';
     document.body.append(stamp);
   });
 })();

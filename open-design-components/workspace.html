@@ -401,11 +401,11 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260908-field11" />
-  <script src="field-rules.js?v=20260908-field11"></script>
-  <script src="sliding-configs.js?v=field11"></script>
-  <script src="door-drawings.js?v=field11"></script>
-  <script src="quote-drawing.js?v=field11"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field12" />
+  <script src="field-rules.js?v=20260908-field12"></script>
+  <script src="sliding-configs.js?v=field12"></script>
+  <script src="door-drawings.js?v=field12"></script>
+  <script src="quote-drawing.js?v=field12"></script>
 </head>
 <body>
   <main class="app">
@@ -417,9 +417,9 @@
       </div>
       <nav class="nav" style="display:grid;gap:9px">
         <a class="active" href="workspace.html"><span>Quote workspace</span><small id="navLineCount">0 lines</small></a>
-        <a href="window-picker.html"><span>Window picker</span><small>Ctrl+P</small></a>
-        <a href="window-builder.html"><span>Custom builder</span><small>Ctrl+B</small></a>
-        <a href="door-picker.html"><span>Door picker</span><small>Ctrl+D</small></a>
+        <a href="window-picker.html"><span>Window picker</span></a>
+        <a href="window-builder.html"><span>Custom builder</span></a>
+        <a href="door-picker.html"><span>Door picker</span></a>
       </nav>
       <div class="quick">
         <span>Open items</span>
@@ -469,17 +469,23 @@
         </div>
         <div class="site-gate" id="siteGate" role="status" aria-live="polite">
           <p id="siteGateMessage">Confirm the site conditions before capturing any line.</p>
-          <button class="primary" id="confirmSiteBtn" type="button">Confirm site details — start capturing</button>
+
         </div>
         <div class="site-grid" id="siteGrid">
-          <label><span class="label">Job ref</span><input class="input" data-site="jobRef" /></label>
-          <label><span class="label">Workpool ref</span><input class="input" data-site="workpoolRef" placeholder="JH / JHJ / KH / AM ref" /></label>
-          <label><span class="label">Date</span><input class="input" type="date" data-site="date" /></label>
-          <label><span class="label">Client</span><input class="input" data-site="client" /></label>
-          <label><span class="label">Phone</span><input class="input" type="tel" data-site="phone" /></label>
-          <label class="wide"><span class="label">Site address</span><input class="input" data-site="address" /></label>
-          <label><span class="label">Email</span><input class="input" type="email" data-site="email" /></label>
-          <label><span class="label">Rep</span><input class="input" data-site="rep" /></label>
+          <div class="site-contact-grid full">
+            <div class="site-contact-column">
+              <label><span class="label">Client</span><input class="input" data-site="client" /></label>
+              <label><span class="label">Phone</span><input class="input" type="tel" data-site="phone" /></label>
+              <label><span class="label">Email</span><input class="input" type="email" data-site="email" /></label>
+              <label><span class="label">Site address</span><input class="input" data-site="address" /></label>
+            </div>
+            <div class="site-contact-column">
+              <label><span class="label">Job ref</span><input class="input" data-site="jobRef" /></label>
+              <label><span class="label">Workpool ref</span><input class="input" data-site="workpoolRef" placeholder="JH / JHJ / KH / AM ref" /></label>
+              <label><span class="label">Rep</span><input class="input" data-site="rep" /></label>
+              <label><span class="label">Date</span><input class="input" type="date" data-site="date" /></label>
+            </div>
+          </div>
           <label><span class="label">Building type</span>
             <select data-site="building">
               <option value="">— select —</option>
@@ -538,6 +544,11 @@
             <button class="secondary" id="applyGlassBtn" type="button">Apply glass policy to lines…</button>
             <p>Quote policy preserves each item's glass. Per-line exceptions remain possible; unsafe or missing door glass must be resolved.</p>
           </div>
+        </div>
+        <div class="site-bottom-actions">
+          <p id="siteBottomMessage" role="status" aria-live="polite"></p>
+          <button class="primary" id="confirmSiteBtn" type="button">Confirm site details — start capturing</button>
+          <button class="secondary" id="addLineSiteBtn" type="button">+ Add opening</button>
         </div>
         <div class="note-banner hidden" id="siteRuleNote"></div>
         <div class="note-banner hidden" id="colourNote"></div>
@@ -760,7 +771,7 @@
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>');
     }
   </script>
-  <script src="quote-parser.js?v=20260908-field11"></script>
+  <script src="quote-parser.js?v=20260908-field12"></script>
   <script>
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";
@@ -933,7 +944,7 @@
         try {
           const trimmed=await QuoteDrawing.trim(source);
           if(state.lines!==lines || l.quoteDiagPNG!==source) continue;
-          l.quoteOriginalPNG ||= source; l.quoteDiagPNG=trimmed; l.quoteCropVersion='field11';
+          l.quoteOriginalPNG ||= source; l.quoteDiagPNG=trimmed; l.quoteCropVersion='field12';
         } catch(e) { console.warn('Quote crop retained',e); }
       }
       if(state.lines===lines) { save(); renderTable(); renderSummary(); if(editingIndex>=0) renderEditor(); }
@@ -1083,7 +1094,7 @@
         out.getContext("2d").drawImage(c, cx1, cropY, cropW, cropH, 0, 0, out.width, out.height);
         lines[k].quoteOriginalPNG = out.toDataURL("image/png");
         lines[k].quoteDiagPNG = await QuoteDrawing.trim(lines[k].quoteOriginalPNG);
-        lines[k].quoteCropVersion='field11';
+        lines[k].quoteCropVersion='field12';
       }
     }
 
@@ -1384,6 +1395,7 @@
         ? "Site conditions confirmed. You can capture the openings below. Changing a required field will ask for confirmation again."
         : missing.length ? "Before line capture, complete: " + missing.join(", ") + "."
         : "Review the building type, existing material, wall and colour, then confirm. Imported values are not site confirmation.";
+      document.getElementById("siteBottomMessage").textContent = document.getElementById("siteGateMessage").textContent;
       const btn = document.getElementById("confirmSiteBtn");
       btn.disabled = missing.length > 0 || ready;
       btn.textContent = ready ? "✓ Site confirmed" : "Confirm site details — start capturing";
@@ -1394,7 +1406,7 @@
         if (!ready) { if (!input.disabled) input.dataset.siteLocked = '1'; input.disabled = true; }
         else if (input.dataset.siteLocked) { input.disabled = false; delete input.dataset.siteLocked; }
       });
-      ['addLineBtn', 'addLineTableBtn', 'useAllQuoteBtn', 'confirmAllBtn'].forEach(id => { document.getElementById(id).disabled = !ready; });
+      ['addLineBtn', 'addLineTableBtn', 'addLineSiteBtn', 'useAllQuoteBtn', 'confirmAllBtn'].forEach(id => { document.getElementById(id).disabled = !ready; });
     }
     function requireSite() {
       if (FieldRules.siteReady(state.site)) return true;
@@ -2414,6 +2426,7 @@
       el.addEventListener(evt, () => handleSiteFieldChange(el));
     });
 
+    document.getElementById('addLineSiteBtn').addEventListener('click', addOpening);
     document.getElementById('confirmSiteBtn').addEventListener('click', () => {
       if (FieldRules.siteMissing(state.site).length) return;
       state.site.captureConfirmed = FieldRules.fingerprint(state.site);
@@ -2464,6 +2477,6 @@
     // line context unconsumed until a manual refresh — force a real reload.
     window.addEventListener("pageshow", (e) => { if (e.persisted) location.reload(); });
   </script>
-  <div class="build-stamp">Field build · 2026-09-08 / field11</div>
+  <div class="build-stamp">Field build · 2026-09-08 / field12</div>
 </body>
 </html>

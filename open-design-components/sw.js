@@ -11,7 +11,7 @@
      is wasted bandwidth on a phone hotspot.
 
    Bump CACHE when shipping — old caches are dropped on activate. */
-const CACHE = 'anglo-rc-20260908-field11-release';
+const CACHE = 'anglo-rc-20260908-field12-release';
 
 const SHELL = [
   './',
