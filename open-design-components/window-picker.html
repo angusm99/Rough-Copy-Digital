@@ -184,9 +184,10 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260908-field7" />
-  <script src="sliding-configs.js?v=20260908-field7"></script>
-  <script src="picker-reference.js?v=20260908-field7"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field10" />
+  <script src="sliding-configs.js?v=20260908-field10"></script>
+  <script src="picker-variants.js?v=field10"></script>
+  <script src="picker-reference.js?v=20260908-field10"></script>
 </head>
 <body>
 <div class="modal">
@@ -792,8 +793,18 @@ function workspaceUrl() {
 }
 
 // ── Save selection back to the workspace line ───────────────────────────
+// The hand chosen at "Use this", applied to this pick without mutating CATALOG.
+let chosenHand = null;
+function withChosenHand(w) {
+  if (!w || !chosenHand || chosenHand.code !== w.code) return w;
+  const config = chosenHand.config;
+  return { ...w, config, panels: config.split(''), hands: [config],
+    name: String(w.name).replace(w.hands.join(' / '), config),
+    sub: SlidingConfigs.describe(config) + ' · outside view' };
+}
+
 function useSelected() {
-  const w = CATALOG.find(x => x.code === selectedCode);
+  const w = withChosenHand(CATALOG.find(x => x.code === selectedCode));
   if (!w) { alert('Select a window first.'); return; }
   const fixPos = fixPositionValue(w);
   // thumbnail for the workspace diagram cell (red coupling line included)
@@ -819,7 +830,22 @@ function useSelected() {
 
 // ── Select + confirm in one tap, straight from the card ─────────────────
 // Reps were having to scroll to the side panel / footer to confirm a pick.
-function useCard(code) {
+async function useCard(code) {
+  const w = CATALOG.find(x => x.code === code);
+  // Elite and Knysna carry both hands on one card; ask which way round it
+  // hangs here, with a drawing of each viewed from outside, rather than
+  // listing OX and XO as two near-identical cards.
+  if (w && w.hands && w.hands.length > 1) {
+    const config = await PickerVariants.chooseSliderConfig(
+      w.hands[0], (c) => SlidingConfigs.svg(c, 900, 520));
+    if (!config) return;
+    // Applied for THIS pick only. Writing the choice back onto the CATALOG
+    // entry would strip the card of its other hand, so a rep who picked OX
+    // once could never pick XO from that card again.
+    chosenHand = { code, config };
+  } else {
+    chosenHand = null;
+  }
   selectCard(code);
   useSelected();
 }

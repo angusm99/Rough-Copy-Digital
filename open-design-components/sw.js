@@ -11,7 +11,7 @@
      is wasted bandwidth on a phone hotspot.
 
    Bump CACHE when shipping — old caches are dropped on activate. */
-const CACHE = 'anglo-rc-20260908-field7-release';
+const CACHE = 'anglo-rc-20260908-field10-release';
 
 const SHELL = [
   './',
@@ -26,6 +26,7 @@ const SHELL = [
   'quote-drawing.js',
   'sliding-configs.js',
   'picker-reference.js',
+  'picker-variants.js',
   'field-ui.css',
   'assets/brand/anglo-logo-gold.png',
   'assets/brand/anglo-logo-black.png',
@@ -65,7 +66,10 @@ self.addEventListener('fetch', (e) => {
   if (isAppCode) {
     // network-first: latest code when online, cached shell when not
     e.respondWith(
-      fetch(req)
+      // Same reason as the asset branch below: the worker's own fetch still
+      // reads the browser HTTP cache, and the preview server sends only
+      // Last-Modified, so "network-first" was quietly serving stale HTML.
+      fetch(new Request(req, { cache: 'no-cache' }))
         .then((res) => {
           if (!res.ok) throw new Error('App unavailable');
           const copy = res.clone();

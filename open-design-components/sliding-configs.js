@@ -2,7 +2,15 @@
    Shared geometry, distinct system labels. Codes without panel tokens need a
    deliberate layout choice; catalogue dimensions never confirm site sizes. */
 (function (root) {
-  const layouts = ['OX', 'XO', 'OXX', 'XXO', 'OXXO', 'OXXXXO'];
+  // OX/XO and OXX/XXO are the same unit hung the other way round, so the
+  // catalogue carries one card each and the rep chooses the hand at "Use
+  // this" (Angus, 2026-09-08). OXXO and OXXXXO are palindromes - no choice
+  // to make. `layouts` stays the full set for anything that needs to
+  // enumerate real configurations.
+  const baseLayouts = ['OX', 'OXX', 'OXXO', 'OXXXXO'];
+  const mirrorOf = (c) => String(c).split('').reverse().join('');
+  const handsFor = (c) => (c === mirrorOf(c) ? [c] : [c, mirrorOf(c)]);
+  const layouts = baseLayouts.flatMap(handsFor);
   const eliteSizes = [
     ['0909', ['OX', 'XO']], ['0912', ['OX', 'XO']],
     ['1209', ['OX', 'XO']], ['1503', ['OX', 'XO']],
@@ -13,14 +21,29 @@
   function describe(config) {
     return config.split('').map(p => p === 'O' ? 'Fixed' : 'Sliding').join(' · ');
   }
+  // Merge each size's mirror pair into a single card carrying both hands.
+  function mergeHands(configs) {
+    const out = [], taken = new Set();
+    for (const c of configs) {
+      if (taken.has(c)) continue;
+      const m = mirrorOf(c);
+      const hands = configs.includes(m) && m !== c ? [c, m] : [c];
+      hands.forEach(h => taken.add(h));
+      out.push(hands);
+    }
+    return out;
+  }
   function windowPresets() {
-    return ['Elite', 'Knysna'].flatMap(system => eliteSizes.flatMap(([size, configs]) => configs.map(config => {
+    return ['Elite', 'Knysna'].flatMap(system => eliteSizes.flatMap(([size, configs]) => mergeHands(configs).map(hands => {
+      const config = hands[0];
       const W = Number(size.slice(0, 2)) * 100 - 10;
       const H = Number(size.slice(2)) * 100 - 10;
       return { code: `${system.toUpperCase()}-EHS-${size}-${config}`, sourceCode: `EHS-${size}`,
-        name: `${system} ${config} ${W}×${H}`, system, family: system.toLowerCase(),
-        W, H, panels: config.split(''), config,
-        sub: `${describe(config)} · outside view`,
+        name: `${system} ${hands.join(' / ')} ${W}×${H}`, system, family: system.toLowerCase(),
+        W, H, panels: config.split(''), config, hands,
+        sub: hands.length > 1
+          ? `${describe(config)} · choose hand at Use this`
+          : `${describe(config)} · outside view`,
         note: `${system} sliding window. ${describe(config)} (outside view). EHS-${size}: code-derived reference size ${W} × ${H} mm; confirm final size on site. ` +
           (configs.length > 1 && size !== '3012' ? 'Source does not specify O/X order: these are selectable layouts, not an inferred quote configuration.' : 'Layout explicitly named in the Elite template catalogue.') +
           (system === 'Knysna' ? ' Knysna mirrors the Elite layout; EHS is the source reference, not a verified Knysna stock code.' : '') };
@@ -42,7 +65,7 @@
     });
     return s + '</svg>';
   }
-  const api = { layouts, windowPresets, describe, svg };
+  const api = { layouts, baseLayouts, mirrorOf, handsFor, windowPresets, describe, svg };
   if (typeof module !== 'undefined') module.exports = api;
   else root.SlidingConfigs = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

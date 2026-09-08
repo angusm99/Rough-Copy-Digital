@@ -48,12 +48,62 @@ test('Elite and Knysna have identical explicit layouts and code-derived referenc
   const presets = sliders.windowPresets();
   const elite = presets.filter(p => p.system === 'Elite');
   const knysna = presets.filter(p => p.system === 'Knysna');
-  assert.equal(elite.length, 17); assert.equal(knysna.length, 17);
+  // Mirror pairs share one card now - the hand is chosen at "Use this", so
+  // OX and XO no longer sit next to each other on the page.
+  assert.equal(elite.length, 11); assert.equal(knysna.length, 11);
   assert.deepEqual(elite.map(p=>[p.W,p.H,p.config]), knysna.map(p=>[p.W,p.H,p.config]));
+  // Every card offering two hands must offer exactly a mirror pair, and a
+  // palindrome must never offer a choice there is no difference between.
+  for (const p of presets) {
+    if (p.hands.length > 1) {
+      assert.equal(p.hands.length, 2);
+      assert.equal(p.hands[1], p.hands[0].split('').reverse().join(''));
+      assert.notEqual(p.hands[0], p.hands[1]);
+    } else {
+      assert.equal(p.hands[0], p.config);
+    }
+  }
+  // Both hands of every pair must still be reachable, so nothing was dropped.
+  const reachable = new Set(presets.filter(p=>p.system==='Elite').flatMap(p=>p.hands));
+  assert.ok(reachable.has('OX') && reachable.has('XO'), 'both hands reachable');
   const sourceError = elite.find(p => p.sourceCode === 'EHS-3012' && p.config === 'XOX');
   assert.equal(sourceError.W, 2990); // known wrong quote drawing/overall width: 2090
   assert.equal(elite.find(p=>p.sourceCode === 'EHS-1503').H, 290);
   assert.equal(new Set(presets.map(p=>p.code)).size, presets.length);
+});
+test('one card per configuration: hands and stiles are chosen, not duplicated', () => {
+  // Angus, 2026-09-08: OX beside XO (and 60mm beside 90mm) was "too much
+  // traffic on the page". The catalogue must carry the configuration once.
+  assert.deepEqual(sliders.baseLayouts, ['OX','OXX','OXXO','OXXXXO']);
+  assert.deepEqual(sliders.handsFor('OX'), ['OX','XO']);
+  assert.deepEqual(sliders.handsFor('OXXO'), ['OXXO'], 'palindrome offers no choice');
+  assert.deepEqual(sliders.handsFor('OXXXXO'), ['OXXXXO']);
+  // ...but the full set of real configurations is still enumerable.
+  assert.ok(sliders.layouts.includes('XO') && sliders.layouts.includes('XXO'));
+
+  const cards = doors.hingedCards();
+  assert.ok(cards.length < doors.DOORS.hinged.length, 'stile duplicates collapsed');
+  const multi = cards.filter(c => c.stiles && c.stiles.length > 1);
+  assert.deepEqual(multi.map(c => c.code).sort(), ['HD-O','HDD-O']);
+  for (const c of multi) assert.deepEqual(c.stiles, [60,90]);
+  // A chosen stile must resolve back to the real Bizman code, not a synthetic one.
+  assert.equal(doors.withStile(cards.find(c=>c.code==='HD-O'), 90).code, 'HD-O-90');
+  assert.equal(doors.withStile(cards.find(c=>c.code==='HD-O'), 60).code, 'HD-O-60');
+  // Every hinged entry must still be reachable through some card + stile.
+  const reachable = new Set(cards.flatMap(c =>
+    (c.stiles || [null]).map(w => (w ? doors.withStile(c, w).code : c.code))));
+  for (const d of doors.DOORS.hinged) assert.ok(reachable.has(d.code), d.code + ' unreachable');
+});
+test('60mm and 90mm stiles do not render identically', () => {
+  // They used to: the stile was a flat 30 regardless of the code, so the two
+  // cards were visually indistinguishable. Width is geometry, so it survives
+  // a black-and-white print of the rough copy.
+  const base = { ...doors.find('HD-O-60'), family: 'hinged' };
+  const w60 = doors.doorSVG({ ...base, stile: 60 });
+  const w90 = doors.doorSVG({ ...base, stile: 90 });
+  assert.notEqual(w60, w90);
+  assert.match(w60, /stroke-width="60"/);
+  assert.match(w90, /stroke-width="90"/);
 });
 test('sliding windows do not require door safety glass or door handing', () => {
   const l = {...line(), product:'Elite OX', family:'elite', config:'OX', glass:'4mm Clear', handleSide:'', openingDirection:''};

@@ -1,8 +1,11 @@
 name: Deploy to Netlify
 
+# Manual only, from 2026-09-08. Every push to main used to deploy, which burned
+# Netlify build credits on work-in-progress the reps were never going to see.
+# Pushes still back the code up to GitHub; deploy when a build is field-ready:
+#   gh workflow run "Deploy to Netlify"
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   deploy:

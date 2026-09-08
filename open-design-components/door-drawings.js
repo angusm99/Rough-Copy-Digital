@@ -47,7 +47,12 @@ const SlidingConfigs = typeof module !== 'undefined' ? require('./sliding-config
             + `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${opts.fixed ? D.FIX : D.SASH}"/>`;
       // sash border FIRST, then the midrail on top — drawing the midrail
       // underneath let the border's stroke cut it into two thin lines
-      if (!opts.fixed) s += `<rect x="${x+15}" y="${y+15}" width="${w-30}" height="${h-30}" fill="none" stroke="${D.GOLD}" stroke-width="30"/>`;
+      // Stile drawn at its true mm width. It used to be a flat 30 regardless,
+      // so HD-O-60 and HD-O-90 rendered IDENTICALLY - two cards a rep could
+      // not tell apart. Width is geometry, so it survives a black-and-white
+      // print of the rough copy; shading would not.
+      const stile = opts.stile || 60;
+      if (!opts.fixed) s += `<rect x="${x + stile/2}" y="${y + stile/2}" width="${w - stile}" height="${h - stile}" fill="none" stroke="${D.GOLD}" stroke-width="${stile}"/>`;
       // Midrail is OPT-IN. It used to default on, which put a midrail on every
       // sliding-folding, pivot and patio leaf — only the M codes have one.
       if (opts.midrail === true) s += `<rect x="${x}" y="${D.MID}" width="${w}" height="${D.MIDH}" fill="${D.GOLD}"/>`;
@@ -106,8 +111,8 @@ const SlidingConfigs = typeof module !== 'undefined' ? require('./sliding-config
     }
 
 
-    function hingedStyleSVG(style, widthClass, W, H) {
-      const extras = leafOptsFor(style);
+    function hingedStyleSVG(style, widthClass, W, H, stile) {
+      const extras = { ...leafOptsFor(style), stile: stile || 60 };
       if (widthClass === 'double') {
         // Handles meet at the centre, and the apex follows the handle — so
         // BOTH apexes point inward: left leaf's apex on its right, right
@@ -219,18 +224,67 @@ const SlidingConfigs = typeof module !== 'undefined' ? require('./sliding-config
     // are picker IDs, not a claim that every combination is a Bizman stock code.
     DOORS.multislide = [
       ['PAL', 'Palace Door', 'PALACE'], ['VAL', 'Valencia', 'VALENCIA'], ['CLS', 'CLS-250 Lift and Slide', 'CLS-250']
-    ].flatMap(([key, group, brand]) => SlidingConfigs.layouts.map(config => ({
-      id: `HDS-${key}-${config.length}-${config}`, code: `${key}-${config.length}-${config}`,
-      group, brand, label: `${group} ${config}`, config, panels: config.split(''),
-      lock: '', open: '', note: `${SlidingConfigs.describe(config)} — viewed from outside. Panel order is the configuration; lock side does not change it.`
-    })));
-    DOORS.patio = SlidingConfigs.layouts.map(config => ({
-      id: `SL-${config.length}-${config}`, code: `SL-${config.length}-${config}`, label: `Patio Slider ${config}`,
-      config, panels: config.split(''), lock: '', open: '', note: `${SlidingConfigs.describe(config)} — viewed from outside.`
+    ].flatMap(([key, group, brand]) => SlidingConfigs.baseLayouts.map(config => {
+      const hands = SlidingConfigs.handsFor(config);
+      return {
+        id: `HDS-${key}-${config.length}-${config}`, code: `${key}-${config.length}-${config}`,
+        group, brand, label: `${group} ${hands.join(' / ')}`, config, hands, panels: config.split(''),
+        lock: '', open: '', note: `${SlidingConfigs.describe(config)} — viewed from outside. Panel order is the configuration; lock side does not change it.`
+      };
     }));
+    DOORS.patio = SlidingConfigs.baseLayouts.map(config => {
+      const hands = SlidingConfigs.handsFor(config);
+      return {
+        id: `SL-${config.length}-${config}`, code: `SL-${config.length}-${config}`,
+        label: `Patio Slider ${hands.join(' / ')}`,
+        config, hands, panels: config.split(''), lock: '', open: '',
+        note: `${SlidingConfigs.describe(config)} — viewed from outside.`
+      };
+    });
 
 
 DOORS.hinged.sort((a,b) => (a.open === 'Open out' ? 0 : 1) - (b.open === 'Open out' ? 0 : 1));
+
+// The stile width is a property of the leaf, not a different door. Two cards
+// that differ only by "-60"/"-90" become ONE card carrying both widths, and
+// the rep is asked which at "Use this" (Angus, 2026-09-08: the duplicate
+// cards were "too much traffic on the page"). Only the codes Bizman actually
+// lists get offered - most hinged doors are 60mm only.
+DOORS.hinged.forEach(d => { const m = (d.code || '').match(/-(60|90)$/); if (m) d.stile = Number(m[1]); });
+
+function stileBase(code) { return String(code || '').replace(/-(60|90)$/, ''); }
+
+// One card per configuration, with every stile width Bizman lists for it.
+function hingedCards() {
+  const byBase = new Map();
+  const cards = [];
+  for (const d of DOORS.hinged) {
+    if (!d.stile) { cards.push(d); continue; }
+    const key = stileBase(d.code);
+    const seen = byBase.get(key);
+    if (seen) { if (!seen.stiles.includes(d.stile)) seen.stiles.push(d.stile); continue; }
+    const card = { ...d, stiles: [d.stile] };
+    byBase.set(key, card);
+    cards.push(card);
+  }
+  // Label the card by its configuration, not by the width it happened to be
+  // built from - the width is chosen at pick time.
+  for (const c of cards) {
+    if (c.stiles && c.stiles.length > 1) {
+      c.stiles.sort((a, b) => a - b);
+      c.label = String(c.label).replace(/ · \d+mm$/, '');
+      c.code = stileBase(c.code);
+    }
+  }
+  return cards;
+}
+
+// Resolve a card plus a chosen stile back to the real Bizman entry.
+function withStile(door, stile) {
+  const exact = stile ? find(stileBase(door.code) + '-' + stile) : null;
+  if (exact) return { ...exact, family: door.family || 'hinged', handleSide: door.handleSide };
+  return { ...door, stile: stile || door.stile || 60 };
+}
 DOORS.pivot.forEach(d => { if (!/OI|OO/.test(d.code)) d.open = 'Open out'; });
 function hinged(door) { return ['hinged','pivot'].includes(door?.family); }
 function handMirror(svg, side) {
@@ -242,7 +296,9 @@ function handMirror(svg, side) {
 function doorSVG(door, W, H) {
   if (door.panels) return slidingSVG(door.panels, W, H);
   if (door.leaves) return foldingSVG(door.leaves, W, H, door.activeLeaf || 0);
-  const svg = door.family === 'pivot' ? pivotDoorSVG(door.style || 'glass',W,H) : hingedStyleSVG(door.style || 'glass',door.widthClass || 'single',W,H);
+  const svg = door.family === 'pivot'
+    ? pivotDoorSVG(door.style || 'glass', W, H)
+    : hingedStyleSVG(door.style || 'glass', door.widthClass || 'single', W, H, door.stile);
   return handMirror(svg, door.handleSide);
 }
 function find(code) {
@@ -260,6 +316,6 @@ function openingVariant(door, opening) {
   if (String(door.open).toUpperCase() === opening) return door;
   return {...door, id:'CUSTOM', code:'', open:opening, label:(door.label || 'Door').replace(/ · Open (In|Out)/i,'') + ' · ' + opening};
 }
-const api = {DOORS, doorSVG, find, hinged, openingVariant};
+const api = {DOORS, doorSVG, find, hinged, openingVariant, hingedCards, withStile, stileBase};
 if (typeof module !== 'undefined') module.exports = api; else root.DoorDrawings = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

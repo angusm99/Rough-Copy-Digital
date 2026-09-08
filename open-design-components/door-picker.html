@@ -200,9 +200,9 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260908-field7" />
-  <script src="sliding-configs.js?v=20260908-field7"></script>
-  <script src="picker-reference.js?v=20260908-field7"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field10" />
+  <script src="sliding-configs.js?v=20260908-field10"></script>
+  <script src="picker-reference.js?v=20260908-field10"></script>
 </head>
 <body>
   <div class="wrap">
@@ -220,6 +220,12 @@
             <button class="option" data-family="vistafold">Sliding Folding</button>
             <button class="option" data-family="pivot">Pivot</button>
             <button class="option" data-family="patio">Patio Sliding</button>
+          </div>
+          <div class="families" id="hingedTabs">
+            <button class="option active" data-hgroup="">All hinged</button>
+            <button class="option" data-hgroup="Single Hinged (HD)">Single</button>
+            <button class="option" data-hgroup="Double Hinged (HDD)">Double</button>
+            <button class="option" data-hgroup="Stable (HDSTAB)">Stable</button>
           </div>
         </div>
       </div>
@@ -280,7 +286,8 @@
     </footer>
   </div>
 
-  <script src="door-drawings.js?v=field7"></script>
+  <script src="door-drawings.js?v=field10"></script>
+  <script src="picker-variants.js?v=field10"></script>
   <script>
     // ── Generated drawings in the Anglo architectural door style ─────────
     // Same language as the hand-drawn Anglo-HD/DD/PD assets: #c29b27 frame,
@@ -341,8 +348,34 @@
       document.getElementById('configNote').textContent = 'Select a door configuration.';
     }
 
+    // Which hinged sub-group is showing (Single / Double / Stable), or null
+    // for all. Reps were scrolling past nine singles to reach the doubles.
+    let hingedGroupFilter = null;
+
+    async function resolveVariants(card, family) {
+      if (card.hands && card.hands.length > 1) {
+        const config = await PickerVariants.chooseSliderConfig(
+          card.hands[0], (c) => SlidingConfigs.svg(c, 900, 520));
+        if (!config) return null;
+        return { ...card, family, config, panels: config.split(''),
+                 code: String(card.code).replace(card.hands[0], config),
+                 label: String(card.label).replace(card.hands.join(' / '), config) };
+      }
+      if (card.stiles && card.stiles.length > 1) {
+        const stile = await PickerVariants.chooseStile(card.stiles,
+          (w) => doorSVG({ ...card, family, stile: w }, 200, 380));
+        if (!stile) return null;
+        return DoorDrawings.withStile({ ...card, family }, stile);
+      }
+      return { ...card, family };
+    }
+
     function renderCatalog(family) {
-      const catalog = DOORS[family];
+      // Hinged shows one card per configuration; 60/90 is asked at Use this.
+      let catalog = family === 'hinged' ? DoorDrawings.hingedCards() : DOORS[family];
+      if (family === 'hinged' && hingedGroupFilter) {
+        catalog = catalog.filter(d => (d.group || '') === hingedGroupFilter);
+      }
       const groups = [];
       catalog.forEach((door) => {
         const key = door.group || 'Standard';
@@ -381,6 +414,7 @@
         hinged: 'HINGED DOORS'
       };
       document.getElementById('sectionLabel').textContent = labels[family];
+      document.getElementById('hingedTabs').hidden = family !== 'hinged';
 
       document.querySelectorAll('.door-card').forEach(card => {
         card.addEventListener('click', () => selectDoor(family, card.dataset.id));
@@ -389,16 +423,23 @@
       // Select + confirm in one tap, straight from the card. Reps were having
       // to scroll to the side panel to confirm a pick.
       document.querySelectorAll('.door-card [data-use]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
           e.stopPropagation();
-          selectDoor(family, btn.dataset.use);
+          const card = catalog.find(d => d.id === btn.dataset.use);
+          if (!card) return;
+          // One card per configuration: the hand (OX/XO) and the stile width
+          // are asked here, with a drawing of each, instead of doubling the
+          // number of near-identical cards on the page.
+          const chosen = await resolveVariants(card, family);
+          if (!chosen) return;              // rep cancelled
+          selectDoor(family, chosen.id, chosen);
           saveDoorSelection();
         });
       });
     }
 
-    function selectDoor(family, doorId) {
-      const door = DOORS[family].find(d => d.id === doorId);
+    function selectDoor(family, doorId, resolved) {
+      const door = resolved || DOORS[family].find(d => d.id === doorId);
       if (!door) return;
 
       selectedDoor = { ...door, family };
@@ -414,6 +455,15 @@
       document.getElementById('configNote').textContent =
         `${door.note || door.label} Confirm handle side and opening before using this door.`;
     }
+
+    document.getElementById('hingedTabs').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-hgroup]');
+      if (!btn) return;
+      hingedGroupFilter = btn.dataset.hgroup || null;
+      document.querySelectorAll('#hingedTabs .option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCatalog('hinged');
+    });
 
     document.getElementById('familyTabs').addEventListener('click', (e) => {
       if (!e.target.classList.contains('option')) return;
