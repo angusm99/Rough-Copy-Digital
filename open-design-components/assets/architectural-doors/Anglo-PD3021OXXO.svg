@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2990 2090" width="100%" height="100%">
       <style>
         .frame-bg { fill: #c29b27; }
-        .glass-fixed { fill: rgba(40, 100, 180, 0.6); stroke: #000; stroke-width: 2; }
-        .glass-sash { fill: rgba(40, 100, 180, 0.6); stroke: #000; stroke-width: 2; }
+        .glass-fixed { fill: #1e4273; stroke: #000; stroke-width: 2; }
+        .glass-sash { fill: #1e4273; stroke: #000; stroke-width: 2; }
         .glass-highlight { fill: url(#glow); opacity: 0.15; }
         .sash { fill: none; stroke: #c29b27; stroke-width: 24; }
         .sash-door { fill: none; stroke: #c29b27; stroke-width: 30; }

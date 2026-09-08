@@ -189,15 +189,20 @@
     // offline support for off-site tablet use (see sw.js)
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("sw.js")
+        // updateViaCache:"none" is load-bearing: the default ("imports") checks
+        // sw.js itself against the HTTP cache, and the preview server sends no
+        // Cache-Control, so Chrome kept serving a stale worker. The old worker
+        // then kept serving its own old asset cache, which is why bumping the
+        // cache name twice never reached the tablet.
+        navigator.serviceWorker.register("sw.js", { updateViaCache: "none" })
           .then((r) => console.info("[rc] offline ready:", r.scope))
           .catch((e) => console.warn("[rc] offline unavailable:", e.message));
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260908-field3" />
-  <script src="sliding-configs.js?v=20260908-field3"></script>
-  <script src="picker-reference.js?v=20260908-field3"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field7" />
+  <script src="sliding-configs.js?v=20260908-field7"></script>
+  <script src="picker-reference.js?v=20260908-field7"></script>
 </head>
 <body>
   <div class="wrap">
@@ -275,7 +280,7 @@
     </footer>
   </div>
 
-  <script src="door-drawings.js?v=field3"></script>
+  <script src="door-drawings.js?v=field7"></script>
   <script>
     // ── Generated drawings in the Anglo architectural door style ─────────
     // Same language as the hand-drawn Anglo-HD/DD/PD assets: #c29b27 frame,

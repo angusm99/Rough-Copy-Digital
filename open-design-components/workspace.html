@@ -390,17 +390,22 @@
     // offline support for off-site tablet use (see sw.js)
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("sw.js")
+        // updateViaCache:"none" is load-bearing: the default ("imports") checks
+        // sw.js itself against the HTTP cache, and the preview server sends no
+        // Cache-Control, so Chrome kept serving a stale worker. The old worker
+        // then kept serving its own old asset cache, which is why bumping the
+        // cache name twice never reached the tablet.
+        navigator.serviceWorker.register("sw.js", { updateViaCache: "none" })
           .then((r) => console.info("[rc] offline ready:", r.scope))
           .catch((e) => console.warn("[rc] offline unavailable:", e.message));
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260908-field3" />
-  <script src="field-rules.js?v=20260908-field3"></script>
-  <script src="sliding-configs.js?v=field3"></script>
-  <script src="door-drawings.js?v=field3"></script>
-  <script src="quote-drawing.js?v=field3"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field7" />
+  <script src="field-rules.js?v=20260908-field7"></script>
+  <script src="sliding-configs.js?v=field7"></script>
+  <script src="door-drawings.js?v=field7"></script>
+  <script src="quote-drawing.js?v=field7"></script>
 </head>
 <body>
   <main class="app">
@@ -753,7 +758,7 @@
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>');
     }
   </script>
-  <script src="quote-parser.js?v=20260908-field3"></script>
+  <script src="quote-parser.js?v=20260908-field7"></script>
   <script>
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";
@@ -925,7 +930,7 @@
         try {
           const trimmed=await QuoteDrawing.trim(source);
           if(state.lines!==lines || l.quoteDiagPNG!==source) continue;
-          l.quoteOriginalPNG ||= source; l.quoteDiagPNG=trimmed; l.quoteCropVersion='field3';
+          l.quoteOriginalPNG ||= source; l.quoteDiagPNG=trimmed; l.quoteCropVersion='field7';
         } catch(e) { console.warn('Quote crop retained',e); }
       }
       if(state.lines===lines) { save(); renderTable(); renderSummary(); if(editingIndex>=0) renderEditor(); }
@@ -1075,7 +1080,7 @@
         out.getContext("2d").drawImage(c, cx1, cropY, cropW, cropH, 0, 0, out.width, out.height);
         lines[k].quoteOriginalPNG = out.toDataURL("image/png");
         lines[k].quoteDiagPNG = await QuoteDrawing.trim(lines[k].quoteOriginalPNG);
-        lines[k].quoteCropVersion='field3';
+        lines[k].quoteCropVersion='field7';
       }
     }
 
@@ -2441,6 +2446,6 @@
     // line context unconsumed until a manual refresh — force a real reload.
     window.addEventListener("pageshow", (e) => { if (e.persisted) location.reload(); });
   </script>
-  <div class="build-stamp">Field build · 2026-09-08 / field3</div>
+  <div class="build-stamp">Field build · 2026-09-08 / field7</div>
 </body>
 </html>

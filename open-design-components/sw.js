@@ -11,7 +11,7 @@
      is wasted bandwidth on a phone hotspot.
 
    Bump CACHE when shipping — old caches are dropped on activate. */
-const CACHE = 'anglo-rc-20260908-field3-release';
+const CACHE = 'anglo-rc-20260908-field7-release';
 
 const SHELL = [
   './',
@@ -77,12 +77,29 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // cache-first for assets
+  // Stale-while-revalidate for assets: answer instantly from cache (so this
+  // still works with no signal), then refresh behind it for the next load.
+  // Pure cache-first meant a corrected drawing only reached a tablet if
+  // someone remembered to bump CACHE — that step was missed twice and reps
+  // kept seeing green glass on doors that had been fixed days earlier.
   e.respondWith(
-    caches.open(CACHE).then(c => c.match(req, { ignoreSearch: true })).then((hit) => hit || fetch(req).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
-      return res;
+    caches.open(CACHE).then((c) => c.match(req, { ignoreSearch: true }).then((hit) => {
+      // cache:'no-cache' is load-bearing. The browser HTTP cache sits UNDER
+      // the service worker, and the preview server sends only Last-Modified
+      // (no Cache-Control, no ETag), so Chrome applied heuristic freshness
+      // and handed the worker its own stale copy - the revalidation never
+      // reached the server. This forces a conditional request, so a 304 is
+      // still cheap but a changed drawing actually comes through.
+      const fresh = fetch(new Request(req, { cache: 'no-cache' })).then((res) => {
+        if (res && res.ok) return c.put(req, res.clone()).then(() => res);
+        return res;
+      }).catch(() => hit);
+      // Without waitUntil the worker can be torn down as soon as respondWith
+      // settles, so the revalidation never reaches c.put and the stale copy
+      // survives every reload. Verified on the tablet: two fetches in a row
+      // both returned the old drawing until this was added.
+      e.waitUntil(fresh);
+      return hit || fresh;
     }))
   );
 });
