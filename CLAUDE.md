@@ -2,7 +2,18 @@
 
 This repo is the active Anglo Windows Digital Rough Copy project.
 
-## Current continuation - 2026-09-08 field3
+## Current continuation - 2026-09-08 field11 (local testing only)
+
+Reviewed Claude's pushed 3616682 (one-card configuration/stile selection) and
+177849a (blue artwork/cache fix). Field11 preserves those changes and adds
+standard/parliament hinges, width grouping for Top Hung and Side Hung,
+continuous fixed panes shared by picker/builder, OPEN OUT for unset opening
+direction, easier Add opening controls, and consistent fonts/gutters.
+P4T912B is removed; PTT912B has one continuous fixed base.
+23 regression tests and syntax checks pass. Do not push main or deploy Netlify
+until Angus approves live release; GitHub main triggers automatic deployment.
+
+### Earlier continuation (historical)
 
 Read `FIELD-WORKFLOW-2026-09-07.md` first. It supersedes the June/July capability
 and tablet snapshots below. Claude's base was `b261d6d`; Codex added Elite/Knysna,
@@ -13,7 +24,7 @@ green glass, border and step-numbering gaps (`f7f420c`). Run
 `tools/verify-project.ps1` (18 field regression tests) before commit. Do not
 infer publication from local HEAD.
 
-**Cache key is `field3`.** The SVG assets are cache-first, so any asset change
+**Current cache key is `field11`.** The SVG assets are cache-first, so any asset change
 must bump `field2`->`field3`->... in `sw.js` and the `?v=` query strings, or
 tablets keep serving the old drawings. This is how the green glass survived two
 "fixed" rounds.

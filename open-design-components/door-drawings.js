@@ -316,6 +316,20 @@ function openingVariant(door, opening) {
   if (String(door.open).toUpperCase() === opening) return door;
   return {...door, id:'CUSTOM', code:'', open:opening, label:(door.label || 'Door').replace(/ · Open (In|Out)/i,'') + ' · ' + opening};
 }
-const api = {DOORS, doorSVG, find, hinged, openingVariant, hingedCards, withStile, stileBase};
+function hingeType(door) {
+ return door?.hingeType || (/PARLIAMENT|^HDD?PH/i.test((door?.code || '')+' '+(door?.label || '')) ? 'PARLIAMENT' : 'STANDARD');
+}
+function withHinges(door,value) {
+ const type=value==='PARLIAMENT'?'PARLIAMENT':'STANDARD';
+ const code=String(door.code || '');
+ const base=code.replace(/^(HDD?)PH-/, '$1-');
+ const target=type==='PARLIAMENT' ? base.replace(/^(HDD?)-/, '$1PH-') : base;
+ const exact=find(target);
+ const result=exact && ['glass','parliament'].includes(door.style) ? {...exact,family:door.family,handleSide:door.handleSide} : {...door};
+ result.hingeType=type;
+ result.label=String(result.label || '').replace(/Parliament(?: hinges)?/ig,'').replace(/\s+·/g,' ·').trim();
+ return result;
+}
+const api = {hingeType, withHinges, DOORS, doorSVG, find, hinged, openingVariant, hingedCards, withStile, stileBase};
 if (typeof module !== 'undefined') module.exports = api; else root.DoorDrawings = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

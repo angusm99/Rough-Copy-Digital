@@ -401,11 +401,11 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260908-field10" />
-  <script src="field-rules.js?v=20260908-field10"></script>
-  <script src="sliding-configs.js?v=field10"></script>
-  <script src="door-drawings.js?v=field10"></script>
-  <script src="quote-drawing.js?v=field10"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field11" />
+  <script src="field-rules.js?v=20260908-field11"></script>
+  <script src="sliding-configs.js?v=field11"></script>
+  <script src="door-drawings.js?v=field11"></script>
+  <script src="quote-drawing.js?v=field11"></script>
 </head>
 <body>
   <main class="app">
@@ -555,6 +555,7 @@
           <h2 style="margin:5px 0 0;font-size:21px">Capture: reference → design → measurements → specifications → confirm.</h2>
         </div>
         <div class="table-tools">
+          <button class="primary" id="addLineTableBtn" type="button">+ Add opening</button>
           <div class="summary" id="summary"><span class="status info">No lines</span></div>
           <div class="summary" style="gap:6px;align-items:center">
             <span class="status warn" id="confirmTracker">0 of 0 sizes confirmed</span>
@@ -682,6 +683,7 @@
                   <option>CUSTOM</option>
                 </select>
               </label>
+              <label id="edHingeField"><span class="label">Hinges</span><select id="edHingeType"><option value="STANDARD">Standard hinges</option><option value="PARLIAMENT">Parliament hinges</option></select></label>
               <label><span class="label">Opening direction</span>
                 <select id="edOpeningDirection">
                   <option value="">— confirm —</option>
@@ -703,7 +705,7 @@
           <label class="full"><span class="label">5 · Notes (handles, burglar bars, access, sashes)</span>
             <textarea id="edNotes" placeholder="Anything the workshop or installer must know about this opening"></textarea>
           </label>
-          <div class="full confirm-line-actions"><span id="edDraftStatus" role="status">Draft — changes saved automatically</span><button class="primary" id="edConfirmUse">Confirm and use</button><button class="secondary" id="edConfirmNext">Confirm and next →</button></div>
+          <div class="full confirm-line-actions"><span id="edDraftStatus" role="status">Draft — changes saved automatically</span><button class="primary" id="edConfirmUse">Confirm and use</button><button class="secondary" id="edConfirmNext">Confirm and next →</button><button class="secondary" id="edAddLine" type="button">+ Save draft and add opening</button></div>
         </div>
       </section>
 
@@ -758,7 +760,7 @@
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>');
     }
   </script>
-  <script src="quote-parser.js?v=20260908-field10"></script>
+  <script src="quote-parser.js?v=20260908-field11"></script>
   <script>
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";
@@ -880,6 +882,7 @@
       add("Config", l.config);
       add("Handle/lead", l.handleSide);
       add("Opening", l.openingDirection);
+      add("Hinges", l.hingeType === "PARLIAMENT" ? "Parliament hinges" : l.hingeType === "STANDARD" ? "Standard hinges" : "");
       add("Code", l.code);
       add("Builder", l.pickerNote);
       if (l.designSource === "quote") add("Design", "Quote drawing reviewed on site");
@@ -930,7 +933,7 @@
         try {
           const trimmed=await QuoteDrawing.trim(source);
           if(state.lines!==lines || l.quoteDiagPNG!==source) continue;
-          l.quoteOriginalPNG ||= source; l.quoteDiagPNG=trimmed; l.quoteCropVersion='field10';
+          l.quoteOriginalPNG ||= source; l.quoteDiagPNG=trimmed; l.quoteCropVersion='field11';
         } catch(e) { console.warn('Quote crop retained',e); }
       }
       if(state.lines===lines) { save(); renderTable(); renderSummary(); if(editingIndex>=0) renderEditor(); }
@@ -1080,7 +1083,7 @@
         out.getContext("2d").drawImage(c, cx1, cropY, cropW, cropH, 0, 0, out.width, out.height);
         lines[k].quoteOriginalPNG = out.toDataURL("image/png");
         lines[k].quoteDiagPNG = await QuoteDrawing.trim(lines[k].quoteOriginalPNG);
-        lines[k].quoteCropVersion='field10';
+        lines[k].quoteCropVersion='field11';
       }
     }
 
@@ -1391,7 +1394,7 @@
         if (!ready) { if (!input.disabled) input.dataset.siteLocked = '1'; input.disabled = true; }
         else if (input.dataset.siteLocked) { input.disabled = false; delete input.dataset.siteLocked; }
       });
-      ['addLineBtn', 'useAllQuoteBtn', 'confirmAllBtn'].forEach(id => { document.getElementById(id).disabled = !ready; });
+      ['addLineBtn', 'addLineTableBtn', 'useAllQuoteBtn', 'confirmAllBtn'].forEach(id => { document.getElementById(id).disabled = !ready; });
     }
     function requireSite() {
       if (FieldRules.siteReady(state.site)) return true;
@@ -1910,9 +1913,13 @@
       const opOptions = hinged ? ['', 'OPEN OUT','OPEN IN','CUSTOM'] : ['', 'OPEN OUT','OPEN IN','STACK LEFT','STACK RIGHT','CUSTOM'];
       document.getElementById('edOpeningDirection').innerHTML=opOptions.map(o=>'<option value="'+o+'">'+(o || '— confirm —')+'</option>').join('');
       if (hinged && !l.openingDirection) {
-        l.openingDirection = /(?:-|\b)I-(60|90)\b|OPEN IN/i.test((l.code || '')+' '+(l.rawDescription || l.product || '')) ? 'OPEN IN' : 'OPEN OUT';
+        l.openingDirection = 'OPEN OUT'; // new review default; existing saved choices are retained
         save();
       }
+      const hingeDoor=l.family==='hinged' || /HINGED|STABLE/i.test(l.product || '');
+      document.getElementById('edHingeField').classList.toggle('hidden',!hingeDoor);
+      if(hingeDoor && !l.hingeType) l.hingeType=DoorDrawings.hingeType(l.design || {code:l.code,label:l.rawDescription || l.product});
+      setSelect('edHingeType',l.hingeType || 'STANDARD');
       setSelect("edHandleSide", l.handleSide);
       setSelect("edOpeningDirection", l.openingDirection);
       setVal("edNotes", l.notes);
@@ -2042,6 +2049,15 @@
       bind("edCustomColour", (l, v) => { l.customColour = v; });
       bind("edCustomColourCode", (l, v) => { l.customColourCode = v; });
       bind("edWrap", (l, v) => { l.wrap = v; });
+      bind("edHingeType",(l,v)=>{
+        l.hingeType=v;
+        if(l.designSource!=='quote') {
+          const design=l.design || DoorDrawings.find(l.code);
+          if(design) { l.design=DoorDrawings.withHinges(design,v); l.code=l.design.code; l.product=l.design.label; }
+        }
+        updateLineDrawing(l);
+        document.getElementById('edTypeName').textContent=l.product || '';
+      });
       bind("edHandleSide", (l, v) => { l.handleSide = v; updateLineDrawing(l); });
       bind("edOpeningDirection", (l, v) => { l.openingDirection = v; updateLineDrawing(l, true); });
       bind("edNotes", (l, v) => { l.notes = v; });
@@ -2195,6 +2211,7 @@
       if (res.kind === "window" || typeof res.config === "string") l.config = res.config || "";
       l.handleSide = res.handleSide || '';
       l.openingDirection = res.openingDirection || '';
+      l.hingeType = res.hingeType || '';
       if (typeof res.glass === 'string') l.glass = res.glass;
       l.customGlass = res.customGlass || '';
       l.glassOverride = l.glass !== l.quoteGlass || l.customGlass !== l.quoteCustomGlass;
@@ -2234,15 +2251,16 @@
     document.getElementById("applyGlassBtn").addEventListener('click',applyGlassPolicy);
     document.getElementById("useAllQuoteBtn").addEventListener("click", useAllQuoteSizes);
     document.getElementById("confirmAllBtn").addEventListener("click", confirmAllSizes);
-    document.getElementById("addLineBtn").addEventListener("click", () => {
-      if (!requireSite()) return;
+    function addOpening() {
+      if (!requireSite() || !save()) return;
       state.lines.push(blankLine(state.site.glassPolicy === 'GLOBAL' ? {glass:state.site.globalGlass || '', customGlass:state.site.globalCustomGlass || ''} : {}));
       save();
       renderTable();
       renderSummary();
       openEditor(state.lines.length - 1);
       document.getElementById("edRef").focus();
-    });
+    }
+    ['addLineBtn','addLineTableBtn','edAddLine'].forEach(id=>document.getElementById(id).addEventListener('click',addOpening));
     document.getElementById("clearBtn").addEventListener("click", () => {
       if (!state.job && !state.lines.length && !Object.keys(state.site).length) return;
       if (!confirm("Clear the current job, site details, and all lines?")) return;
@@ -2446,6 +2464,6 @@
     // line context unconsumed until a manual refresh — force a real reload.
     window.addEventListener("pageshow", (e) => { if (e.persisted) location.reload(); });
   </script>
-  <div class="build-stamp">Field build · 2026-09-08 / field10</div>
+  <div class="build-stamp">Field build · 2026-09-08 / field11</div>
 </body>
 </html>

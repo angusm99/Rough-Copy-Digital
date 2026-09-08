@@ -194,8 +194,9 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260908-field10" />
-  <script src="picker-reference.js?v=20260908-field10"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field11" />
+  <script src="window-frames.js?v=field11"></script>
+  <script src="picker-reference.js?v=20260908-field11"></script>
 </head>
 <body>
 <div class="modal">
@@ -347,7 +348,7 @@ try {
       W: seed.W, H: seed.H,
       cols: seed.colW.length, rows: seed.rowH.length,
       colW: seed.colW.slice(), rowH: seed.rowH.slice(),
-      types: seed.types.slice(),
+      types: seed.types.slice(), spans: seed.spans || [],
     };
     if (seed.name) document.getElementById('builderName').textContent = seed.name + ' — custom';
   }
@@ -376,6 +377,7 @@ function fixTotals(arr, total) {
   }
 }
 function regrid(newCols, newRows) {
+  wb.spans=[];
   const old = { cols: wb.cols, rows: wb.rows, types: wb.types.slice() };
   wb.cols = newCols; wb.rows = newRows;
   wb.colW = split(wb.W, newCols);
@@ -420,7 +422,10 @@ function resizeOverall(newW, newH) {
   render();
 }
 function cycleCell(i) {
-  wb.types[i] = CYCLE[(CYCLE.indexOf(wb.types[i]) + 1) % CYCLE.length];
+  const pane=WindowFrames.panes(wb).find(p=>p.r*wb.cols+p.c===i);
+  const next=CYCLE[(CYCLE.indexOf(wb.types[i])+1)%CYCLE.length];
+  if(pane) { for(let r=pane.r;r<pane.r+pane.rs;r++)for(let c=pane.c;c<pane.c+pane.cs;c++)wb.types[r*wb.cols+c]=next; }
+  else wb.types[i]=next;
   render();
 }
 function setDim(axis, i, v) {
@@ -433,74 +438,13 @@ function setDim(axis, i, v) {
 }
 
 // ── SVG render (same drawing language as the window picker) ──────────────
-function drawSVG(W, H, interactive) {
-  let colXs = [0]; wb.colW.forEach((w) => colXs.push(colXs[colXs.length - 1] + w));
-  let rowYs = [0]; wb.rowH.forEach((h) => rowYs.push(rowYs[rowYs.length - 1] + h));
-  const scX = W / wb.W, scY = H / wb.H;
-  const profile = Math.max(3, Math.min(12, Math.round(Math.min(W, H) * .055)));
-  const sashInset = Math.max(3, Math.round(profile * .75));
-  const clickRects = [];
-  let s = '';
-  for (let r = 0; r < wb.rows; r++) for (let c = 0; c < wb.cols; c++) {
-    const i = r * wb.cols + c;
-    const t = wb.types[i];
-    const x1 = Math.round(colXs[c] * scX + .5), y1 = Math.round(rowYs[r] * scY + .5);
-    const x2 = Math.round(colXs[c + 1] * scX - .5), y2 = Math.round(rowYs[r + 1] * scY - .5);
-    const fillClr = CLR[t] || CLR.FIXED;
-    const w = Math.max(1, x2 - x1);
-    const h = Math.max(1, y2 - y1);
-    const gx = x1 + profile;
-    const gy = y1 + profile;
-    const gw = Math.max(2, w - profile * 2);
-    const gh = Math.max(2, h - profile * 2);
-    s += `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" fill="${fillClr}12" stroke="none"/>`;
-    s += `<rect x="${gx}" y="${gy}" width="${gw}" height="${gh}" fill="#0d1319" stroke="#d0ae62" stroke-width="${Math.max(.8, profile * .16)}"/>`;
-    s += `<rect x="${gx + 1}" y="${gy + 1}" width="${Math.max(1, gw - 2)}" height="${Math.max(1, gh - 2)}" fill="rgba(40,100,180,0.60)" stroke="#1b242b" stroke-width="${Math.max(.6, profile * .12)}"/>`;
-    if (t === 'TOP') {
-      const topY = gy + sashInset;
-      const apexY = gy + Math.round(gh * .86);
-      const midX = Math.round(gx + gw / 2);
-      s += `<path d="M ${gx + sashInset} ${topY} L ${gx + gw - sashInset} ${topY} L ${midX} ${apexY} Z" fill="none" stroke="#fff" stroke-dasharray="4 4" stroke-width="${Math.max(1.2, profile * .28)}" stroke-linejoin="round" pointer-events="none"/>`;
-    }
-    if (t === 'SIDE') {
-      const leftX = gx + sashInset;
-      const apexX = gx + Math.round(gw * .86);
-      const midY = Math.round(gy + gh / 2);
-      s += `<path d="M ${leftX} ${gy + sashInset} L ${apexX} ${midY} L ${leftX} ${gy + gh - sashInset} Z" fill="none" stroke="#fff" stroke-dasharray="4 4" stroke-width="${Math.max(1.2, profile * .28)}" stroke-linejoin="round" pointer-events="none"/>`;
-    }
-    if (t === 'TOPLIGHT') {
-      for (let hx = gx + 4; hx < gx + gw; hx += 7)
-        s += `<line x1="${hx}" y1="${gy + 2}" x2="${hx - 6}" y2="${gy + gh - 2}" stroke="${CLR.TOPLIGHT}" stroke-width=".7" opacity=".5" pointer-events="none"/>`;
-    }
-    if (interactive) {
-      // cell label: type + mm
-      s += `<text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-family="monospace" fill="${fillClr}" opacity=".85" pointer-events="none">${t}</text>`;
-      s += `<text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 + 14}" text-anchor="middle" font-size="9.5" font-family="monospace" fill="#8a9ab0" pointer-events="none">${wb.colW[c]}×${wb.rowH[r]}</text>`;
-    }
-    clickRects.push(`<rect data-i="${i}" x="${x1}" y="${y1}" width="${w}" height="${h}" fill="transparent" pointer-events="all"/>`);
-  }
-
-  for (let c = 1; c < wb.cols; c++) {
-    const x = Math.round(colXs[c] * scX);
-    s += `<line x1="${x}" y1="1.5" x2="${x}" y2="${H - 1.5}" stroke="#d0ae62" stroke-width="${profile * 1.1}" pointer-events="none"/>`;
-    s += `<line x1="${x}" y1="1.5" x2="${x}" y2="${H - 1.5}" stroke="${CLR.MULLION}" stroke-width="${Math.max(1.2, profile * .3)}" pointer-events="none"/>`;
-  }
-  for (let r = 1; r < wb.rows; r++) {
-    const y = Math.round(rowYs[r] * scY);
-    s += `<line x1="1.5" y1="${y}" x2="${W - 1.5}" y2="${y}" stroke="#d0ae62" stroke-width="${profile * 1.1}" pointer-events="none"/>`;
-    s += `<line x1="1.5" y1="${y}" x2="${W - 1.5}" y2="${y}" stroke="${CLR.MULLION}" stroke-width="${Math.max(1.2, profile * .3)}" pointer-events="none"/>`;
-  }
-
-  s += `<rect x="${profile / 2}" y="${profile / 2}" width="${W - profile}" height="${H - profile}" fill="none" stroke="#d0ae62" stroke-width="${profile}" pointer-events="none"/>`;
-  s += `<rect x="1" y="1" width="${W - 2}" height="${H - 2}" fill="none" stroke="${CLR.FRAME}" stroke-width="${Math.max(1.6, profile * .28)}" pointer-events="none"/>`;
-  if (interactive) s += clickRects.join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${s}</svg>`;
-}
+function drawSVG(W,H,interactive) { return WindowFrames.svg(wb,W,H,null,interactive); }
 
 function specString() {
-  const cells = wb.types.map((t, i) => {
-    const c = i % wb.cols, r = Math.floor(i / wb.cols);
-    return `${t}@${wb.colW[c]}×${wb.rowH[r]}`;
+  const cells = WindowFrames.panes(wb).map(p => {
+    const width=wb.colW.slice(p.c,p.c+p.cs).reduce((a,b)=>a+b,0);
+    const height=wb.rowH.slice(p.r,p.r+p.rs).reduce((a,b)=>a+b,0);
+    return p.t+'@'+width+'×'+height;
   });
   return `${wb.W}×${wb.H} • ${wb.cols}×${wb.rows} grid\ncols: ${wb.colW.join(' | ')}\nrows: ${wb.rowH.join(' | ')}\n${cells.join(', ')}`;
 }
@@ -555,6 +499,7 @@ const FRAME_PRESETS = {
   'Twin vents + fix': { colW:[450,450], rowH:[600,300], types:['TOP','TOP','FIXED','FIXED'] },
 };
 function applyFramePreset(key) {
+  wb.spans=[];
   const p = FRAME_PRESETS[key];
   if (!p) return;
   const cw = p.colW.reduce((a,b)=>a+b,0), rh = p.rowH.reduce((a,b)=>a+b,0);

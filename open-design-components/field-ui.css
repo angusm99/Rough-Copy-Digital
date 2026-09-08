@@ -75,3 +75,20 @@
     border: 2px solid var(--outline-gold-soft); border-radius: 10px;
     background: transparent; color: var(--text); font: inherit; cursor: pointer; }
 }
+/* Shared field typography and safe viewport gutters (field11). */
+@media screen {
+ :root { --font-body: "Segoe UI", Arial, sans-serif; --font-display: "Segoe UI", Arial, sans-serif; --font-mono: "Cascadia Mono", Consolas, monospace; }
+ body, button, input, select, textarea { font-family:var(--font-body); }
+ h1,h2,h3,.catalog-group-title,.hdr-input-lg { font-family:var(--font-display); }
+ .label { font-family:var(--font-body); letter-spacing:.035em; }
+ body { padding:clamp(12px,2vw,24px); }
+ .app,.wrap,.shell,.workspace { min-width:0; max-width:100%; }
+ .head,.header,.table-tools,.toolbar,.actions,.head-actions,.editor-nav { flex-wrap:wrap; gap:10px; }
+ .head-left,.job-id,.job-id-fields,.content,.body,.side,.canvas-panel { min-width:0; }
+ .side input,.side select { width:100%; min-width:0; }
+ .table-scroll { max-width:100%; }
+ .screen-card,.card,.door-card,.panel,.site-grid label { min-width:0; overflow-wrap:anywhere; }
+ #canvasBox svg { max-width:100%; height:auto; }
+ .variant-dialog { max-height:calc(100dvh - 32px); overflow:auto; }
+ @media(max-width:850px) { .editor-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .head h1 { font-size:26px; } .head-left { flex:1 1 100%; } }
+}

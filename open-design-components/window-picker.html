@@ -184,10 +184,11 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260908-field10" />
-  <script src="sliding-configs.js?v=20260908-field10"></script>
-  <script src="picker-variants.js?v=field10"></script>
-  <script src="picker-reference.js?v=20260908-field10"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field11" />
+  <script src="window-frames.js?v=field11"></script>
+  <script src="sliding-configs.js?v=20260908-field11"></script>
+  <script src="picker-variants.js?v=field11"></script>
+  <script src="picker-reference.js?v=20260908-field11"></script>
 </head>
 <body>
 <div class="modal">
@@ -291,61 +292,17 @@
 // Same visual language as the hand-drawn Anglo-*.svg assets: gold frame,
 // dark glass, green sash / blue fixed tint, white dashed opening chevrons.
 // Drawn in mm coordinates so every config renders its true proportions.
-function presetSVG(p, W, H, couplingEdge) {
-  const mmW = p.W, mmH = p.H;
-  const FR = 45;        // outer frame border (mm)
-  const GAP = 14;       // gold gap between panes (mullion/transom)
-  const SASH = 22;      // sash inner gold border
-  const GOLD = '#ffcc00', GLASS = '#0f1012';
-  const TINT_S = 'rgba(40,100,180,0.60)', TINT_F = 'rgba(40,100,180,0.60)';
-  const OPEN = 'rgba(255,255,255,0.6)';
-  let colXs=[0]; p.colW.forEach(w=>colXs.push(colXs[colXs.length-1]+w));
-  let rowYs=[0]; p.rowH.forEach(h=>rowYs.push(rowYs[rowYs.length-1]+h));
-
-  let s = `<rect x="0" y="0" width="${mmW}" height="${mmH}" rx="6" fill="${GOLD}"/>`;
-  for (let r=0; r<p.rows; r++) for (let c=0; c<p.cols; c++) {
-    const t = p.types[r*p.cols+c];
-    const x1 = colXs[c]   + (c===0        ? FR : GAP/2);
-    const x2 = colXs[c+1] - (c===p.cols-1 ? FR : GAP/2);
-    const y1 = rowYs[r]   + (r===0        ? FR : GAP/2);
-    const y2 = rowYs[r+1] - (r===p.rows-1 ? FR : GAP/2);
-    const w = x2-x1, h = y2-y1;
-    if (w <= 0 || h <= 0) continue;
-    const vent = (t==='TOP' || t==='SIDE');
-    s += `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" fill="${GLASS}" stroke="#000" stroke-width="2"/>`;
-    s += `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" fill="${vent ? TINT_S : TINT_F}"/>`;
-    if (vent) {
-      const si = SASH/2 + 6;
-      s += `<rect x="${x1+si}" y="${y1+si}" width="${w-2*si}" height="${h-2*si}" fill="none" stroke="${GOLD}" stroke-width="${SASH}"/>`;
-      const m = SASH + 22; // opening-line inset
-      const dash = `fill="none" stroke="${OPEN}" stroke-width="6" stroke-dasharray="12,12" stroke-linecap="round" stroke-linejoin="round"`;
-      if (t === 'TOP') {
-        s += `<polyline points="${x1+m},${y1+m} ${(x1+x2)/2},${y2-m} ${x2-m},${y1+m}" ${dash}/>`;
-      } else {
-        s += `<polyline points="${x1+m},${y1+m} ${x2-m},${(y1+y2)/2} ${x1+m},${y2-m}" ${dash}/>`;
-      }
-    }
-  }
-
-  // Stronger coupling-mullion indicator (fix presets): red edge line —
-  // toplight = below, sublight = above, sidelight = left/right.
-  if (couplingEdge) {
-    const RED = '#e5484d', cw = 40, i = cw/2;
-    if (couplingEdge === 'top')    s += `<line x1="0" y1="${i}" x2="${mmW}" y2="${i}" stroke="${RED}" stroke-width="${cw}"/>`;
-    if (couplingEdge === 'bottom') s += `<line x1="0" y1="${mmH-i}" x2="${mmW}" y2="${mmH-i}" stroke="${RED}" stroke-width="${cw}"/>`;
-    if (couplingEdge === 'left')   s += `<line x1="${i}" y1="0" x2="${i}" y2="${mmH}" stroke="${RED}" stroke-width="${cw}"/>`;
-    if (couplingEdge === 'right')  s += `<line x1="${mmW-i}" y1="0" x2="${mmW-i}" y2="${mmH}" stroke="${RED}" stroke-width="${cw}"/>`;
-  }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${mmW} ${mmH}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
-}
+function presetSVG(p,W,H,couplingEdge) { return WindowFrames.svg(p,W,H,couplingEdge); }
 
 function makeGridPreset({ name, code, W, H, family, group, colW, rowH, types, sub, note, svgFn }) {
-  return {
+  const preset = {
     name, code, W, H, family, group, svgFn,
     cols: colW ? colW.length : 0,
     rows: rowH ? rowH.length : 0,
     colW, rowH, types, sub, note,
   };
+  preset.spans=WindowFrames.standardSpans(preset);
+  return preset;
 }
 
 function makeTopHung({ name, code, W, H, colW, rowH, types, group = 'Top Hung - Standard', sub, note }) {
@@ -426,7 +383,7 @@ function drawingMarkupFor(windowItem) {
 
 function renderWindowGraphic(windowItem, width, height, couplingEdge) {
   if (windowItem.panels) return SlidingConfigs.svg(windowItem.config, windowItem.W, windowItem.H);
-  const drawing = drawingMarkupFor(windowItem);
+  const drawing = windowItem.spans?.length ? '' : drawingMarkupFor(windowItem);
   if (drawing) return drawing;
   return presetSVG(windowItem, width, height, couplingEdge);
 }
@@ -510,7 +467,6 @@ const CATALOG = [
 
   // ── Top Hung B range ────────────────────────────────────────────────
   makeTopHung({ name:'Top Hung B 900×1200', code:'PTT912B', W:900, H:1200, group:'Top Hung B Range', colW:[450,450], rowH:[600,600], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + fixed base • PTT912B' }),
-  makeTopHung({ name:'Top Hung B 900×1200 (Four Vent)', code:'P4T912B', W:900, H:1200, group:'Top Hung B Range', colW:[450,450], rowH:[600,600], types:['TOP','TOP','TOP','TOP'], sub:'Four vents • P4T912B' }),
   makeTopHung({ name:'Top Hung B 1200×1200', code:'PTT1212B', W:1200, H:1200, group:'Top Hung B Range', colW:[600,600], rowH:[600,600], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + fixed base • PTT1212B' }),
   makeTopHung({ name:'Top Hung B 1200×1200 (Four Vent)', code:'P4T1212B', W:1200, H:1200, group:'Top Hung B Range', colW:[600,600], rowH:[600,600], types:['TOP','TOP','TOP','TOP'], sub:'Four vents • P4T1212B' }),
   makeTopHung({ name:'Top Hung B 1500×1200', code:'PTT1512B', W:1500, H:1200, group:'Top Hung B Range', colW:[750,750], rowH:[600,600], types:['TOP','TOP','FIXED','FIXED'], sub:'Twin vents + fixed base • PTT1512B' }),
@@ -683,6 +639,8 @@ function setFilter(f) {
     b.classList.toggle('active', b.dataset.filter === f);
   });
   renderCatalog();
+  const visible=CATALOG.filter(w=>f==='all'||w.family===f);
+  if(visible.length && !visible.some(w=>w.code===selectedCode))selectCard(visible[0].code);
 }
 
 function setView(v) {
@@ -710,16 +668,17 @@ function renderCatalog() {
   const groups = [];
   items.forEach((item) => {
     const isFix = item.family === 'fixed';
-    const key = isFix ? 'Full fix — any size' : `${item.H} high`;
+    const byWidth = ['tophung','sidehung'].includes(activeFilter);
+    const key = isFix ? 'Full fix — any size' : byWidth ? `${item.W} wide` : `${item.H} high`;
     let found = groups.find((g) => g.key === key);
     if (!found) {
-      found = { key, sortKey: isFix ? Infinity : item.H, items: [] };
+      found = { key, sortKey: isFix ? Infinity : byWidth ? item.W : item.H, items: [] };
       groups.push(found);
     }
     found.items.push(item);
   });
   groups.sort((a, b) => a.sortKey - b.sortKey);
-  groups.forEach((g) => g.items.sort((a, b) => a.W - b.W));
+  groups.forEach((g) => g.items.sort((a,b) => ['tophung','sidehung'].includes(activeFilter) ? a.H-b.H : a.W-b.W));
 
   const renderCard = (w) => {
     const thumbW = 88, thumbH = Math.max(56, Math.round(thumbW * w.H / w.W));
@@ -856,7 +815,7 @@ function openInBuilder() {
   if (w?.panels) { alert('Sliding layouts are edited in this picker. The custom builder currently supports casements and fixed frames only.'); return; }
   if (w && w.colW && w.rowH && w.types) {
     localStorage.setItem('aw_builder_seed', JSON.stringify({
-      W: w.W, H: w.H, colW: w.colW, rowH: w.rowH, types: w.types, name: w.name
+      W: w.W, H: w.H, colW: w.colW, rowH: w.rowH, types: w.types, spans:w.spans || [], name: w.name
     }));
   }
   // aw_picker_ctx stays put so the builder still returns to the same line

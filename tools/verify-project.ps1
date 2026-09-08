@@ -24,6 +24,7 @@ Write-Host ""
 $requiredFiles = @(
     "index.html",
     "field-rules.js",
+    "window-frames.js",
     "door-drawings.js",
     "quote-drawing.js",
     "sliding-configs.js",
@@ -74,7 +75,7 @@ else {
         "door-picker.html"
     )
 
-    foreach ($module in @("field-rules.js", "sliding-configs.js", "door-drawings.js", "quote-drawing.js", "picker-reference.js", "sw.js")) {
+    foreach ($module in @("field-rules.js", "window-frames.js", "sliding-configs.js", "door-drawings.js", "quote-drawing.js", "picker-reference.js", "picker-variants.js", "sw.js")) {
         & $node.Source --check (Join-Path $activeDir $module)
         if ($LASTEXITCODE -eq 0) { Add-Pass "$module syntax" }
         else { Add-Failure "$module syntax" }

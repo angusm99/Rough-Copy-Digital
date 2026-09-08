@@ -116,6 +116,37 @@ test('quote parser preserves sliding window identity and XO panel order', () => 
 });
 const doors = require('../open-design-components/door-drawings.js');
 const crops = require('../open-design-components/quote-drawing.js');
+const frames = require('../open-design-components/window-frames.js');
+test('continuous side fix and single B-range base have no phantom transoms',()=>{
+  const side={W:1800,H:900,cols:2,rows:2,colW:[900,900],rowH:[450,450],types:['TOP','FIXED','FIXED','FIXED'],family:'tophung'};
+  side.spans=frames.standardSpans(side);
+  assert.deepEqual(frames.panes(side).find(p=>p.c===1),{r:0,c:1,rs:2,cs:1,t:'FIXED'});
+  assert.equal(frames.panes(side).length,3);
+  const base={...side,W:900,H:1200,colW:[450,450],rowH:[600,600],types:['TOP','TOP','FIXED','FIXED']};
+  base.spans=frames.standardSpans(base);
+  assert.deepEqual(frames.panes(base).find(p=>p.r===1),{r:1,c:0,rs:1,cs:2,t:'FIXED'});
+  assert.equal(frames.panes(base).length,3);
+  assert.equal((frames.svg(base,90,120).match(/data-pane=/g)||[]).length,3);
+});
+test('full fix grids retain intentional splits; changing a merged pane preserves coverage',()=>{
+  const p={W:1200,H:1200,cols:2,rows:2,colW:[600,600],rowH:[600,600],types:['FIXED','FIXED','FIXED','FIXED'],family:'fixed'};
+  p.spans=frames.standardSpans(p);
+  assert.equal(p.spans.length,0); assert.equal(frames.panes(p).length,4);
+  p.spans=[{r:0,c:1,rs:2,cs:1}];
+  p.types[1]=p.types[3]='TOP';
+  assert.equal(frames.panes(p).length,3);
+});
+test('hinge hardware choice round-trips independently from leaf design',()=>{
+  const standard=doors.find('HD-O-60');
+  const parliament=doors.withHinges(standard,'PARLIAMENT');
+  assert.equal(parliament.hingeType,'PARLIAMENT');
+  assert.equal(parliament.code,'HDPH-O-60');
+  assert.equal(doors.withHinges(parliament,'STANDARD').code,'HD-O-60');
+  const midrail=doors.withHinges(doors.find('HDM-O-60'),'PARLIAMENT');
+  assert.equal(midrail.style,'midrail'); assert.equal(midrail.hingeType,'PARLIAMENT');
+  const l={...line(),hingeType:'STANDARD'}; l.lineConfirmed=rules.lineFingerprint(l);
+  assert.ok(rules.lineMissing({...l,hingeType:'PARLIAMENT'}).includes('confirm line'));
+});
 const fs = require('node:fs');
 const vm = require('node:vm');
 function workspaceHarness() {

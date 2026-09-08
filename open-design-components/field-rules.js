@@ -27,7 +27,7 @@
   }
   function slider(l) { return ['elite','knysna','patio','multislide'].includes(l.family) || /SLIDING|SLIDER|PALACE|VALENCIA|CLS-?250/i.test(l.product || '') && !/FOLD/i.test(l.product || ''); }
   function lineFingerprint(l,s={}) {
-    const fields = ['ref','location','product','code','family','width','height','qty','glass','customGlass','colour','specialColour','customColour','customColourCode','wrap','notes','config','handleSide','openingDirection','designSource','diagSVG','sizeConfirmed'];
+    const fields = ['ref','location','product','code','family','width','height','qty','glass','customGlass','colour','specialColour','customColour','customColourCode','wrap','notes','config','handleSide','openingDirection','hingeType','designSource','diagSVG','sizeConfirmed'];
     return JSON.stringify([fields.map(k=>l[k] ?? ''), fingerprint(s), s.flatsAngles || 'YES']);
   }
   function lineMissing(l, s = {}, skipReview = false) {
@@ -52,7 +52,7 @@
     if (!skipReview && l.lineConfirmed !== lineFingerprint(l,s)) m.push('confirm line');
     return m;
   }
-  function quoteDesignFingerprint(l) { return JSON.stringify(['product','config','handleSide','openingDirection'].map(k=>l[k] || '')); }
+  function quoteDesignFingerprint(l) { return JSON.stringify(['product','config','handleSide','openingDirection','hingeType'].map(k=>l[k] || '')); }
   const api = { slider, lineFingerprint, quoteDesignFingerprint, siteKeys, siteMissing, fingerprint, siteReady, lineMissing, positive };
   if (typeof module !== 'undefined') module.exports = api;
   else root.FieldRules = api;
