@@ -32,9 +32,9 @@
 
     /* Edges carry the brand as a TINT, not as a shout. Every hairline is
        gold at low alpha, so the warmth survives without the boxes. */
-    --hairline: rgba(255, 207, 1, .14);
-    --hairline-strong: rgba(255, 207, 1, .28);
-    --hairline-hover: rgba(255, 207, 1, .45);
+    --hairline: rgba(255, 207, 1, .26);
+    --hairline-strong: rgba(255, 207, 1, .48);
+    --hairline-hover: rgba(255, 207, 1, .70);
 
     /* Elevation scale — what separates panels now that borders don't. */
     --bg: #0d0f13;
@@ -45,8 +45,8 @@
     /* Text. Kept bright deliberately: the tablet is read in direct sun. */
     --fg: #f5f3ec;
     --text: #f5f3ec;
-    --muted: #c9c5b7;               /* labels — readable, not decorative */
-    --muted-2: #9a968a;             /* hints, secondary notes */
+    --muted: #ded9c6;               /* labels — warm, bright enough for sun */
+    --muted-2: #b0ab9a;             /* hints, secondary notes */
 
     --danger: #ff9470;
     --ok: #6fcf97;
@@ -71,7 +71,18 @@
   }
 
   /* ── Type ──────────────────────────────────────────────────────────── */
-  h1, h2, h3, .catalog-group-title, .hdr-input-lg { font-family: var(--font-display); }
+  :root {
+    --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system,
+                    Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system,
+                 Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Cascadia Mono", "JetBrains Mono", Consolas, ui-monospace, monospace;
+  }
+  h1, h2, h3, .brand-title, .catalog-group-title, .hdr-input-lg {
+    font-family: var(--font-display);
+    font-weight: 650;
+    letter-spacing: -.011em;
+  }
   body, button, input, select, textarea { font-family: var(--font-body); }
 
   /* Labels step back so the VALUE is what the eye lands on. They used to be
@@ -345,7 +356,56 @@
 /* ── Layout: compact site capture ────────────────────────────────────────
    Contact/reference columns, paired decisions, bottom actions (field12). */
 @media screen {
-  .workspace .site-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  /* One page at a time. The grid itself is now a plain block and each step
+     carries the columns, so wrapping the fields did not disturb the layout. */
+  .workspace .site-grid { display: block; }
+  .site-step { display: none; }
+  .site-step.is-active {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 12px;
+    align-content: start;
+  }
+
+  .site-steps { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; }
+  .site-step-chip {
+    flex: 1 1 150px;
+    display: flex; align-items: center; gap: 9px;
+    min-height: 46px; padding: 8px 12px;
+    border: 1.5px solid var(--hairline-strong);
+    border-radius: var(--radius-sm);
+    background: var(--field);
+    color: var(--muted);
+    font: inherit; font-size: 14px; font-weight: 600;
+    text-align: left; cursor: pointer;
+    transition: border-color .12s, background .12s, color .12s;
+  }
+  .site-step-chip .sc-n {
+    display: grid; place-items: center;
+    width: 24px; height: 24px; flex: none;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline-strong);
+    font-size: 12.5px; font-weight: 700;
+  }
+  .site-step-chip .sc-t { flex: 1 1 auto; min-width: 0; }
+  .site-step-chip .sc-dot {
+    flex: none; min-width: 20px; height: 20px; padding: 0 5px;
+    display: grid; place-items: center;
+    border-radius: 999px; background: var(--danger); color: #1a1400;
+    font-size: 11.5px; font-weight: 800;
+  }
+  .site-step-chip:hover { border-color: var(--hairline-hover); }
+  .site-step-chip.is-active {
+    border-color: var(--accent);
+    background: rgba(255, 207, 1, .10);
+    color: var(--fg);
+  }
+  .site-step-chip.is-active .sc-n { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+  @media (max-width: 620px) {
+    .site-step-chip { flex: 1 1 100%; }
+  }
   .site-grid > .full { grid-column: 1 / -1; }
   .site-contact-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
   .site-contact-column { display: grid; gap: 10px; min-width: 0; }

@@ -401,11 +401,11 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="field-ui.css?v=20260908-field13" />
-  <script src="field-rules.js?v=20260908-field13"></script>
-  <script src="sliding-configs.js?v=field13"></script>
-  <script src="door-drawings.js?v=field13"></script>
-  <script src="quote-drawing.js?v=field13"></script>
+  <link rel="stylesheet" href="field-ui.css?v=20260908-field15" />
+  <script src="field-rules.js?v=20260908-field15"></script>
+  <script src="sliding-configs.js?v=field15"></script>
+  <script src="door-drawings.js?v=field15"></script>
+  <script src="quote-drawing.js?v=field15"></script>
 </head>
 <body>
   <main class="app">
@@ -471,10 +471,15 @@
           <p id="siteGateMessage">Confirm the site conditions before capturing any line.</p>
 
         </div>
+        <nav class="site-steps" id="siteSteps" aria-label="Site capture steps">
+          <button type="button" class="site-step-chip is-active" data-goto="1"><span class="sc-n">1</span><span class="sc-t">Customer &amp; job</span><span class="sc-dot" hidden></span></button>
+          <button type="button" class="site-step-chip" data-goto="2"><span class="sc-n">2</span><span class="sc-t">Building &amp; finish</span><span class="sc-dot" hidden></span></button>
+          <button type="button" class="site-step-chip" data-goto="3"><span class="sc-n">3</span><span class="sc-t">Access &amp; glass</span><span class="sc-dot" hidden></span></button>
+        </nav>
         <div class="site-grid" id="siteGrid">
+          <div class="site-step is-active" data-step="1">
           <div class="site-contact-grid full">
             <div class="site-contact-column">
-              <label><span class="label">Client</span><input class="input" data-site="client" /></label>
               <label><span class="label">Phone</span><input class="input" type="tel" data-site="phone" /></label>
               <label><span class="label">Email</span><input class="input" type="email" data-site="email" /></label>
               <label><span class="label">Site address</span><input class="input" data-site="address" /></label>
@@ -486,6 +491,8 @@
               <label><span class="label">Date</span><input class="input" type="date" data-site="date" /></label>
             </div>
           </div>
+          </div>
+          <div class="site-step" data-step="2">
           <label><span class="label">Building type</span>
             <select data-site="building">
               <option value="">— select —</option>
@@ -533,6 +540,8 @@
               <button type="button" class="toggle-opt" data-toggle="flatsAngles" data-val="NO">No</button>
             </div>
           </label>
+          </div>
+          <div class="site-step" data-step="3">
           <label><span class="label">Floor — required</span><select data-site="floor"><option value="">— select —</option><option>GROUND</option><option>FIRST</option><option>SECOND</option><option>THIRD</option><option>OTHER</option></select></label>
           <label id="floorDetailField" class="hidden"><span class="label">Floor / levels</span><input class="input" data-site="floorDetail" placeholder="e.g. Fourth; Ground and First" /></label>
           <label><span class="label">Arrange access</span><select data-site="access"><option value="">— not checked —</option><option value="YES">Required</option><option value="NO">Not required</option></select></label>
@@ -544,9 +553,12 @@
             <button class="secondary" id="applyGlassBtn" type="button">Apply glass policy to lines…</button>
             <p>Quote policy preserves each item's glass. Per-line exceptions remain possible; unsafe or missing door glass must be resolved.</p>
           </div>
+          </div>
         </div>
         <div class="site-bottom-actions">
           <p id="siteBottomMessage" role="status" aria-live="polite"></p>
+          <button class="secondary" id="sitePrevBtn" type="button">← Back</button>
+          <button class="primary" id="siteNextBtn" type="button">Next →</button>
           <button class="primary" id="confirmSiteBtn" type="button">Confirm site details — start capturing</button>
           <button class="secondary" id="addLineSiteBtn" type="button">+ Add opening</button>
         </div>
@@ -771,7 +783,7 @@
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>');
     }
   </script>
-  <script src="quote-parser.js?v=20260908-field13"></script>
+  <script src="quote-parser.js?v=20260908-field15"></script>
   <script>
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";
@@ -944,7 +956,7 @@
         try {
           const trimmed=await QuoteDrawing.trim(source);
           if(state.lines!==lines || l.quoteDiagPNG!==source) continue;
-          l.quoteOriginalPNG ||= source; l.quoteDiagPNG=trimmed; l.quoteCropVersion='field13';
+          l.quoteOriginalPNG ||= source; l.quoteDiagPNG=trimmed; l.quoteCropVersion='field15';
         } catch(e) { console.warn('Quote crop retained',e); }
       }
       if(state.lines===lines) { save(); renderTable(); renderSummary(); if(editingIndex>=0) renderEditor(); }
@@ -1094,7 +1106,7 @@
         out.getContext("2d").drawImage(c, cx1, cropY, cropW, cropH, 0, 0, out.width, out.height);
         lines[k].quoteOriginalPNG = out.toDataURL("image/png");
         lines[k].quoteDiagPNG = await QuoteDrawing.trim(lines[k].quoteOriginalPNG);
-        lines[k].quoteCropVersion='field13';
+        lines[k].quoteCropVersion='field15';
       }
     }
 
@@ -1402,12 +1414,72 @@
       document.querySelectorAll('#siteGrid [data-site]').forEach(input => {
         input.classList.toggle('required-missing', FieldRules.siteKeys.includes(input.dataset.site) && !input.value && !input.closest('.hidden') && input.dataset.site !== 'customColourCode');
       });
+      if (typeof SiteSteps !== 'undefined') SiteSteps.refresh();
       document.querySelectorAll('#lineBody input, #lineBody button, #editorCard input, #editorCard select, #editorCard textarea, #editorCard button').forEach(input => {
         if (!ready) { if (!input.disabled) input.dataset.siteLocked = '1'; input.disabled = true; }
         else if (input.dataset.siteLocked) { input.disabled = false; delete input.dataset.siteLocked; }
       });
       ['addLineBtn', 'addLineTableBtn', 'addLineSiteBtn', 'useAllQuoteBtn', 'confirmAllBtn'].forEach(id => { document.getElementById(id).disabled = !ready; });
     }
+
+    // ── Site capture, one page at a time ────────────────────────────────
+    const SiteSteps = (function () {
+      const grid = document.getElementById('siteGrid');
+      // The regression harness runs these scripts against a stub DOM whose
+      // getElementById returns a bare object, so check the capability rather
+      // than just truthiness.
+      if (!grid || typeof grid.querySelectorAll !== 'function') {
+        return { refresh() {}, show() {} };
+      }
+      const steps = [...grid.querySelectorAll('.site-step')];
+      const chips = [...document.querySelectorAll('.site-step-chip')];
+      const prevBtn = document.getElementById('sitePrevBtn');
+      const nextBtn = document.getElementById('siteNextBtn');
+      const confirmBtn = document.getElementById('confirmSiteBtn');
+      const addBtn = document.getElementById('addLineSiteBtn');
+      let current = 1;
+
+      function show(n, scroll) {
+        current = Math.min(steps.length, Math.max(1, n));
+        steps.forEach(el => el.classList.toggle('is-active', Number(el.dataset.step) === current));
+        chips.forEach(c => {
+          const on = Number(c.dataset.goto) === current;
+          c.classList.toggle('is-active', on);
+          c.setAttribute('aria-current', on ? 'step' : 'false');
+        });
+        const last = current === steps.length;
+        prevBtn.disabled = current === 1;
+        nextBtn.classList.toggle('hidden', last);
+        confirmBtn.classList.toggle('hidden', !last);
+        if (addBtn) addBtn.classList.toggle('hidden', !last);
+        if (scroll) document.querySelector('.site-card').scrollIntoView({ block: 'start', behavior: 'smooth' });
+        refresh();
+      }
+
+      // A dot on the chip for any step still holding an unfilled required
+      // field, so the rep can see what is outstanding without paging back.
+      function refresh() {
+        steps.forEach(el => {
+          const n = Number(el.dataset.step);
+          const missing = el.querySelectorAll('.required-missing').length;
+          const chip = chips.find(c => Number(c.dataset.goto) === n);
+          if (!chip) return;
+          const dot = chip.querySelector('.sc-dot');
+          chip.classList.toggle('has-missing', missing > 0);
+          if (dot) {
+            dot.hidden = missing === 0;
+            dot.textContent = missing || '';
+          }
+        });
+      }
+
+      prevBtn.addEventListener('click', () => show(current - 1, true));
+      nextBtn.addEventListener('click', () => show(current + 1, true));
+      chips.forEach(c => c.addEventListener('click', () => show(Number(c.dataset.goto), true)));
+      show(1, false);
+      return { refresh, show };
+    })();
+
     function requireSite() {
       if (FieldRules.siteReady(state.site)) return true;
       document.getElementById('siteGate').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2477,6 +2549,6 @@
     // line context unconsumed until a manual refresh — force a real reload.
     window.addEventListener("pageshow", (e) => { if (e.persisted) location.reload(); });
   </script>
-  <div class="build-stamp">Field build · 2026-09-08 / field13</div>
+  <div class="build-stamp">Field build · 2026-09-08 / field15</div>
 </body>
 </html>
