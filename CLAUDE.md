@@ -2,7 +2,18 @@
 
 This repo is the active Anglo Windows Digital Rough Copy project.
 
-## Current continuation - 2026-09-08 field12 (local testing only)
+## Current continuation - 2026-09-10 specialist-link local preview
+
+Based on clean local/GitHub 2424537. Landing page now includes an external Crystal
+View Balustrade card below Screens and above Current job; target=_blank with
+noopener/noreferrer, internet notice, no formulas or job transfer. Local only.
+HTTP verified 2026-09-10: Crystal View returns 200; Netlify workspace already
+contains field12. Earlier "not deployed" statements describe the old handoff,
+not today's live state. Current repository deployment workflow is manual-only.
+24 regression tests pass. Desktop 1280 and tablet 800 have no horizontal overflow;
+narrow 400px landing layout still overflows beyond this link-only scope.
+
+### Previous field12 continuation
 
 Field12 compacts site capture into paired customer/reference columns and two
 decision columns on portrait tablets (three on wide screens). Confirmation and

@@ -3,6 +3,16 @@ const assert = require('node:assert/strict');
 const rules = require('../open-design-components/field-rules.js');
 const sliders = require('../open-design-components/sliding-configs.js');
 const parser = require('../open-design-components/quote-parser.js');
+test('specialist calculator stays external and opens safely without job parameters', () => {
+  const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '../open-design-components/index.html'), 'utf8');
+  const link = html.match(/<a\b[^>]*id="crystalViewLink"[^>]*>/)[0];
+  assert.match(link, /href="https:\/\/crystal-view-balustrade-calculator-codex\.angusm99\.workers\.dev"/);
+  assert.match(link, /target="_blank"/);
+  assert.match(link, /rel="noopener noreferrer"/);
+  assert.match(html, /Internet connection required/);
+  assert.ok(html.indexOf('>Screens<') < html.indexOf('id="specialistToolsHeading"'));
+  assert.ok(html.indexOf('id="crystalViewLink"') < html.indexOf('>Current job<'));
+});
 const site = () => ({ building: 'HOUSE', material: 'EX WOOD', wall: 'PLASTER', colour: 'WHITE', floor:'GROUND', access:'NO', parking:'NO', barriers:'NO' });
 const line = () => ({ ref:'D1', product: 'Hinged door', family: 'hinged', width: 870, height: 2075,
   qty: 1, sizeConfirmed: true, designSelected: true, diagSVG: '<svg/>', glass: '6.38mm Clear Lam',
