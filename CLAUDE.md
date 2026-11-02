@@ -2,6 +2,12 @@
 
 ## Blank paper field master - 2026-11-02
 
+Superseded by RC-FIELD 1.1: official gold AW logo and yellow/charcoal accents
+on every page; three-page pack (site, eight-block drawing sheet, optional
+single-opening detail). Repeat the eight-block sheet as needed. Brand/logo
+are mandatory on Anglo outputs per Angus. Three-page PDF visually checked;
+eight blocks and drawing footer verified on page 2. Still draft/not deployed.
+
 `open-design-components/field-rough-copy.html` is a standalone, data-free A4
 portrait draft: site sheet plus repeatable opening sheet. Linked from landing.
 Print with browser headers/footers off, 100% scale. Does not read localStorage
