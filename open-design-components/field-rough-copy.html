@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anglo Windows | Blank field rough copy</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#e9e8e3;color:#171b20;font:11pt Georgia,serif}nav{padding:16px;text-align:center;font:14px sans-serif}nav a,nav button{margin:4px;padding:12px;color:#171b20;background:white;border:1px solid #777;border-radius:5px;cursor:pointer}nav p{margin:10px 0}.sheet{width:190mm;min-height:277mm;margin:20px auto;padding:8mm;background:white;box-shadow:0 2px 15px #0002;position:relative}header{display:flex;justify-content:space-between;border-bottom:2px solid #222;padding-bottom:5mm;align-items:center}header strong{font-size:18pt}header small{display:block;font:8pt sans-serif;letter-spacing:1.5px;margin-top:2mm}.tag{font:8pt sans-serif;border:1px solid #777;padding:2mm;text-align:right}h1{font-size:23pt;margin:5mm 0 1mm}p.intro{font:9pt sans-serif;margin:0 0 5mm;line-height:1.4}h2{font: bold 9pt sans-serif;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid #777;padding:2mm 0;margin:4mm 0 2mm}.grid{display:grid;grid-template-columns:1fr 1fr;gap:2mm 5mm}.field{min-height:13mm;border-bottom:1px solid #999;padding-top:2mm}.field b{font: bold 8pt sans-serif;display:block;letter-spacing:.3px}.wide{grid-column:1/-1}.choices{font:9pt sans-serif;line-height:1.9;padding:1mm 0}.box{display:inline-block;width:3mm;height:3mm;border:1px solid #555;margin:0 1mm 0 3mm;vertical-align:middle}.choices .box:first-child{margin-left:0}.ruled{height:27mm;background:repeating-linear-gradient(to bottom,transparent 0,transparent 8mm,#bbb 8mm,#bbb 8.2mm)}.sketch{height:87mm;border:1px solid #777;background-image:radial-gradient(#ccc .4px,transparent .5px);background-size:5mm 5mm;position:relative}.sketch span{position:absolute;top:2mm;left:3mm;font:8pt sans-serif;background:white;padding:1mm}.measure{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4mm}.measure .field{min-height:17mm}footer{border-top:1px solid #999;margin-top:5mm;padding-top:2mm;display:flex;justify-content:space-between;font:7.5pt sans-serif}.note{font:8pt sans-serif;line-height:1.45;margin:2mm 0}.sign{height:16mm;border-bottom:1px solid #999;padding-top:4mm;font:8pt sans-serif}@page{size:A4 portrait;margin:10mm}@media print{body{background:white}nav{display:none}.sheet{width:190mm;height:277mm;min-height:0;padding:0;margin:0;box-shadow:none;break-after:page}.sheet:last-child{break-after:auto}*{print-color-adjust:exact;-webkit-print-color-adjust:exact}}@media screen and (max-width:760px){.sheet{margin:12px;width:calc(100% - 24px);min-height:0;padding:16px}.grid{gap:8px}.choices{line-height:2.2}}
+@media print{h2{margin:2mm 0 1mm;padding:1mm 0}.sketch{height:55mm}.field{min-height:10mm}.measure .field{min-height:12mm}.choices{line-height:1.5}footer{margin-top:3mm}h1{margin-top:3mm}.grid{gap:1mm 5mm}.intro{margin-bottom:3mm!important}}
+.ruled{background:none;position:relative;border-bottom:1px solid #bbb}.ruled:before,.ruled:after{content:"";position:absolute;left:0;right:0;border-bottom:1px solid #bbb;top:33%}.ruled:after{top:66%}
+</style>
+<nav aria-label="Print controls"><a href="index.html">Back to digital rough copy</a><button onclick="window.print()">Print / Save blank PDF</button><p>A4 portrait &middot; 100% scale &middot; turn browser headers and footers off.<br>Print page 1 once per job. Repeat page 2 for each opening. No saved customer data is used.</p></nav>
+<main>
+<section class="sheet" aria-label="Site details sheet">
+<header><div><strong>Anglo Windows</strong><small>FIELD MEASUREMENTS / ROUGH COPY</small></div><div class="tag">BLANK FIELD MASTER<br>DRAFT FOR REVIEW &middot; RC-FIELD 1.0</div></header>
+<h1>Site details</h1><p class="intro">Complete once per job. Attach an opening sheet for every distinct window or door.</p>
+<div class="grid">
+<div class="field"><b>Customer / client</b></div><div class="field"><b>Site visit date</b></div>
+<div class="field"><b>Quote / job reference</b></div><div class="field"><b>Workpool reference (include prefix)</b></div>
+<div class="field wide"><b>Site address</b></div>
+<div class="field"><b>Contact person / phone</b></div><div class="field"><b>Email</b></div>
+<div class="field"><b>Rep / measured by</b></div><div class="field"><b>Total opening sheets attached</b></div>
+</div>
+<h2>01 / Building and installation</h2>
+<div class="choices">Building: <i class="box"></i>New <i class="box"></i>House <i class="box"></i>Flat <i class="box"></i>Commercial<br>Existing: <i class="box"></i>Wood <i class="box"></i>Steel <i class="box"></i>Aluminium <i class="box"></i>New opening<br>Wall: <i class="box"></i>Plaster <i class="box"></i>Face brick <i class="box"></i>Bagged <i class="box"></i>Cladding<br>New work: <i class="box"></i>New building <i class="box"></i>Enclosure</div>
+<div class="grid"><div class="field"><b>Floor / levels</b></div><div class="field"><b>Other building / wall details</b></div></div>
+<div class="choices">Plastic wrap: <i class="box"></i>Required <i class="box"></i>Not required<br>Standard flats &amp; angles: <i class="box"></i>Yes <i class="box"></i>No</div>
+<p class="note">Digital site rule: new building = wrap; enclosure = no wrap. Record any opening-specific exception on its sheet.</p>
+<h2>02 / Finish and glass</h2>
+<div class="grid"><div class="field"><b>Frame colour / preset special colour</b></div><div class="field"><b>CPO / RAL / custom colour code and texture</b></div><div class="field wide"><b>Job glass specification / special variants (or specify per opening)</b></div></div>
+<h2>03 / Access and site notes</h2>
+<div class="choices">Arrange access: <i class="box"></i>Yes <i class="box"></i>No &nbsp; Arrange parking: <i class="box"></i>Yes <i class="box"></i>No<br>Caution barriers / tape: <i class="box"></i>Required <i class="box"></i>Not required</div>
+<div class="ruled" aria-label="Site notes writing area"></div>
+<div class="sign">Rep signature: __________________________________ &nbsp; Date: __________________</div>
+<footer><span>RC-FIELD 1.0 / 02 NOV 2026 / Draft - approval pending</span><span>SITE SHEET / 1</span></footer>
+</section>
+<section class="sheet" aria-label="Repeatable opening sheet">
+<header><div><strong>Anglo Windows</strong><small>FIELD MEASUREMENTS / ROUGH COPY</small></div><div class="tag">OPENING SHEET<br>Sheet ______ of ______</div></header>
+<h1>Window / door opening</h1><p class="intro">All sizes in mm. Quote sizes are references only; confirm final measurements on site.</p>
+<div class="grid"><div class="field"><b>Customer / job reference</b></div><div class="field"><b>Workpool reference (include prefix)</b></div><div class="field"><b>Opening reference / quantity</b></div><div class="field"><b>Room / location</b></div><div class="field wide"><b>Unit type / system / configuration code (e.g. casement 30.5 / 38 / Baobab)</b></div></div>
+<h2>01 / Drawing and configuration</h2>
+<div class="choices">Drawing viewed from: <i class="box"></i>Outside <i class="box"></i>Inside</div>
+<div class="sketch"><span>Mark sashes, fixed panes, mullions, transoms, dimensions and opening direction.</span></div>
+<h2>02 / Measurements</h2>
+<div class="measure"><div class="field"><b>Quote width (reference)</b></div><div class="field"><b>Quote height (reference)</b></div><div class="field"><b>Quantity</b></div><div class="field"><b>FINAL WIDTH / mm</b></div><div class="field"><b>FINAL HEIGHT / mm</b></div><div class="field"><b>Size confirmed / initials</b></div></div>
+<h2>03 / Operation and specification</h2>
+<div class="choices">Handle / lead side: <i class="box"></i>Left <i class="box"></i>Right <i class="box"></i>N/A<br>Opens: <i class="box"></i>Out <i class="box"></i>In <i class="box"></i>N/A &nbsp; Hinges: <i class="box"></i>Standard <i class="box"></i>Parliament</div>
+<div class="grid"><div class="field"><b>Glass thickness / type / special variant</b></div><div class="field"><b>Colour / code / texture (or same as site)</b></div></div>
+<p class="note">Doors: specify safety glass. Record handing against the marked viewing side; mark folding / sliding direction on the drawing.</p>
+<div class="choices">Wrap: <i class="box"></i>Site rule <i class="box"></i>Yes <i class="box"></i>No</div>
+<h2>04 / Workshop and installer notes</h2>
+<div class="ruled" style="height:18mm"></div>
+<p class="note">Include handles, locks, kickplates, burglar bars, sill / coupling details and flats / angles exceptions.</p>
+<footer><span>RC-FIELD 1.0 / Draft - approval pending</span><span>REPEAT FOR EACH OPENING / 2</span></footer>
+</section>
+</main>
+</html>

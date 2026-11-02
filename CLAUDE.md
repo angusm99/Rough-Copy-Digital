@@ -1,5 +1,14 @@
 # Claude Handoff - Rough Copy Digital
 
+## Blank paper field master - 2026-11-02
+
+`open-design-components/field-rough-copy.html` is a standalone, data-free A4
+portrait draft: site sheet plus repeatable opening sheet. Linked from landing.
+Print with browser headers/footers off, 100% scale. Does not read localStorage
+or bypass digital export validation. Draft RC-FIELD 1.0 requires Angus approval
+before staff rollout. PDF: `output/pdf/Anglo-Windows-Blank-Field-Rough-Copy.pdf`.
+Two-page rendered PDF checked; existing 24 regression tests pass. Not deployed.
+
 This repo is the active Anglo Windows Digital Rough Copy project.
 
 ## Current continuation - 2026-09-10 specialist-link local preview
