@@ -3,7 +3,7 @@ from pathlib import Path
 import fitz
 
 root = Path(__file__).resolve().parents[1]
-with fitz.open(root / "output/pdf/Anglo-Windows-Rough-Copy-v2.0.pdf") as doc:
+with fitz.open(root / "output/pdf/Anglo-Windows-Rough-Copy-v2.1.pdf") as doc:
     assert len(doc) == 1, "Field copy must fit one page"
     page = doc[0]
     assert abs(page.rect.width - 595.28) < 2 and abs(page.rect.height - 841.89) < 2
@@ -12,7 +12,8 @@ with fitz.open(root / "output/pdf/Anglo-Windows-Rough-Copy-v2.0.pdf") as doc:
         assert text.count(label) == 16, f"Missing drawing labels: {label}"
     for label in ("WP REF:", "Page", "Always viewed from outside", "All dimensions in millimetres", "Special Notes", "New Hole", "Enclosure", "Burglar Bars", "Special Work", "No Wrap", "Flats & Angles", "Ex Wood", "Ex Steel", "Ex Aluminium"):
         assert label in text, f"Missing {label}"
-    assert text.index("Finish") < text.index("Existing Opening") < text.index("Building") < text.index("Wall")
+    normalised = " ".join(text.split())
+    assert normalised.index("Finish") < normalised.index("Existing Opening") < normalised.index("Building") < normalised.index("Wall")
     assert text.count("Always viewed from outside") == 1
     for old_label in ("Room:", "Final W:", "Check:", "DRAFT", "Rep Signature", "Texture", "Job Type:", "Tick = Yes", "match the job colour"):
         assert old_label not in text, f"Old wording remains: {old_label}"

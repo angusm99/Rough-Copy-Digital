@@ -1,5 +1,11 @@
 # Claude Handoff - Rough Copy Digital
 
+Latest2.1 output/pdf/Anglo-Windows-Rough-Copy-v2.1.pdf: stacked Existing/Opening,
+21mm label column, roomier option gaps, centred title, black border around logo.
+First-block-only direction circles halved to3mm, inset1.5mm; OUT text fitted3.3pt.
+One-page16blocks tests and render checked. Tiny markers require physical print
+acceptance; not propagated/deployed. Previous2.0 stronger text retained.
+
 Latest2.0: output/pdf/Anglo-Windows-Rough-Copy-v2.0.pdf. Black semibold body,
 bold8pt Ref/W/H/Qty, options7.7pt, contacts8.3pt, stronger dots/checkboxes and
 grey8pt bold trial markers. Cards39.8mm (0.2mm shorter) preserve one-page layout.
