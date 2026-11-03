@@ -1,5 +1,13 @@
 # Claude Handoff - Rough Copy Digital
 
+Latest RC-FIELD1.6: `output/pdf/Anglo-Windows-Rough-Copy-v1.6.pdf`.
+Site choices now fixed 29mm label column/aligned options; new opening linked
+New House-Wrap/New Enclosure-No Wrap, flats/angles alongside opening decisions;
+Special Work replaces Job Type. Finish detail indented; site legend and bar-colour
+sentence removed per Angus. Burglar Bars with ALU/CLR subchoices, Hours beneath.
+One-page16blocks/logo/text checks and render inspection pass; physical approval
+pending. No digital rule/parser change or deployment.
+
 RC-FIELD1.5 latest: `output/pdf/Anglo-Windows-Rough-Copy-v1.5.pdf`.
 Proofread whole one-page form: Ex Wood/Ex Steel/Ex Aluminium, consistent title-case
 field labels/options, millimetres/colour/aluminium spelling, Always viewed from
