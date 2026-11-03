@@ -14,6 +14,8 @@ body{color:#000;font-weight:600}.decision b,.special-notes h2{font-weight:700;fo
 .page-footer{padding-top:.7mm;line-height:1}.drawing{height:39.8mm}
 .decision{grid-template-columns:21mm 1fr}.decision b{line-height:1.25;padding:1mm 1.5mm}.choice{margin-right:3.5mm}.finish-choices{gap:2mm}.option-line{padding:.3mm 0}.options{padding-left:1.5mm;padding-right:1.5mm}.direction-mark{width:3mm;height:3mm;font-size:4.3pt;border-width:.7px}.direction-mark.in{top:1.5mm}.direction-mark.out{bottom:1.5mm}.direction-mark.lh{left:1.5mm}.direction-mark.rh{right:1.5mm}header>div:first-of-type{text-align:center}header img{border:1.5px solid #000;padding:1mm}
 .direction-mark.out{font-size:3.3pt}
+.options.split-options{display:grid;grid-template-columns:minmax(0,1fr) 24mm;gap:2mm}.options.split-options>div:first-child{min-width:0}.side-field{width:24mm;min-height:100%;margin:0;border-left:1.2px solid #333;align-self:stretch}.choice{margin-right:4.5mm}.finish-choices{gap:3mm}.spread-options{display:flex;align-items:baseline;justify-content:space-between;gap:1mm}.spread-options .choice{margin-right:0}.write-row{display:flex!important;align-items:baseline;gap:1mm;min-width:0;white-space:nowrap}.write-row>.hand-line{flex:1;min-width:4mm}.special-choice{flex:1;min-width:0}.special-code{padding-left:3.1mm}.special-code.write-row{width:100%}.side-field .hand-line{width:18mm}.option-line{white-space:normal}
+.options.split-options{padding:0;gap:0}.options.split-options>div:first-child{padding:.6mm 1.5mm}.side-field{padding:.6mm 1.5mm}.finish-choices{display:flex;justify-content:flex-start;gap:5mm}.finish-choices .choice{flex:none;margin-right:0}.write-row{gap:3mm}.special-code.write-row,.option-line.write-row{gap:1mm}.spread-options.write-row{justify-content:flex-start;gap:3mm}
 </style>
 <nav><button onclick="print()">Print / Save PDF</button><p>A4 portrait, 100% scale. Browser headers/footers off. Draft for review.</p></nav>
 <main class="sheet">
@@ -58,4 +60,20 @@ building.querySelector('.options').innerHTML='<div> <span class="choice"><span c
 const glass=[...document.querySelectorAll('.decision')].find(el=>el.querySelector('b').textContent==='Glass');
 glass.querySelector('.options>div').innerHTML='<div class="finish-choices"><span class="choice"><span class="box"></span>Standard</span><span class="special-choice"><span><span class="box"></span>Special</span><span class="special-code">Type / Thickness: ________</span></span></div>';
 document.querySelectorAll('.options').forEach(el=>{el.innerHTML=el.innerHTML.replace(/_+/g,'<span class="hand-line"></span>');});
+// Reserve the same right-hand column on every row; writing guides stop before it.
+document.querySelectorAll('.options').forEach(options=>{
+  if(!options.classList.contains('split-options')){
+    const content=document.createElement('div');
+    while(options.firstChild) content.append(options.firstChild);
+    options.append(content);options.classList.add('split-options');
+    const extra=document.createElement('div');extra.className='side-field';options.append(extra);
+  }
+  const content=options.firstElementChild;
+  const flats=[...content.querySelectorAll('.option-line')].find(el=>el.textContent.includes('Flats & Angles'));
+  if(flats){flats.insertAdjacentHTML('beforeend','<span class="hand-line"></span>');flats.classList.add('write-row');}
+  content.querySelectorAll('.hand-line').forEach(line=>line.parentElement.classList.add('write-row'));
+  const firstOptions=content.querySelector('.option-line');
+  if(firstOptions && firstOptions!==flats) firstOptions.classList.add('spread-options');
+  if(content.querySelectorAll(':scope > .choice').length>2 && !content.querySelector('.option-line')) content.classList.add('spread-options');
+});
 </script></html>

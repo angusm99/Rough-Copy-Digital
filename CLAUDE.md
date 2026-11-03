@@ -1,5 +1,11 @@
 # Claude Handoff - Rough Copy Digital
 
+Latest2.2: output/pdf/Anglo-Windows-Rough-Copy-v2.2.pdf. Uniform24mm right-hand
+column extends through every site row (blank for additional information where
+unlabelled). Flats/Angles dotted guide added; main writing guides flex to same
+column boundary. Options spaced across available width, colours/glass5mm gaps.
+One-page16blocks/logo/markers tests and detail/full render checks pass. Not deployed.
+
 Latest2.1 output/pdf/Anglo-Windows-Rough-Copy-v2.1.pdf: stacked Existing/Opening,
 21mm label column, roomier option gaps, centred title, black border around logo.
 First-block-only direction circles halved to3mm, inset1.5mm; OUT text fitted3.3pt.

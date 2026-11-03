@@ -3,7 +3,7 @@ from pathlib import Path
 import fitz
 
 root = Path(__file__).resolve().parents[1]
-with fitz.open(root / "output/pdf/Anglo-Windows-Rough-Copy-v2.1.pdf") as doc:
+with fitz.open(root / "output/pdf/Anglo-Windows-Rough-Copy-v2.2.pdf") as doc:
     assert len(doc) == 1, "Field copy must fit one page"
     page = doc[0]
     assert abs(page.rect.width - 595.28) < 2 and abs(page.rect.height - 841.89) < 2
