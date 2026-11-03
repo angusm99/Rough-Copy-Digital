@@ -1,5 +1,11 @@
 # Claude Handoff - Rough Copy Digital
 
+RC-FIELD1.5 latest: `output/pdf/Anglo-Windows-Rough-Copy-v1.5.pdf`.
+Proofread whole one-page form: Ex Wood/Ex Steel/Ex Aluminium, consistent title-case
+field labels/options, millimetres/colour/aluminium spelling, Always viewed from
+outside, Flats & Angles. Unknown RC-X/OBS QTY retained without invented expansions.
+One-page16blocks/logo/new wording/absence of old wording and visual checks pass.
+
 RC-FIELD 1.4 (2026-11-03) supersedes1.3: `output/pdf/Anglo-Windows-Rough-Copy-v1.4.pdf`.
 Existing opening first, linked New house/New enclosure, separate Building/Wall,
 side special-notes box, boxed abbreviated contacts/larger icons including WP,
