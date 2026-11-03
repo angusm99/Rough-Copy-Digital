@@ -1,5 +1,13 @@
 # Claude Handoff - Rough Copy Digital
 
+RC-FIELD 1.4 (2026-11-03) supersedes1.3: `output/pdf/Anglo-Windows-Rough-Copy-v1.4.pdf`.
+Existing opening first, linked New house/New enclosure, separate Building/Wall,
+side special-notes box, boxed abbreviated contacts/larger icons including WP,
+prominent circled RC/RC-X, ALU/CLR bars (ALU inherits job colour), site checks
+Tick=Yes/X=No/empty=N/A per Angus. Empty cannot distinguish skipped from N/A;
+future OCR must not claim certainty. This is print-only, not parser/app rule edits.
+One A4 page,16top/bottom strips,logo/fields/order and visual checks pass. Draft.
+
 RC-FIELD 1.3 (2026-11-03): larger labels, title Rough copy, mandatory outside
 view beneath title; removed contradictory Inside checkbox. Latest PDF is
 `output/pdf/Anglo-Windows-Rough-Copy-v1.3.pdf`. Earlier 1.2 PDF was open/locked,
