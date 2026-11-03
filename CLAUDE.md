@@ -1,5 +1,13 @@
 # Claude Handoff - Rough Copy Digital
 
+Latest RC-FIELD1.7: `output/pdf/Anglo-Windows-Rough-Copy-v1.7.pdf`. 5mm margins,
+200mm form,16 unnumbered Ref/Width/Height/Qty blocks, darker borders, dotted contact
+writing lines, Finish first/code below Special and aligned right-side H/W Colour,
+OBS QTY,Hours. Empty RC/RCX mark circles labelled above; page field top right.
+Removed printed draft/signature/footer text at Angus request (not approval of
+production release). One-page/labels/absence/ordering tests and visual check pass.
+Physical printer margins and filled-form OCR unverified; no parser/deployment change.
+
 Latest RC-FIELD1.6: `output/pdf/Anglo-Windows-Rough-Copy-v1.6.pdf`.
 Site choices now fixed 29mm label column/aligned options; new opening linked
 New House-Wrap/New Enclosure-No Wrap, flats/angles alongside opening decisions;
