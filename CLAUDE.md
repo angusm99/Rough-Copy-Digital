@@ -1,5 +1,14 @@
 # Claude Handoff - Rough Copy Digital
 
+## Paper form comparison - 2026-11-03
+
+Uploaded 2023 master has 16 drawing blocks (4x4), each with top AND bottom
+reference strips. Preserve these; yesterday's 8-block three-page draft is not
+an accepted replacement. Compare fields before further layout changes.
+Company branding authority: `C:\Users\angusm\Documents\Obsidian Vault\ANGLO WINDOWS\ANGLO CORE\07 - Forms and Templates\Anglo Windows Brand Assets.md`.
+Official existing assets/brand PNGs match supplied source logos. Never replace
+with a generated/typed logo. Shared startup Core Identity now carries this rule.
+
 ## Blank paper field master - 2026-11-02
 
 Superseded by RC-FIELD 1.1: official gold AW logo and yellow/charcoal accents
