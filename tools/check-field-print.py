@@ -3,7 +3,7 @@ from pathlib import Path
 import fitz
 
 root = Path(__file__).resolve().parents[1]
-with fitz.open(root / "output/pdf/Anglo-Windows-Rough-Copy-v1.9.pdf") as doc:
+with fitz.open(root / "output/pdf/Anglo-Windows-Rough-Copy-v2.0.pdf") as doc:
     assert len(doc) == 1, "Field copy must fit one page"
     page = doc[0]
     assert abs(page.rect.width - 595.28) < 2 and abs(page.rect.height - 841.89) < 2
@@ -18,6 +18,11 @@ with fitz.open(root / "output/pdf/Anglo-Windows-Rough-Copy-v1.9.pdf") as doc:
         assert old_label not in text, f"Old wording remains: {old_label}"
     assert "B-bar colour" not in text
     assert page.get_images(), "Official logo must print"
+    spans = [span for block in page.get_text("dict")["blocks"] if "lines" in block
+             for line in block["lines"] for span in line["spans"]]
+    ref_spans = [s for s in spans if s["text"].strip() == "Ref:"]
+    assert len(ref_spans) == 16
+    assert all(s["size"] >= 7.8 and s["flags"] & 16 and s["color"] == 0 for s in ref_spans), "Ref labels must be larger, bold black"
     # Match whole words, not substrings in the header or site selections.
     words = page.get_text("words")
     mark_words = {label: [w for w in words if w[4] == label] for label in ("IN", "OUT", "LH", "RH")}

@@ -1,5 +1,11 @@
 # Claude Handoff - Rough Copy Digital
 
+Latest2.0: output/pdf/Anglo-Windows-Rough-Copy-v2.0.pdf. Black semibold body,
+bold8pt Ref/W/H/Qty, options7.7pt, contacts8.3pt, stronger dots/checkboxes and
+grey8pt bold trial markers. Cards39.8mm (0.2mm shorter) preserve one-page layout.
+One-page16blocks/logo/marker tests plus bold-black8pt Ref assertions and visual
+review pass. Angus physical print confirmation pending; not deployed.
+
 Latest1.9: output/pdf/Anglo-Windows-Rough-Copy-v1.9.pdf. Trial grey6mm IN(top),
 OUT(bottom),LH(left),RH(right) circles inside FIRST sketch only. All16 Ref strips
 4.5mm and W/H/Qty strips5mm to reclaim drawing space. One-page16blocks/logo plus
