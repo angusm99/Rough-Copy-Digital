@@ -1,5 +1,15 @@
 # Claude Handoff - Rough Copy Digital
 
+## One-page field draft - 2026-11-03
+
+RC-FIELD 1.2: `open-design-components/field-one-page.html`, linked from landing;
+PDF `output/pdf/Anglo-Windows-One-Page-Field-Rough-Copy.pdf`. One A4 portrait page,
+16 rounded drawing blocks with top/bottom strips, official logo/colours, contact
+icons/text, compact site decisions and original paper extras. Older multi-page
+draft retained as reference, not the landing target. Draft requires Angus approval
+and physical print/handwriting test. No deployment or parser changes.
+Run `python tools/check-field-print.py` after regenerating PDF (PyMuPDF).
+
 ## Paper form comparison - 2026-11-03
 
 Uploaded 2023 master has 16 drawing blocks (4x4), each with top AND bottom

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Anglo Windows - Field Rough Copy</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eee;color:#171b20;font:7pt 'Segoe UI',sans-serif}nav{text-align:center;padding:12px;font-size:12pt}button{padding:12px;background:#ffdb19;border:1px solid #777;border-radius:6px;cursor:pointer}.sheet{width:194mm;margin:12px auto;background:white}header{height:17mm;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #ffdb19}header img{width:38mm;height:15mm;object-fit:contain}h1{font:700 19pt Georgia,serif;margin:0}header small{font-size:7pt}.box{display:inline-block;width:2.3mm;height:2.3mm;border:1px solid #555;vertical-align:middle;margin:0 1mm 0 1.5mm}.contacts{display:grid;grid-template-columns:repeat(3,1fr);gap:0 3mm}.field{height:8mm;border-bottom:1px solid #aaa;padding-top:1mm}.wide{grid-column:span 2}.field svg{width:3mm;height:3mm;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.5;margin-right:1mm}.decisions{border:1px solid #999;border-radius:2mm;overflow:hidden;margin-top:2mm}.decision{height:5mm;padding:.8mm 1.5mm;border-bottom:1px solid #ccc;white-space:nowrap;font-size:6.8pt}.decision:last-child{border:0}.decision b{display:inline-block;min-width:19mm}.notes{height:9mm;padding-top:2mm;border-bottom:1px solid #aaa}.drawing-title{display:flex;justify-content:space-between;margin:2mm 0 1mm;font-size:6.5pt}.drawings{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm}.drawing{height:44mm;border:1px solid #666;border-radius:2mm;overflow:hidden;display:grid;grid-template-rows:6mm 1fr 9mm}.ref{border-bottom:1.5px solid #ffdb19;padding:1mm;font-size:6.5pt;white-space:nowrap}.sketch{background-image:radial-gradient(#ddd .35px,transparent .5px);background-size:4mm 4mm}.sizes{border-top:1px solid #aaa;padding:.8mm 1mm;font-size:6.5pt;line-height:1.6}footer{display:flex;justify-content:space-between;border-top:2px solid #ffdb19;margin-top:2mm;padding-top:1mm;font-size:6.5pt}@page{size:A4 portrait;margin:8mm}@media print{nav{display:none}body{background:white}.sheet{margin:0}*{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+</style>
+<nav><button onclick="print()">Print / Save PDF</button><p>A4 portrait, 100% scale. Browser headers/footers off. Draft for review.</p></nav>
+<main class="sheet">
+<header><img src="assets/brand/anglo-logo-gold.png" alt="Anglo Windows"><div><h1>Field rough copy</h1><small>SITE MEASUREMENTS / ALL DIMENSIONS IN mm</small></div><div><span class="box"></span>RC <span class="box"></span>RC-X<br>Sheet ____ of ____</div></header>
+<div class="contacts">
+<div class="field"><svg viewBox="0 0 16 16"><circle cx="8" cy="4" r="2.5"/><path d="M2 15v-3c0-4 12-4 12 0v3"/></svg>Customer: _______________________</div><div class="field">Quote / job ref: __________________</div><div class="field">Workpool ref: __________________</div>
+<div class="field wide"><svg viewBox="0 0 16 16"><path d="M1 7L8 1l7 6M3 6v9h10V6M6 15V9h4v6"/></svg>Site address: _______________________________________________________</div><div class="field">Rep / date: ____________________</div>
+<div class="field"><svg viewBox="0 0 16 16"><path d="M2 1l4 3-2 3 5 5 3-2 3 4c-7 5-18-6-13-13z"/></svg>Phone: _________________________</div><div class="field wide"><svg viewBox="0 0 16 16"><path d="M1 2h14v12H1zM1 2l7 6 7-6"/></svg>Email: __________________________________________________________</div>
+</div>
+<div class="decisions">
+<div class="decision"><b>Building</b><span class="box"></span>New <span class="box"></span>House <span class="box"></span>Flat <span class="box"></span>Commercial &nbsp; Floor: ______ <span class="box"></span>Enclosure &nbsp; Job type: __________</div>
+<div class="decision"><b>Existing / wall</b><span class="box"></span>Wood <span class="box"></span>Steel <span class="box"></span>Alu <span class="box"></span>Box wood <span class="box"></span>New opening &nbsp; / <span class="box"></span>Plaster <span class="box"></span>FC-brick <span class="box"></span>Dry wall &nbsp; Other: ______</div>
+<div class="decision"><b>Finish</b><span class="box"></span>White <span class="box"></span>Bronze <span class="box"></span>Charcoal <span class="box"></span>Special &nbsp; Name/code/texture: _________________ &nbsp; H/W colour: __________</div>
+<div class="decision"><b>Glass</b><span class="box"></span>Standard <span class="box"></span>Special &nbsp; Type / thickness / variant: __________________________ &nbsp; OBS QTY: ______</div>
+<div class="decision"><b>Site checks</b>Write Y / N / NA: Wrap ____ Flats/angles ____ Access ____ Parking ____ Barriers ____ Skip ____ Video ____ Drainage ____</div>
+<div class="decision"><b>Extras</b>Boxes ____ Round tube ____ B-bar alu ____ B-bar colour ____ Hours ____ &nbsp; Other: _______________________</div>
+</div>
+<div class="notes"><b>Special / site notes:</b> ___________________________________________________________________________________</div>
+<div class="drawing-title"><b>OPENING DRAWINGS</b><span>View: <span class="box"></span>Outside <span class="box"></span>Inside. Mark exceptions per block. Quote sizes are not final site sizes.</span></div>
+<div class="drawings" id="drawings"></div>
+<footer><span>RC-FIELD 1.2 / 03 NOV 2026 / DRAFT - approval pending</span><span>Rep signature: ___________________ Final sizes checked: __________</span></footer>
+</main>
+<script>
+// Fixed labels and numbered blocks keep handwriting capture consistent.
+document.getElementById('drawings').innerHTML=Array.from({length:16},(_,i)=>`<section class="drawing" aria-label="Opening ${i+1}"><div class="ref">${String(i+1).padStart(2,'0')} Ref: ______ Room: ______ Qty: ___</div><div class="sketch"></div><div class="sizes">Final W: ______ H: ______ Check: ____<br>Type / glass / handing: ______________</div></section>`).join('');
+</script></html>
