@@ -1,5 +1,11 @@
 # Claude Handoff - Rough Copy Digital
 
+Latest1.9: output/pdf/Anglo-Windows-Rough-Copy-v1.9.pdf. Trial grey6mm IN(top),
+OUT(bottom),LH(left),RH(right) circles inside FIRST sketch only. All16 Ref strips
+4.5mm and W/H/Qty strips5mm to reclaim drawing space. One-page16blocks/logo plus
+single-instance marker positions tested; full-page/crop visual inspection pass.
+Do not propagate to all blocks until Angus approves; physical print/OCR untested.
+
 Latest1.8 PDF: output/pdf/Anglo-Windows-Rough-Copy-v1.8.pdf. Bottom Page/of;
 curved RC/RCX labels above separate empty circles; true dotted writing guides;
 W/H/Qty blocks, New Hole(House/Enclosure), centred right-side details and Special

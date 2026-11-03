@@ -3,7 +3,7 @@ from pathlib import Path
 import fitz
 
 root = Path(__file__).resolve().parents[1]
-with fitz.open(root / "output/pdf/Anglo-Windows-Rough-Copy-v1.8.pdf") as doc:
+with fitz.open(root / "output/pdf/Anglo-Windows-Rough-Copy-v1.9.pdf") as doc:
     assert len(doc) == 1, "Field copy must fit one page"
     page = doc[0]
     assert abs(page.rect.width - 595.28) < 2 and abs(page.rect.height - 841.89) < 2
@@ -18,4 +18,14 @@ with fitz.open(root / "output/pdf/Anglo-Windows-Rough-Copy-v1.8.pdf") as doc:
         assert old_label not in text, f"Old wording remains: {old_label}"
     assert "B-bar colour" not in text
     assert page.get_images(), "Official logo must print"
+    # Match whole words, not substrings in the header or site selections.
+    words = page.get_text("words")
+    mark_words = {label: [w for w in words if w[4] == label] for label in ("IN", "OUT", "LH", "RH")}
+    assert all(len(found) == 1 for found in mark_words.values()), "Trial markers must appear once only"
+    first_ref = page.search_for("Ref:")[0]
+    first_width = page.search_for("W:")[0]
+    for found in mark_words.values():
+        x0, y0, x1, y1 = found[0][:4]
+        assert first_ref.y1 < y0 < y1 < first_width.y0
+        assert x1 < page.rect.width / 4 + 10, "Markers must stay in first drawing"
 print("PASS: one A4 page, 16 simplified drawing blocks, finish first, page field and logo")
