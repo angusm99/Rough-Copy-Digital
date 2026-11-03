@@ -1,5 +1,11 @@
 # Claude Handoff - Rough Copy Digital
 
+Latest1.8 PDF: output/pdf/Anglo-Windows-Rough-Copy-v1.8.pdf. Bottom Page/of;
+curved RC/RCX labels above separate empty circles; true dotted writing guides;
+W/H/Qty blocks, New Hole(House/Enclosure), centred right-side details and Special
+Work, Code/Type aligned under Special. Solid consistent row dividers.
+One-page16blocks/render checked; physical printer/OCR still untested. Not deployed.
+
 Latest RC-FIELD1.7: `output/pdf/Anglo-Windows-Rough-Copy-v1.7.pdf`. 5mm margins,
 200mm form,16 unnumbered Ref/Width/Height/Qty blocks, darker borders, dotted contact
 writing lines, Finish first/code below Special and aligned right-side H/W Colour,
