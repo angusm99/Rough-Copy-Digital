@@ -1,5 +1,10 @@
 # Claude Handoff - Rough Copy Digital
 
+RC-FIELD 1.3 (2026-11-03): larger labels, title Rough copy, mandatory outside
+view beneath title; removed contradictory Inside checkbox. Latest PDF is
+`output/pdf/Anglo-Windows-Rough-Copy-v1.3.pdf`. Earlier 1.2 PDF was open/locked,
+so retained unchanged. One-page/16-block/logo/text checks and visual review pass.
+
 ## One-page field draft - 2026-11-03
 
 RC-FIELD 1.2: `open-design-components/field-one-page.html`, linked from landing;
