@@ -16,6 +16,8 @@ body{color:#000;font-weight:600}.decision b,.special-notes h2{font-weight:700;fo
 .direction-mark.out{font-size:3.3pt}
 .options.split-options{display:grid;grid-template-columns:minmax(0,1fr) 24mm;gap:2mm}.options.split-options>div:first-child{min-width:0}.side-field{width:24mm;min-height:100%;margin:0;border-left:1.2px solid #333;align-self:stretch}.choice{margin-right:4.5mm}.finish-choices{gap:3mm}.spread-options{display:flex;align-items:baseline;justify-content:space-between;gap:1mm}.spread-options .choice{margin-right:0}.write-row{display:flex!important;align-items:baseline;gap:1mm;min-width:0;white-space:nowrap}.write-row>.hand-line{flex:1;min-width:4mm}.special-choice{flex:1;min-width:0}.special-code{padding-left:3.1mm}.special-code.write-row{width:100%}.side-field .hand-line{width:18mm}.option-line{white-space:normal}
 .options.split-options{padding:0;gap:0}.options.split-options>div:first-child{padding:.6mm 1.5mm}.side-field{padding:.6mm 1.5mm}.finish-choices{display:flex;justify-content:flex-start;gap:5mm}.finish-choices .choice{flex:none;margin-right:0}.write-row{gap:3mm}.special-code.write-row,.option-line.write-row{gap:1mm}.spread-options.write-row{justify-content:flex-start;gap:3mm}
+body.twelve-blocks{font-size:8.5pt}.twelve-blocks header{height:21mm}.twelve-blocks .field{height:9mm;font-size:8.8pt}.twelve-blocks .options{font-size:8.2pt}.twelve-blocks .options.split-options>div:first-child,.twelve-blocks .side-field{padding:1mm 1.5mm}.twelve-blocks .decision b{font-size:8.5pt;padding:1.3mm 1.5mm}.twelve-blocks .special-code{font-size:8pt}.twelve-blocks .drawing{height:47.5mm}.twelve-blocks .ref,.twelve-blocks .sizes{font-size:8.5pt}.twelve-blocks .site-panel{margin-top:3mm}
+.twelve-blocks .side-field:has(.box){font-size:7.7pt;white-space:nowrap}
 </style>
 <nav><button onclick="print()">Print / Save PDF</button><p>A4 portrait, 100% scale. Browser headers/footers off. Draft for review.</p></nav>
 <main class="sheet">
@@ -47,7 +49,9 @@ body{color:#000;font-weight:600}.decision b,.special-notes h2{font-weight:700;fo
 // Keep printed labels and writing zones stable for later scan extraction.
 document.querySelector('.decisions').prepend(document.getElementById('finish-row'));
 document.querySelectorAll('.field').forEach(field => { field.innerHTML=field.innerHTML.replace(/_+/g,'<span class="write-line"></span>'); });
-document.getElementById('drawings').innerHTML=Array.from({length:16},(_,i)=>`<section class="drawing" aria-label="Opening ${i+1}"><div class="ref">Ref:<span class="write-line"></span></div><div class="sketch"></div><div class="sizes">Width:<span class="write-line"></span>Height:<span class="write-line"></span>Qty:<span class="write-line"></span></div></section>`).join('');
+const twelveBlocks=new URLSearchParams(location.search).get('blocks')==='12';
+document.body.classList.toggle('twelve-blocks',twelveBlocks);
+document.getElementById('drawings').innerHTML=Array.from({length:twelveBlocks?12:16},(_,i)=>`<section class="drawing" aria-label="Opening ${i+1}"><div class="ref">Ref:<span class="write-line"></span></div><div class="sketch"></div><div class="sizes">Width:<span class="write-line"></span>Height:<span class="write-line"></span>Qty:<span class="write-line"></span></div></section>`).join('');
 document.querySelectorAll('.sizes').forEach(el=>{el.innerHTML=el.innerHTML.replace('Width:','W:').replace('Height:','H:');});
 // Trial only: leave the other fifteen sketches free of direction markers.
 document.querySelector('.drawing .sketch').innerHTML=['IN','OUT','LH','RH'].map(label=>`<span class="direction-mark ${label.toLowerCase()}">${label}</span>`).join('');

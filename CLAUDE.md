@@ -1,5 +1,12 @@
 # Claude Handoff - Rough Copy Digital
 
+2026-11-06: comparison variant2.3 `output/pdf/Anglo-Windows-Rough-Copy-v2.3-12-blocks.pdf`.
+Open `field-one-page.html?blocks=12`: 4x3 blocks47.5mm tall vs39.8mm; larger contact/
+option/drawing labels, taller header/customer fields and more selection padding.
+Default remains16; existing2.2 PDF unchanged. Both PDF checks pass;12-page render
+visually checked as ONE A4 page. `python tools/check-field-print.py --12` checks it.
+First-block-only watermark retained. Physical print approval pending; no deploy.
+
 Latest2.2: output/pdf/Anglo-Windows-Rough-Copy-v2.2.pdf. Uniform24mm right-hand
 column extends through every site row (blank for additional information where
 unlabelled). Flats/Angles dotted guide added; main writing guides flex to same
