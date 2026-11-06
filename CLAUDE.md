@@ -1,5 +1,11 @@
 # Claude Handoff - Rough Copy Digital
 
+Latest comparison2.4: output/pdf/Anglo-Windows-Rough-Copy-v2.4-3x4.pdf, via
+`field-one-page.html?blocks=12&columns=3`. Twelve blocks in3columns/4rows,65.3mm
+wide by35mm tall, roomier2.3header retained. Original16 and4x3 variants unchanged.
+One-page12blocks/3x4geometry/logo/marker tests and render inspected. Print approval
+pending; first-block-only watermark retained; no deployment.
+
 2026-11-06: comparison variant2.3 `output/pdf/Anglo-Windows-Rough-Copy-v2.3-12-blocks.pdf`.
 Open `field-one-page.html?blocks=12`: 4x3 blocks47.5mm tall vs39.8mm; larger contact/
 option/drawing labels, taller header/customer fields and more selection padding.

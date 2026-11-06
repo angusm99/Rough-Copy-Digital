@@ -4,8 +4,11 @@ import sys
 import fitz
 
 root = Path(__file__).resolve().parents[1]
-block_count = 12 if "--12" in sys.argv else 16
+three_columns = "--3x4" in sys.argv
+block_count = 12 if "--12" in sys.argv or three_columns else 16
 pdf_name = "Anglo-Windows-Rough-Copy-v2.3-12-blocks.pdf" if block_count == 12 else "Anglo-Windows-Rough-Copy-v2.2.pdf"
+if three_columns:
+    pdf_name = "Anglo-Windows-Rough-Copy-v2.4-3x4.pdf"
 with fitz.open(root / "output/pdf" / pdf_name) as doc:
     assert len(doc) == 1, "Field copy must fit one page"
     page = doc[0]
@@ -13,6 +16,10 @@ with fitz.open(root / "output/pdf" / pdf_name) as doc:
     text = page.get_text()
     for label in ("Ref:", "W:", "H:", "Qty:"):
         assert text.count(label) == block_count, f"Missing drawing labels: {label}"
+    if three_columns:
+        refs = [fitz.Rect(w[:4]) for w in page.get_text("words") if w[4] == "Ref:"]
+        assert len({round(r.x0) for r in refs}) == 3, "Expected three columns"
+        assert len({round(r.y0) for r in refs}) == 4, "Expected four rows"
     for label in ("WP REF:", "Page", "Always viewed from outside", "All dimensions in millimetres", "Special Notes", "New Hole", "Enclosure", "Burglar Bars", "Special Work", "No Wrap", "Flats & Angles", "Ex Wood", "Ex Steel", "Ex Aluminium"):
         assert label in text, f"Missing {label}"
     normalised = " ".join(text.split())
@@ -36,5 +43,5 @@ with fitz.open(root / "output/pdf" / pdf_name) as doc:
     for found in mark_words.values():
         x0, y0, x1, y1 = found[0][:4]
         assert first_ref.y1 < y0 < y1 < first_width.y0
-        assert x1 < page.rect.width / 4 + 10, "Markers must stay in first drawing"
+        assert x1 < page.rect.width / (3 if three_columns else 4) + 10, "Markers must stay in first drawing"
 print(f"PASS: one A4 page, {block_count} simplified drawing blocks, finish first, page field and logo")
